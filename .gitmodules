@@ -1,0 +1,6 @@
+[submodule "libraries/plog"]
+	path = libraries/plog
+	url = git@github.com:SergiusTheBest/plog.git
+[submodule "libraries/fmt"]
+	path = libraries/fmt
+	url = git@github.com:fmtlib/fmt.git
