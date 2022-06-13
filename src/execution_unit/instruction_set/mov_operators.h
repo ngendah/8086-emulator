@@ -1,6 +1,7 @@
 #ifndef _MOV_OPERATORS_H_
 #define _MOV_OPERATORS_H_
 
+#include "instruction_templates.h"
 #include "types.h"
 
 enum OpTypes {
@@ -8,11 +9,6 @@ enum OpTypes {
   byte,
   high_byte,
   low_byte,
-};
-
-template <typename T, typename P> struct OpTypeSelector {
-  virtual OpTypes
-  op_type(const InstructionTemplate<T, P> &instruction_template) = 0;
 };
 
 class OpType {
@@ -63,16 +59,17 @@ public:
       : _source(source), _destination(destination) {}
 
   virtual void mov(const Instruction &instruction) = 0;
+
+protected:
+  virtual OpTypes op_type(const Instruction &instruction) { return word; };
 };
 
-template <typename T, typename P>
-struct WREGMovOperator : public MovOperator, public OpTypeSelector<T, P> {
+struct WREGMovOperator : public MovOperator {
   explicit WREGMovOperator(IO *source, IO *destination)
       : MovOperator(source, destination) {}
 
   void mov(const Instruction &instruction) override {
-    InstructionTemplate<T, P> instruction_template(instruction);
-    auto _op_type = op_type(instruction_template);
+    auto _op_type = op_type(instruction);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();
     } else {
@@ -80,8 +77,9 @@ struct WREGMovOperator : public MovOperator, public OpTypeSelector<T, P> {
     }
   }
 
-  OpTypes
-  op_type(const InstructionTemplate<T, P> &instruction_template) override {
+  OpTypes op_type(const Instruction &instruction) override {
+    InstructionTemplate<opcode_w_t, opcode_reg_t> instruction_template(
+        instruction);
     uint8_t REG = instruction_template.mode().REG;
     uint8_t W = instruction_template.opcode().W;
     auto WREG = (uint8_t)(W << 3 | REG);
@@ -99,15 +97,12 @@ struct WREGMovOperator : public MovOperator, public OpTypeSelector<T, P> {
   }
 };
 
-template <typename T, typename P>
-struct ExtendedWREGMovOperator : public MovOperator,
-                                 public OpTypeSelector<T, P> {
-  explicit ExtendedWREGMovOperator(IO *source, IO *destination)
+struct ImmediateMovOperator : public MovOperator {
+  explicit ImmediateMovOperator(IO *source, IO *destination)
       : MovOperator(source, destination) {}
 
   void mov(const Instruction &instruction) override {
-    InstructionTemplate<T, P> instruction_template(instruction);
-    auto _op_type = op_type(instruction_template);
+    auto _op_type = op_type(instruction);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();
     } else {
@@ -115,10 +110,10 @@ struct ExtendedWREGMovOperator : public MovOperator,
     }
   }
 
-  OpTypes
-  op_type(const InstructionTemplate<T, P> &instruction_template) override {
-    uint8_t REG = instruction_template.opcode().REG;
-    uint8_t W = instruction_template.opcode().W;
+  OpTypes op_type(const Instruction &instruction) override {
+    opcode_w_reg_t opcode = instruction.opcode_to<opcode_w_reg_t>();
+    uint8_t REG = opcode.REG;
+    uint8_t W = opcode.W;
     auto WREG = (uint8_t)(W << 3 | REG);
     if (W == 1) {
       return word;
@@ -134,14 +129,12 @@ struct ExtendedWREGMovOperator : public MovOperator,
   }
 };
 
-template <typename T, typename P>
-struct WMovOperator : public MovOperator, public OpTypeSelector<T, P> {
+struct WMovOperator : public MovOperator {
   explicit WMovOperator(IO *source, IO *destination)
       : MovOperator(source, destination) {}
 
   void mov(const Instruction &instruction) override {
-    InstructionTemplate<T, P> instruction_template(instruction);
-    auto _op_type = op_type(instruction_template);
+    auto _op_type = op_type(instruction);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();
     } else {
@@ -149,9 +142,8 @@ struct WMovOperator : public MovOperator, public OpTypeSelector<T, P> {
     }
   }
 
-  OpTypes
-  op_type(const InstructionTemplate<T, P> &instruction_template) override {
-    return instruction_template.opcode().W == 1 ? word : byte;
+  OpTypes op_type(const Instruction &instruction) override {
+    return instruction.opcode_to<opcode_w_t>().W == 1 ? word : byte;
   }
 };
 
@@ -159,7 +151,7 @@ struct WordMovOperator : public MovOperator {
   explicit WordMovOperator(IO *source, IO *destination)
       : MovOperator(source, destination) {}
 
-  void mov(__attribute__((unused)) const Instruction&) override {
+  void mov(__attribute__((unused)) const Instruction &) override {
     WordOpType(_source, _destination).execute();
   }
 };
