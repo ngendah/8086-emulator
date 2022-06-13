@@ -1,8 +1,9 @@
-#include <plog/Log.h>
-#include <plog/Init.h>
-#include <plog/Formatters/TxtFormatter.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
+#include <plog/Init.h>
+#include <plog/Log.h>
 
+#include "instruction_set_tests/io_selectors_tests.h"
 #include "instruction_set_tests/segment_mapper_tests.h"
 #include "peripheral_tests/ram_tests.h"
 #include "types_tests.h"
