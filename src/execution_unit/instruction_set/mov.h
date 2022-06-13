@@ -5,6 +5,7 @@
 
 #include "instruction_templates.h"
 #include "io_selectors.h"
+#include "mov_operators.h"
 #include "types.h"
 
 struct IOReader {
@@ -15,13 +16,14 @@ struct IOWriter {
   virtual IO *writer(const Instruction &) = 0;
 };
 
-class MovRegisterRegister final {
+class MovRegisterRegister final : RegisterMovOpTypeSelector {
 public:
   explicit MovRegisterRegister(Registers *registers) : _registers(registers) {}
 
   void execute(const Instruction &instruction) {
     auto mod = instruction.opcode_to<mod_reg_rm_t>();
     assert(mod.MOD == 0x3);
+    return mov(instruction);
   }
 
 protected:
@@ -75,7 +77,12 @@ protected:
     }
   };
 
-  void mov(const Instruction &instruction) {}
+  void mov(const Instruction &instruction) {
+    auto mov_operator =
+        MovOperator(_IOReader(_registers).reader(instruction),
+                    _IOWriter(_registers).writer(instruction), this);
+    mov_operator.mov(instruction);
+  }
 };
 
 #endif
