@@ -131,7 +131,7 @@ protected:
 public:
   explicit SegmentIOSelector(Registers *registers,
                              SegmentSelector *selector = nullptr)
-      : _selector(selector), _segmentMapper(registers) {}
+      : _segmentMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {
     if (_selector != nullptr)

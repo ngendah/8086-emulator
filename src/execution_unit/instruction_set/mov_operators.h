@@ -121,7 +121,9 @@ struct WordOrByteMovOpTypeSelector : OpTypeSelector {
 };
 
 struct WordMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(const Instruction &instruction) override { return word; }
+  OpTypes op_type(__attribute__((unused)) const Instruction &) override {
+    return word;
+  }
 };
 
 #endif // _MOV_OPERATORS_H_

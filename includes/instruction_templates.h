@@ -59,11 +59,11 @@ typedef struct _sr_t final {
   uint8_t _X2 : 3;
   uint8_t SR : 2;
   uint8_t _X1 : 3;
-  friend std::ostream &operator<<(std::ostream &os, const _mod_reg_rm_t &t) {
+  friend std::ostream &operator<<(std::ostream &os, const _sr_t &t) {
     os << " sr_t{"
        << fmt::format("_X1=0x{0:x}(0b{0:b}), SR=0x{1:x}(0b{1:b}), "
                       "_X2=0x{2:x}(0b{2:b})",
-                      t.MOD, t.REG, t.RM)
+                      t._X1, t.SR, t._X2)
        << "} ";
     return os;
   }
