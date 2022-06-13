@@ -51,7 +51,7 @@ public:
 };
 
 struct OpTypeSelector {
-  virtual OpTypes op_type(const Instruction &instruction) = 0;
+  virtual OpTypes op_type(const Instruction &instruction) const = 0;
 };
 
 class MovOperator {
@@ -74,7 +74,7 @@ public:
 };
 
 struct RegisterMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(const Instruction &instruction) override {
+  OpTypes op_type(const Instruction &instruction) const override {
     InstructionTemplate<opcode_w_t, opcode_reg_t> instruction_template(
         instruction);
     uint8_t REG = instruction_template.mode().REG;
@@ -95,7 +95,7 @@ struct RegisterMovOpTypeSelector : OpTypeSelector {
 };
 
 struct ImmediateMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(const Instruction &instruction) override {
+  OpTypes op_type(const Instruction &instruction) const override {
     opcode_w_reg_t opcode = instruction.opcode_to<opcode_w_reg_t>();
     uint8_t REG = opcode.REG;
     uint8_t W = opcode.W;
@@ -115,13 +115,13 @@ struct ImmediateMovOpTypeSelector : OpTypeSelector {
 };
 
 struct WordOrByteMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(const Instruction &instruction) override {
+  OpTypes op_type(const Instruction &instruction) const override {
     return instruction.opcode_to<opcode_w_t>().W == 1 ? word : byte;
   }
 };
 
 struct WordMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(__attribute__((unused)) const Instruction &) override {
+  OpTypes op_type(__attribute__((unused)) const Instruction &) const override {
     return word;
   }
 };
