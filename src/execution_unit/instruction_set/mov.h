@@ -87,4 +87,48 @@ protected:
   }
 };
 
+class MovRegisterImmediate : public ImmediateMovOpTypeSelector {
+public:
+  explicit MovRegisterImmediate(Registers *registers) : _registers(registers) {}
+
+  void execute(const Instruction &instruction) {
+    return MovOperator(_IOReader().reader(instruction),
+                       _IOWriter(_registers).writer(instruction), this)
+        .mov(instruction);
+  }
+
+protected:
+  Registers *_registers;
+
+  struct _RegisterSelector : RegisterSelector {
+    virtual uint8_t REG(const Instruction &instruction) const {
+      return instruction.opcode_to<opcode_w_reg_t>().REG;
+    }
+  };
+
+  struct _IOReader : IOReader {
+    ValueIO _value_io;
+    explicit _IOReader() = default;
+
+    IO *reader(const Instruction &instruction) override {
+      auto w_reg = instruction.opcode_to<opcode_w_reg_t>();
+      if (w_reg.W == 1)
+        _value_io = instruction.data<uint16_t>();
+      else
+        _value_io = instruction.data<uint8_t>();
+      return &_value_io;
+    }
+  };
+
+  struct _IOWriter : IOWriter, _RegisterSelector {
+    Registers *_registers;
+
+    explicit _IOWriter(Registers *registers) : _registers(registers) {}
+
+    IO *writer(const Instruction &instruction) override {
+      return RegisterIOSelector(_registers, this).get(instruction);
+    }
+  };
+};
+
 #endif

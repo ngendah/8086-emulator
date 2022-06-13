@@ -1,6 +1,8 @@
 #ifndef _MOV_OPERATORS_H_
 #define _MOV_OPERATORS_H_
 
+#include <string>
+
 #include "instruction_templates.h"
 #include "types.h"
 
@@ -10,6 +12,8 @@ enum OpTypes {
   high_byte,
   low_byte,
 };
+
+static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte"};
 
 class OpType {
 protected:
@@ -65,6 +69,7 @@ public:
 
   virtual void mov(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);
+    PLOGD << fmt::format("mov operation type: {}", _OpTypes[_op_type]);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();
     } else {

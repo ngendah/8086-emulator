@@ -45,7 +45,10 @@ public:
 
   virtual ~RegisterMapper() = default;
 
-  virtual Register *get(uint8_t idx) { return _mapper[idx]; }
+  virtual Register *get(uint8_t idx) {
+    PLOGD << fmt::format("register idx:{:x}", idx);
+    return _mapper[idx];
+  }
 
   static const uint8_t AX_INDEX = 0;
   static const uint8_t CX_INDEX = 1;
