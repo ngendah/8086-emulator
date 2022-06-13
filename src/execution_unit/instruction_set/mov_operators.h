@@ -50,33 +50,30 @@ public:
   }
 };
 
+struct OpTypeSelector {
+  virtual OpTypes op_type(const Instruction &instruction) = 0;
+};
+
 class MovOperator {
 protected:
   IO *_source, *_destination;
+  OpTypeSelector *_selector;
 
 public:
-  MovOperator(IO *source, IO *destination)
-      : _source(source), _destination(destination) {}
+  MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
+      : _source(source), _destination(destination), _selector(selector) {}
 
-  virtual void mov(const Instruction &instruction) = 0;
-
-protected:
-  virtual OpTypes op_type(const Instruction &instruction) { return word; };
-};
-
-struct WREGMovOperator : public MovOperator {
-  explicit WREGMovOperator(IO *source, IO *destination)
-      : MovOperator(source, destination) {}
-
-  void mov(const Instruction &instruction) override {
-    auto _op_type = op_type(instruction);
+  virtual void mov(const Instruction &instruction) {
+    auto _op_type = _selector->op_type(instruction);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();
     } else {
       ByteOpType(_op_type, _source, _destination).execute();
     }
   }
+};
 
+struct RegisterMovOpTypeSelector : OpTypeSelector {
   OpTypes op_type(const Instruction &instruction) override {
     InstructionTemplate<opcode_w_t, opcode_reg_t> instruction_template(
         instruction);
@@ -97,19 +94,7 @@ struct WREGMovOperator : public MovOperator {
   }
 };
 
-struct ImmediateMovOperator : public MovOperator {
-  explicit ImmediateMovOperator(IO *source, IO *destination)
-      : MovOperator(source, destination) {}
-
-  void mov(const Instruction &instruction) override {
-    auto _op_type = op_type(instruction);
-    if (_op_type == word) {
-      WordOpType(_source, _destination).execute();
-    } else {
-      ByteOpType(_op_type, _source, _destination).execute();
-    }
-  }
-
+struct ImmediateMovOpTypeSelector : OpTypeSelector {
   OpTypes op_type(const Instruction &instruction) override {
     opcode_w_reg_t opcode = instruction.opcode_to<opcode_w_reg_t>();
     uint8_t REG = opcode.REG;
@@ -129,31 +114,14 @@ struct ImmediateMovOperator : public MovOperator {
   }
 };
 
-struct WMovOperator : public MovOperator {
-  explicit WMovOperator(IO *source, IO *destination)
-      : MovOperator(source, destination) {}
-
-  void mov(const Instruction &instruction) override {
-    auto _op_type = op_type(instruction);
-    if (_op_type == word) {
-      WordOpType(_source, _destination).execute();
-    } else {
-      ByteOpType(byte, _source, _destination).execute();
-    }
-  }
-
+struct WordOrByteMovOpTypeSelector : OpTypeSelector {
   OpTypes op_type(const Instruction &instruction) override {
     return instruction.opcode_to<opcode_w_t>().W == 1 ? word : byte;
   }
 };
 
-struct WordMovOperator : public MovOperator {
-  explicit WordMovOperator(IO *source, IO *destination)
-      : MovOperator(source, destination) {}
-
-  void mov(__attribute__((unused)) const Instruction &) override {
-    WordOpType(_source, _destination).execute();
-  }
+struct WordMovOpTypeSelector : OpTypeSelector {
+  OpTypes op_type(const Instruction &instruction) override { return word; }
 };
 
 #endif // _MOV_OPERATORS_H_
