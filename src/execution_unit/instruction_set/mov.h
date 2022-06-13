@@ -16,12 +16,14 @@ struct IOWriter {
   virtual IO *writer(const Instruction &) = 0;
 };
 
-class MovRegisterRegister final : RegisterMovOpTypeSelector {
+class MovRegisterRegister : RegisterMovOpTypeSelector {
 public:
   explicit MovRegisterRegister(Registers *registers) : _registers(registers) {}
 
   void execute(const Instruction &instruction) {
-    auto mod = instruction.opcode_to<mod_reg_rm_t>();
+    auto mod = instruction.mode_to<mod_reg_rm_t>();
+    PLOGD << instruction;
+    PLOGD << mod;
     assert(mod.MOD == 0x3);
     return mov(instruction);
   }
@@ -41,7 +43,7 @@ protected:
     }
   };
 
-  struct _IOReader : IOReader, _RegisterSelector1, _RegisterSelector2 {
+  struct _IOReader final : IOReader, _RegisterSelector1, _RegisterSelector2 {
     Registers *_registers;
     std::array<RegisterSelector *, 2> _selectors;
 
@@ -59,7 +61,7 @@ protected:
     }
   };
 
-  struct _IOWriter : IOWriter, _RegisterSelector1, _RegisterSelector2 {
+  struct _IOWriter final : IOWriter, _RegisterSelector1, _RegisterSelector2 {
     Registers *_registers;
     std::array<RegisterSelector *, 2> _selectors;
 

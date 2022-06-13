@@ -4,6 +4,7 @@
 #include <plog/Log.h>
 
 #include "instruction_set_tests/io_selectors_tests.h"
+#include "instruction_set_tests/mov_tests.h"
 #include "instruction_set_tests/segment_mapper_tests.h"
 #include "peripheral_tests/ram_tests.h"
 #include "types_tests.h"
