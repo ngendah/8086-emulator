@@ -69,4 +69,18 @@ typedef struct _sr_t final {
   }
 } sr_t;
 
+typedef struct _d_w_t final {
+  uint8_t W : 1;
+  uint8_t D : 1;
+  uint8_t _X : 3;
+  friend std::ostream &operator<<(std::ostream &os, const _d_w_t &t) {
+    os << " sr_t{"
+       << fmt::format("_X1=0x{0:x}(0b{0:b}), D=0x{1:x}(0b{1:b}), "
+                      "W=0x{2:x}(0b{2:b})",
+                      t._X, t.D, t.W)
+       << "} ";
+    return os;
+  }
+} d_w_t;
+
 #endif // INSTRUCTION_TEMPLATES_H_
