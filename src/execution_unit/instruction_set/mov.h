@@ -30,13 +30,13 @@ protected:
   Registers *_registers;
 
   struct _RegisterSelector1 : RegisterSelector {
-    virtual uint8_t REG(const Instruction &instruction) {
+    virtual uint8_t REG(const Instruction &instruction) const {
       return instruction.mode_to<mod_reg_rm_t>().REG;
     }
   };
 
   struct _RegisterSelector2 : RegisterSelector {
-    virtual uint8_t REG(const Instruction &instruction) {
+    virtual uint8_t REG(const Instruction &instruction) const {
       return instruction.mode_to<mod_reg_rm_t>().RM;
     }
   };
