@@ -164,21 +164,20 @@ protected:
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
-      assert(opcode.D == 1);
+      assert(opcode.D == 0);
       auto reg_selector = _RegisterSelector1();
       return RegisterIOSelector(_registers, &reg_selector).get(instruction);
     }
   };
 
   struct _IOWriter final : IOWriter {
-    Registers *_registers;
-    BUS *_bus;
+    MemoryIOSelector _io_selector;
 
     explicit _IOWriter(BUS *bus, Registers *registers)
-        : _bus(bus), _registers(registers) {}
+        : _io_selector(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
-      return MemoryIOSelector(_bus, _registers).get(instruction);
+      return _io_selector.get(instruction);
     }
   };
 };
