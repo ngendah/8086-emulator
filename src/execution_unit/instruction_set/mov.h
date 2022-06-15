@@ -16,7 +16,7 @@ struct IOWriter {
   virtual IO *writer(const Instruction &) = 0;
 };
 
-class MovRegisterRegister : RegisterMovOpTypeSelector {
+class MovRegisterRegister {
 public:
   explicit MovRegisterRegister(Registers *registers) : _registers(registers) {}
 
@@ -80,20 +80,22 @@ protected:
   };
 
   void mov(const Instruction &instruction) {
+    auto op_selector = RegisterMovOpTypeSelector();
     auto mov_operator =
         MovOperator(_IOReader(_registers).reader(instruction),
-                    _IOWriter(_registers).writer(instruction), this);
+                    _IOWriter(_registers).writer(instruction), &op_selector);
     mov_operator.mov(instruction);
   }
 };
 
-class MovRegisterImmediate : public ImmediateMovOpTypeSelector {
+class MovRegisterImmediate {
 public:
   explicit MovRegisterImmediate(Registers *registers) : _registers(registers) {}
 
   void execute(const Instruction &instruction) {
+    auto op_selector = ImmediateMovOpTypeSelector();
     return MovOperator(_IOReader().reader(instruction),
-                       _IOWriter(_registers).writer(instruction), this)
+                       _IOWriter(_registers).writer(instruction), &op_selector)
         .mov(instruction);
   }
 
@@ -131,4 +133,53 @@ protected:
   };
 };
 
+class MovRegisterMemory {
+public:
+  explicit MovRegisterMemory(Registers *registers, BUS *bus)
+      : _registers(registers), _bus(bus) {}
+
+  void execute(const Instruction &instruction) {
+    auto opcode = instruction.opcode_to<d_w_t>();
+    assert(opcode.W == 1);
+    auto mov_operator = WordMovOpTypeSelector();
+    MovOperator(_IOReader(_registers).reader(instruction),
+                _IOWriter(_bus, _registers).writer(instruction), &mov_operator)
+        .mov(instruction);
+  }
+
+protected:
+  Registers *_registers;
+  BUS *_bus;
+
+  struct _RegisterSelector1 : RegisterSelector {
+    virtual uint8_t REG(const Instruction &instruction) const {
+      return instruction.mode_to<mod_reg_rm_t>().REG;
+    }
+  };
+
+  struct _IOReader final : IOReader {
+    Registers *_registers;
+
+    explicit _IOReader(Registers *registers) : _registers(registers) {}
+
+    IO *reader(const Instruction &instruction) override {
+      auto opcode = instruction.opcode_to<d_w_t>();
+      assert(opcode.D == 1);
+      auto reg_selector = _RegisterSelector1();
+      return RegisterIOSelector(_registers, &reg_selector).get(instruction);
+    }
+  };
+
+  struct _IOWriter final : IOWriter {
+    Registers *_registers;
+    BUS *_bus;
+
+    explicit _IOWriter(BUS *bus, Registers *registers)
+        : _bus(bus), _registers(registers) {}
+
+    IO *writer(const Instruction &instruction) override {
+      return MemoryIOSelector(_bus, _registers).get(instruction);
+    }
+  };
+};
 #endif
