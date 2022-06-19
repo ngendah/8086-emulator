@@ -55,6 +55,21 @@ typedef struct _mod_reg_rm_t final {
   }
 } mod_reg_rm_t;
 
+typedef struct _mod_sr_rm_t final {
+  uint8_t RM : 3;
+  uint8_t SR : 2;
+  uint8_t _X : 1;
+  uint8_t MOD : 2;
+  friend std::ostream &operator<<(std::ostream &os, const _mod_sr_rm_t &t) {
+    os << " mod_sr_rm_t{"
+       << fmt::format("MODE=0x{0:x}(0b{0:b}), SR=0x0{1:x}(0b0{1:b}), "
+                      "RM=0x{2:x}(0b{2:b})",
+                      t.MOD, t.SR, t.RM)
+       << "} ";
+    return os;
+  }
+} mod_sr_rm_t;
+
 typedef struct _sr_t final {
   uint8_t _X2 : 3;
   uint8_t SR : 2;

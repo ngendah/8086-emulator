@@ -1,6 +1,7 @@
 #ifndef _MOV_TESTS_H_
 #define _MOV_TESTS_H_
 
+#include "logger.h"
 #include "mov.h"
 #include "ram.h"
 #include "gtest/gtest.h"
@@ -67,6 +68,34 @@ TEST(MovRegisterMemoryTests, test_execute) {
   io.execute(Instruction(0xff, 0x8996, (uint16_t)address));
   auto bytes = ram.read(&address, sizeof(uint16_t));
   EXPECT_EQ((uint16_t)bytes, 0x12);
+}
+
+TEST(MovRegisterSegmentTests, test_execute) {
+  auto registers = Registers();
+  registers.BX += 0x12;
+  auto io = MovRegisterSegment(&registers);
+  io.execute(Instruction(0xff, 0x8EDB));
+  EXPECT_EQ(registers.DS, 0x12);
+}
+
+TEST(MovRegisterSegmentTests, test_execute_2) {
+  auto registers = Registers();
+  registers.DS += 0x12;
+  auto io = MovRegisterSegment(&registers);
+  io.execute(Instruction(0xff, 0x8CDB));
+  EXPECT_EQ(registers.BX, 0x12);
+}
+
+TEST(MovMemorySegmentTests, test_execute) {
+  auto registers = Registers();
+  auto ram = RAM(64);
+  uint16_t val = 0x12;
+  auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
+  auto address = Address((uint16_t)(0x010));
+  ram.write(&address, bytes);
+  auto io = MovMemorySegment(&ram, &registers);
+  io.execute(Instruction(0xff, 0x8E90, address));
+  PLOGD << (uint16_t)registers.SS;
 }
 
 #endif // _MOV_TESTS_H_

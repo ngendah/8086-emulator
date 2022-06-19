@@ -92,6 +92,7 @@ public:
 
   Segment *segment(const Instruction &instruction,
                    MemorySelector const *selector) {
+    PLOGD << "memory io segment selector";
     if (instruction.sop() == 0xff) {
       return SegmentMapper(_registers)
           .get(selector->RM(instruction), selector->segment_mapping_type());
@@ -104,6 +105,7 @@ public:
 
 struct SegmentSelector {
   virtual uint8_t SR(const Instruction &instruction) const = 0;
+  virtual SegmentMappingTypes map_type() const { return indexed; }
 };
 
 struct ModeSegmentSelector : SegmentSelector {
@@ -122,7 +124,7 @@ struct OpCodeSegmentSelector : SegmentSelector {
   }
 };
 
-static const auto default_segment_selector = OpCodeSegmentSelector();
+static const auto default_segment_selector = ModeSegmentSelector();
 
 class SegmentIOSelector : public IOSelector {
 protected:
@@ -136,7 +138,8 @@ public:
       : _segmentMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {
-    return _segmentMapper.get(_selector->SR(instruction), indexed);
+    return _segmentMapper.get(_selector->SR(instruction),
+                              _selector->map_type());
   }
 };
 

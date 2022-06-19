@@ -107,11 +107,6 @@ public:
 };
 
 template <typename T, typename P> class InstructionTemplate {
-public:
-  typedef T opcode_t;
-  typedef P mode_t;
-
-protected:
   Instruction _instruction;
 
 public:
@@ -122,25 +117,9 @@ public:
   InstructionTemplate(const InstructionTemplate<T, P> &rhs)
       : _instruction(rhs._instruction) {}
 
-  InstructionTemplate<T, P> operator=(Instruction instruction) {
-    _instruction = instruction;
-    return *this;
-  }
-
-  InstructionTemplate<T, P> operator=(const Instruction &instruction) {
-    _instruction = instruction;
-    return *this;
-  }
-
-  operator sop_t() const { return (sop_t)_instruction; }
-
   T opcode() const { return _instruction.opcode_to<T>(); }
 
   P mode() const { return _instruction.mode_to<P>(); }
-
-  uint8_t sop() const { return _instruction.sop(); }
-
-  uint16_t offset() const { return _instruction.offset(); }
 
   friend std::ostream &
   operator<<(std::ostream &os,
@@ -199,7 +178,7 @@ struct Bytes {
   uint16_t _size;
   Bytes() : _bytes(nullptr), _size(0) {}
 
-  Bytes(uint8_t *bytes, uint16_t size) : _bytes(nullptr), _size(size) {
+  explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(nullptr), _size(size) {
     _bytes = bytes;
     _size = size;
   }

@@ -15,7 +15,7 @@
 class Buffer {
   std::vector<uint8_t> _memory;
 
- public:
+public:
   Buffer(uint32_t size = 128) : _memory(size & 0x000FFFFF) {}
 
   uint16_t write(Address *address, Bytes bytes) {
@@ -23,7 +23,7 @@ class Buffer {
     if (it == _memory.end() || it + bytes._size == _memory.end()) {
       assert(false);
     }
-    std::copy(bytes._bytes, bytes._bytes + bytes._size, it);
+    std::memcpy((void *)&(*it), bytes._bytes, bytes._size);
     return bytes._size;
   }
 
@@ -39,7 +39,7 @@ class Buffer {
 class RAM : public BUS {
   Buffer _buffer;
 
- public:
+public:
   RAM(uint32_t size = 1024 * 1024) : _buffer(size){};
 
   virtual ~RAM();
