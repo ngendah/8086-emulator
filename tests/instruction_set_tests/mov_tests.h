@@ -93,9 +93,11 @@ TEST(MovMemorySegmentTests, test_execute) {
   auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
   auto address = Address((uint16_t)(0x010));
   ram.write(&address, bytes);
+  PLOGD << fmt::format("test: source=0x{:x}", (long)&ram);
   auto io = MovMemorySegment(&ram, &registers);
   io.execute(Instruction(0xff, 0x8E90, address));
-  PLOGD << (uint16_t)registers.SS;
+  PLOGD << fmt::format("test: destination=0x{:x}", (long)&registers.SS);
+  EXPECT_EQ((uint16_t)registers.SS, val);
 }
 
 #endif // _MOV_TESTS_H_

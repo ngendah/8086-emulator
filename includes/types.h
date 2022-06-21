@@ -365,6 +365,14 @@ public:
     std::memcpy(&byte, bytes._bytes, sizeof(uint8_t));
     return byte;
   }
+
+  friend std::ostream &operator<<(std::ostream &os, const BUSIO &t) {
+    os << "BUSIO{"
+       << fmt::format("_bus=0x{0:x}, _address=0x{1:x}", (long)t._bus,
+                      (uint32_t)t._address)
+       << "}";
+    return os;
+  }
 };
 
 class Register : public IO {

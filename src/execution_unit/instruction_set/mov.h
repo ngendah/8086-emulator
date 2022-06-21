@@ -253,6 +253,7 @@ public:
   void execute(const Instruction &instruction) {
     auto op_selector = WordMovOpTypeSelector();
     auto opcode = instruction.opcode_to<d_w_t>();
+    PLOGD << opcode;
     assert(opcode.W == 0);
     auto io_reader = _IOReader(_bus, _registers);
     auto io_writer = _IOWriter(_bus, _registers);
@@ -288,8 +289,8 @@ protected:
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
-      return opcode.D == 1 ? segment_selector(instruction)
-                           : memory_selector(instruction);
+      return opcode.D == 1 ? memory_selector(instruction)
+                           : segment_selector(instruction);
     }
   };
 
@@ -299,8 +300,8 @@ protected:
 
     IO *writer(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
-      return opcode.D == 1 ? memory_selector(instruction)
-                           : segment_selector(instruction);
+      return opcode.D == 1 ? segment_selector(instruction)
+                           : memory_selector(instruction);
     }
   };
 };

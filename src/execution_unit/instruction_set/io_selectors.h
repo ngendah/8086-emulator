@@ -46,7 +46,6 @@ struct MemorySelector {
 
   virtual uint8_t RM(const Instruction &instruction) const {
     mod_reg_rm_t mode = instruction.mode_to<mod_reg_rm_t>();
-    PLOGD << mode;
     return mode.RM;
   }
 
@@ -87,12 +86,12 @@ public:
       PLOGD << "mod=0x3(0b11) is register selector mode";
       assert(false);
     }
+    PLOGD << _bus;
     return &_bus;
   }
 
   Segment *segment(const Instruction &instruction,
                    MemorySelector const *selector) {
-    PLOGD << "memory io segment selector";
     if (instruction.sop() == 0xff) {
       return SegmentMapper(_registers)
           .get(selector->RM(instruction), selector->segment_mapping_type());
