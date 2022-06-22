@@ -93,10 +93,35 @@ TEST(MovMemorySegmentTests, test_execute) {
   auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
   auto address = Address((uint16_t)(0x010));
   ram.write(&address, bytes);
-  PLOGD << fmt::format("test: source=0x{:x}", (long)&ram);
   auto io = MovMemorySegment(&ram, &registers);
   io.execute(Instruction(0xff, 0x8E90, address));
-  PLOGD << fmt::format("test: destination=0x{:x}", (long)&registers.SS);
+  EXPECT_EQ((uint16_t)registers.SS, val);
+}
+
+TEST(MovMemorySegmentTests, test_execute_2) {
+  auto registers = Registers();
+  auto ram = RAM(64);
+  uint16_t val = 0x12;
+  registers.SS += val;
+  auto address = Address((uint16_t)(0x010));
+  auto io = MovMemorySegment(&ram, &registers);
+  io.execute(Instruction(0xff, 0x8C90, address));
+  auto bytes = ram.read(&address, sizeof(uint16_t));
+  EXPECT_EQ((uint16_t)bytes, val);
+}
+
+TEST(MovMemorySegmentTests, test_execute_with_bx_si_set) {
+  auto registers = Registers();
+  registers.BX = 0x2;
+  registers.SI = 0x3;
+  auto ram = RAM(64);
+  uint16_t val = 0x12;
+  auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
+  auto base_addr = Address((uint16_t)(0x010));
+  auto address = base_addr + (uint16_t)0x5;
+  ram.write(&address, bytes);
+  auto io = MovMemorySegment(&ram, &registers);
+  io.execute(Instruction(0xff, 0x8E90, base_addr));
   EXPECT_EQ((uint16_t)registers.SS, val);
 }
 

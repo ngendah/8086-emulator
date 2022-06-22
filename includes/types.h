@@ -146,6 +146,22 @@ public:
   operator uint8_t() const { return (uint8_t)_address & 0x000000ff; }
   operator uint16_t() const { return (uint16_t)_address & 0x0000ffff; }
   operator uint32_t() const { return (uint32_t)_address & 0x000fffff; }
+
+  Address &operator+=(uint16_t offset) {
+    _address += offset;
+    return *this;
+  }
+
+  Address &operator+=(const Address &address) {
+    *this += address._address;
+    return *this;
+  }
+
+  Address operator+(uint16_t offset) { return Address(_address + offset); }
+
+  Address operator+(const Address &rhs) {
+    return Address(_address + rhs._address);
+  }
 };
 
 class InstructionCode final {
@@ -377,13 +393,18 @@ public:
 
 class Register : public IO {
   uint16_t _register;
+  std::string _name;
 
 public:
   Register() : _register(0) {}
 
-  Register(const Register &rhs) : _register(rhs._register) {}
+  Register(uint16_t val) : _register(val) {}
 
-  Register(const uint16_t val) : _register(val) {}
+  Register(std::string name) : _register(0), _name(name) {}
+
+  Register(uint16_t val, std::string name) : _register(val), _name(name) {}
+
+  Register(const Register &rhs) : _register(rhs._register) {}
 
   ~Register() override = default;
 
@@ -411,6 +432,11 @@ public:
     _register += offset;
     return *this;
   }
+
+  friend std::ostream &operator<<(std::ostream &os, const Register &rhs) {
+    os << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register);
+    return os;
+  }
 };
 
 struct Segment final : public Register {
@@ -418,7 +444,11 @@ struct Segment final : public Register {
 
   Segment(const Segment &rhs) : Register(rhs) {}
 
-  Segment(const uint16_t val) : Register(val) {}
+  Segment(uint16_t val) : Register(val) {}
+
+  Segment(std::string name) : Register(name) {}
+
+  Segment(uint16_t val, std::string name) : Register(val, name) {}
 
   ~Segment() override = default;
 
@@ -436,6 +466,9 @@ struct Registers final {
   Register AX, BX, CX, DX, SP, BP, SI, DI, IP;
   Segment CS, DS, SS, ES;
   flags_t FLAGS;
+  Registers()
+      : AX("AX"), BX("BX"), CX("CX"), DX("DX"), SP("SP"), BP("BP"), SI("SI"),
+        DI("DI"), IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES") {}
 };
 
 #endif /* RAM_H_ */
