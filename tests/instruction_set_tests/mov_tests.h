@@ -125,4 +125,18 @@ TEST(MovMemorySegmentTests, test_execute_with_bx_si_set) {
   EXPECT_EQ((uint16_t)registers.SS, val);
 }
 
+TEST(MovAccumulatorTests, test_execute) {
+  auto registers = Registers();
+  auto ram = RAM(64);
+  uint16_t val = 0x23;
+  auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
+  auto address = Address((uint16_t)(0x010));
+  ram.write(&address, bytes);
+  PLOGD << fmt::format("source=0x{:x}", (long)&ram);
+  auto io = MovAccumulator(&registers, &ram);
+  io.execute(Instruction(0xff, 0xA100, address));
+  PLOGD << fmt::format("destination=0x{:x}", (long)&registers.AX);
+  EXPECT_EQ((uint16_t)registers.AX, val);
+}
+
 #endif // _MOV_TESTS_H_

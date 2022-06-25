@@ -68,7 +68,7 @@ public:
   MemoryIOSelector(const MemoryIOSelector &rhs)
       : _bus(rhs._bus), _registers(rhs._registers), _selector(rhs._selector) {}
 
-  IO *get(const Instruction &instruction) override {
+  virtual IO *get(const Instruction &instruction) override {
     Segment *_segment = segment(instruction, _selector);
     auto MOD = _selector->MOD(instruction);
     auto RM = _selector->RM(instruction);
@@ -99,6 +99,36 @@ public:
     uint8_t idx = ((instruction.sop() >> 3) & 0x03);
     PLOGD << fmt::format("idx: 0x{:x}", idx);
     return SegmentMapper(_registers).get(idx, indexed);
+  }
+};
+
+class DirectMemoryIOSelector : public MemoryIOSelector {
+public:
+  DirectMemoryIOSelector(BUS *bus, Registers *registers)
+      : MemoryIOSelector(bus, registers, nullptr) {}
+
+  struct MemorySegmentSelector : MemorySelector {
+    uint8_t MOD(__attribute__((unused)) const Instruction &) const override {
+      assert(false);
+      return 0;
+    }
+
+    uint8_t RM(__attribute__((unused)) const Instruction &) const override {
+      return SegmentMapper::DS_INDEX;
+    }
+
+    SegmentMappingTypes segment_mapping_type() const override {
+      return indexed;
+    }
+  };
+
+  IO *get(const Instruction &instruction) override {
+    auto selector = MemorySegmentSelector();
+    Segment *_segment = segment(instruction, &selector);
+    uint16_t offset = instruction.offset();
+    _bus.set_address(PhysicalAddresser(_registers).address(_segment, offset));
+    PLOGD << _bus;
+    return &_bus;
   }
 };
 

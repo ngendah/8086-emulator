@@ -1,8 +1,6 @@
 #ifndef _MOV_H_
 #define _MOV_H_
 
-#include <array>
-
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "mov_operators.h"
@@ -326,16 +324,15 @@ protected:
   };
 };
 
-class MovAccumulator : public MovRegisterMemory {
+class MovAccumulator {
+public:
   explicit MovAccumulator(Registers *registers, BUS *bus)
-      : MovRegisterMemory(registers, bus) {}
+      : _registers(registers), _bus(bus) {}
 
   void execute(const Instruction &instruction) {
-    auto opcode = instruction.opcode_to<d_w_t>();
-    assert(opcode.W == 1);
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = MovAccumulator::_IOReader(_bus, _registers);
-    auto io_writer = MovRegisterMemory::_IOWriter(_bus, _registers);
+    auto op_selector = WordOrByteMovOpTypeSelector();
+    auto io_reader = _IOReader(_bus, _registers);
+    auto io_writer = _IOWriter(_bus, _registers);
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
@@ -343,15 +340,18 @@ class MovAccumulator : public MovRegisterMemory {
   }
 
 protected:
-  struct _RegistersSelector1 : RegisterSelector {
-    virtual uint8_t REG(__attribute__((unused)) const Instruction &_) const {
+  Registers *_registers;
+  BUS *_bus;
+
+  struct _RegisterSelector1 : RegisterSelector {
+    virtual uint8_t REG(__attribute__((unused)) const Instruction &) const {
       return RegisterMapper::AX_INDEX;
     }
   };
 
   struct _RWIO {
     Registers *_registers;
-    MemoryIOSelector _io_selector;
+    DirectMemoryIOSelector _io_selector;
 
     explicit _RWIO(BUS *bus, Registers *registers)
         : _registers(registers), _io_selector(bus, registers) {}
@@ -373,7 +373,18 @@ protected:
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
-      assert(opcode.D == 0);
+      return opcode.D == 1 ? register_selector(instruction)
+                           : memory_selector(instruction);
+    }
+  };
+
+  struct _IOWriter final : _RWIO, IOWriter {
+
+    explicit _IOWriter(BUS *bus, Registers *registers)
+        : _RWIO(bus, registers) {}
+
+    IO *writer(const Instruction &instruction) override {
+      auto opcode = instruction.opcode_to<d_w_t>();
       return opcode.D == 1 ? memory_selector(instruction)
                            : register_selector(instruction);
     }
