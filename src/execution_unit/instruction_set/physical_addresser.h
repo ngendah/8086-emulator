@@ -89,7 +89,7 @@ public:
 
   Address address(Segment *segment, uint16_t offset = 0) {
     PLOGD << "direct physical addresser " << *segment
-          << fmt::format(", offset=0x{1:x}", offset);
+          << fmt::format(", offset=0x{:x}", offset);
     fn_t _map_fn = &PhysicalAddresser::_f_1;
     return (this->*_map_fn)(segment, offset);
   }
