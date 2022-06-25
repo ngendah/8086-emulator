@@ -6,14 +6,6 @@
 #include "mov_operators.h"
 #include "types.h"
 
-struct IOReader {
-  virtual IO *reader(const Instruction &) = 0;
-};
-
-struct IOWriter {
-  virtual IO *writer(const Instruction &) = 0;
-};
-
 class MovRegisterRegister {
 public:
   explicit MovRegisterRegister(Registers *registers) : _registers(registers) {}

@@ -471,4 +471,12 @@ struct Registers final {
         DI("DI"), IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES") {}
 };
 
+struct IOReader {
+  virtual IO *reader(const Instruction &) = 0;
+};
+
+struct IOWriter {
+  virtual IO *writer(const Instruction &) = 0;
+};
+
 #endif /* RAM_H_ */
