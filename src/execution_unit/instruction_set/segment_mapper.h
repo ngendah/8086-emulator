@@ -3,9 +3,9 @@
 
 #include <array>
 
+#include "./segment_mapping_types.h"
 #include "logger.h"
 #include "types.h"
-#include "./segment_mapping_types.h"
 
 class SegmentMapper {
 protected:
@@ -49,11 +49,14 @@ public:
   SegmentMapper(Registers *registers) : _registers(registers) {}
 
   Segment *get(uint8_t idx, SegmentMappingTypes segment_mapping_type) {
-    PLOGD << fmt::format("idx: 0x{0:x}, segment-mapping-type: {1}", idx,
-                         _SegmentMappingTypes[segment_mapping_type]);
-    return segment_mapping_type == indexed
-               ? IndexSegmentMapper(_registers).get(idx)
-               : DefaultSegmentMapper(_registers).get(idx);
+    auto _segment = segment_mapping_type == indexed
+                        ? IndexSegmentMapper(_registers).get(idx)
+                        : DefaultSegmentMapper(_registers).get(idx);
+    PLOGD << fmt::format("idx=0x{0:x}, "
+                         "segment-mapping-type={1}, name={2}, address=0x{3:x}",
+                         idx, _SegmentMappingTypes[segment_mapping_type],
+                         _segment->name(), (long)_segment);
+    return _segment;
   }
 
   static const uint8_t ES_INDEX = 0;

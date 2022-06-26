@@ -65,7 +65,7 @@ public:
   }
 
   Address address(Segment *segment, uint8_t idx, uint16_t offset) {
-    PLOGD << "physical address mapping: " << *segment
+    PLOGD << "mapping: " << *segment
           << fmt::format(", addressing_mode=0x{0:x}, offset=0x{1:x}", idx,
                          offset);
     fn_t _map_fn = _mapper[idx];
@@ -73,7 +73,7 @@ public:
   }
 
   Address address(Segment *segment, uint8_t idx, uint8_t offset) {
-    PLOGD << "physical address mapping: " << *segment
+    PLOGD << "mapping: " << *segment
           << fmt::format(", addressing_mode=0x{0:x}, offset=0x{1:x}", idx,
                          offset);
     fn_t _map_fn = _mapper[idx];
@@ -81,15 +81,14 @@ public:
   }
 
   Address address(Segment *segment, uint8_t idx) {
-    PLOGD << "physical addresser mapping " << *segment
+    PLOGD << "mapping: " << *segment
           << fmt::format(", addressing_mode=0x{:x}", idx);
     fn_t _map_fn = _mapper[idx];
     return (this->*_map_fn)(segment, 0x0);
   }
 
   Address address(Segment *segment, uint16_t offset = 0) {
-    PLOGD << "direct physical addresser " << *segment
-          << fmt::format(", offset=0x{:x}", offset);
+    PLOGD << "direct: " << *segment << fmt::format(", offset=0x{:x}", offset);
     fn_t _map_fn = &PhysicalAddresser::_f_1;
     return (this->*_map_fn)(segment, offset);
   }
