@@ -1,1 +1,1 @@
-add_library(instruction_set mov.cpp)
+add_library(instruction_set mov.cpp push.cpp)

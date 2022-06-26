@@ -122,20 +122,40 @@ struct MemorySegmentSelector : MemorySelector {
 
 static const auto direct_memory_selector = MemorySegmentSelector();
 
-class DirectMemoryIOSelector : public MemoryIOSelector {
-public:
+struct DirectMemoryIOSelector : public MemoryIOSelector {
   DirectMemoryIOSelector(
       BUS *bus, Registers *registers,
       MemorySelector const *selector = &direct_memory_selector)
       : MemoryIOSelector(bus, registers, selector) {}
 
   IO *get(const Instruction &instruction) override {
-    auto selector = MemorySegmentSelector();
     Segment *_segment = segment(instruction, _selector);
     uint16_t offset = instruction.offset();
     _bus.set_address(PhysicalAddresser(_registers).address(_segment, offset));
     PLOGD << _bus;
     return &_bus;
+  }
+};
+
+static const auto stack_memory_segment_selector =
+    MemorySegmentSelector(SegmentMapper::SS_INDEX);
+
+struct StackMemoryIOSelector : public DirectMemoryIOSelector {
+  StackMemoryIOSelector(BUS *bus, Registers *registers)
+      : DirectMemoryIOSelector(bus, registers, &stack_memory_segment_selector) {
+  }
+
+  IO *get(const Instruction &instruction) override {
+    Segment *_segment = segment(instruction, _selector);
+    _bus.set_address(
+        PhysicalAddresser(_registers).address(_segment, _registers->SP));
+    return &_bus;
+  }
+
+  Segment *segment(const Instruction &instruction,
+                   MemorySelector const *selector) {
+    return SegmentMapper(_registers)
+        .get(selector->RM(instruction), selector->segment_mapping_type());
   }
 };
 
