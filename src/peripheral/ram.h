@@ -19,20 +19,24 @@ public:
   Buffer(uint32_t size = 128) : _memory(size & 0x000FFFFF) {}
 
   uint16_t write(Address *address, Bytes bytes) {
-    auto it = _memory.begin() + (uint32_t)*address;
-    if (it == _memory.end() || it + bytes._size == _memory.end()) {
+    auto begin = _memory.data();
+    auto end = begin + _memory.size();
+    if (begin + ((uint32_t)*address) + bytes._size >= end) {
       assert(false);
     }
-    std::memcpy((void *)&(*it), bytes._bytes, bytes._size);
+    auto at = begin + (uint32_t)*address;
+    std::memcpy((void *)at, bytes._bytes, bytes._size);
     return bytes._size;
   }
 
   Bytes read(Address *address, uint16_t len) {
-    auto it = _memory.begin() + (uint32_t)*address;
-    if (it == _memory.end() || it + len == _memory.end()) {
+    auto begin = _memory.data();
+    auto end = begin + _memory.size();
+    if (begin + ((uint32_t)*address) >= end) {
       assert(false);
     }
-    return Bytes(&(*it), len);
+    auto at = begin + (uint32_t)*address;
+    return Bytes(at, len);
   }
 };
 
