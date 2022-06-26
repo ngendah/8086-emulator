@@ -90,8 +90,8 @@ public:
     return &_bus;
   }
 
-  Segment *segment(const Instruction &instruction,
-                   MemorySelector const *selector) {
+  virtual Segment *segment(const Instruction &instruction,
+                           MemorySelector const *selector) {
     if (instruction.sop() == 0xff) {
       return SegmentMapper(_registers)
           .get(selector->RM(instruction), selector->segment_mapping_type());
@@ -104,9 +104,11 @@ public:
 
 struct MemorySegmentSelector : MemorySelector {
   uint8_t _segment_index;
+  SegmentMappingTypes _segment_map_type;
 
-  MemorySegmentSelector(uint8_t segment_index = SegmentMapper::DS_INDEX)
-      : _segment_index(segment_index) {}
+  MemorySegmentSelector(uint8_t segment_index = SegmentMapper::DS_INDEX,
+                        SegmentMappingTypes segment_map_type = indexed)
+      : _segment_index(segment_index), _segment_map_type(segment_map_type) {}
 
   uint8_t MOD(__attribute__((unused)) const Instruction &) const override {
     assert(false);
@@ -117,7 +119,9 @@ struct MemorySegmentSelector : MemorySelector {
     return _segment_index;
   }
 
-  SegmentMappingTypes segment_mapping_type() const override { return indexed; }
+  SegmentMappingTypes segment_mapping_type() const override {
+    return _segment_map_type;
+  }
 };
 
 static const auto direct_memory_selector = MemorySegmentSelector();
@@ -128,7 +132,7 @@ struct DirectMemoryIOSelector : public MemoryIOSelector {
       MemorySelector const *selector = &direct_memory_selector)
       : MemoryIOSelector(bus, registers, selector) {}
 
-  IO *get(const Instruction &instruction) override {
+  virtual IO *get(const Instruction &instruction) override {
     Segment *_segment = segment(instruction, _selector);
     uint16_t offset = instruction.offset();
     _bus.set_address(PhysicalAddresser(_registers).address(_segment, offset));
@@ -153,7 +157,7 @@ struct StackMemoryIOSelector : public DirectMemoryIOSelector {
   }
 
   Segment *segment(const Instruction &instruction,
-                   MemorySelector const *selector) {
+                   MemorySelector const *selector) override {
     return SegmentMapper(_registers)
         .get(selector->RM(instruction), selector->segment_mapping_type());
   }

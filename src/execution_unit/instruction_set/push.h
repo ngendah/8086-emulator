@@ -17,13 +17,11 @@ protected:
   BUS *_bus;
 
   struct _IOWriter final : IOWriter {
-    Registers *_registers;
     StackMemoryIOSelector _stack_mem_selector;
     explicit _IOWriter(BUS *bus, Registers *registers)
-        : _registers(registers), _stack_mem_selector(bus, registers) {}
+        : _stack_mem_selector(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
-      _registers->SP += sizeof(uint16_t);
       return _stack_mem_selector.get(instruction);
     }
   };
@@ -41,12 +39,13 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
+    _registers->SP += sizeof(uint16_t);
   }
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {
     virtual uint8_t REG(const Instruction &instruction) const {
-      auto mode = instruction.mode_to<opcode_reg_t>();
+      auto mode = instruction.opcode_to<opcode_reg_t>();
       return mode.REG;
     }
   };
@@ -74,6 +73,7 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
+    _registers->SP += sizeof(uint16_t);
   }
 
 protected:
@@ -102,6 +102,7 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
+    _registers->SP += sizeof(uint16_t);
   }
 
 protected:
