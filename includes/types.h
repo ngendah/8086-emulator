@@ -392,17 +392,14 @@ public:
 };
 
 class Register : public IO {
+protected:
   uint16_t _register;
   std::string _name;
 
 public:
-  Register() : _register(0) {}
+  explicit Register(uint16_t val = 0) : _register(val) {}
 
-  Register(uint16_t val) : _register(val) {}
-
-  Register(std::string name) : _register(0), _name(name) {}
-
-  Register(uint16_t val, std::string name) : _register(val), _name(name) {}
+  Register(const std::string &name) : _register(0), _name(name) {}
 
   Register(const Register &rhs) : _register(rhs._register) {}
 
@@ -428,10 +425,17 @@ public:
 
   operator uint16_t() const { return _register; }
 
-  Register operator+=(uint16_t offset) {
+  Register &operator+=(uint16_t offset) {
     _register += offset;
     return *this;
   }
+
+  Register &operator=(uint16_t val) {
+    _register = val;
+    return *this;
+  }
+
+  std::string name() const { return _name; }
 
   friend std::ostream &operator<<(std::ostream &os, const Register &rhs) {
     os << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register);
@@ -440,17 +444,18 @@ public:
 };
 
 struct Segment final : public Register {
-  Segment() = default;
+  explicit Segment(uint16_t val = 0) : Register(val){};
 
   Segment(const Segment &rhs) : Register(rhs) {}
 
-  Segment(uint16_t val) : Register(val) {}
-
   Segment(std::string name) : Register(name) {}
 
-  Segment(uint16_t val, std::string name) : Register(val, name) {}
-
   ~Segment() override = default;
+
+  Segment &operator=(uint16_t val) {
+    _register = val;
+    return *this;
+  }
 
   Address address(const Register &reg, uint16_t offset = 0x0) {
     uint16_t eff_addr = offset + (uint16_t)reg;
