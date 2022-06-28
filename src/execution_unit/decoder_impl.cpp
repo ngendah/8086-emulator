@@ -16,6 +16,7 @@ DecoderImpl::DecoderImpl(BUS *bus, Clock *clock, Registers *registers)
       INVALID,
       NOP,
   };
+  _clock = nullptr;
 }
 
 DecoderImpl::~DecoderImpl() {}
