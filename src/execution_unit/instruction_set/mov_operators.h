@@ -69,8 +69,8 @@ public:
 
   virtual void mov(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);
-    PLOGD << fmt::format("source=0x{0:x}, destination=0x{1:x}", (long)_source,
-                         (long)_destination);
+    PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
+                         (long)_source, (long)_destination);
     PLOGD << fmt::format("mov operation type={}", _OpTypes[_op_type]);
     if (_op_type == word) {
       WordOpType(_source, _destination).execute();

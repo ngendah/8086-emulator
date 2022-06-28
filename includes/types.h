@@ -383,10 +383,8 @@ public:
   }
 
   friend std::ostream &operator<<(std::ostream &os, const BUSIO &t) {
-    os << "BUSIO{"
-       << fmt::format("_bus=0x{0:x}, _address=0x{1:x}", (long)t._bus,
-                      (uint32_t)t._address)
-       << "}";
+    os << fmt::format("BUSIO_ptr=0x{:x}", (long)&t) << ", "
+       << fmt::format("physical_address=0x{:x}", (uint32_t)t._address);
     return os;
   }
 };

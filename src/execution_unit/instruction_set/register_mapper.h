@@ -47,7 +47,7 @@ public:
 
   virtual Register *get(uint8_t idx) {
     auto _register = _mapper[idx];
-    PLOGD << fmt::format("idx={0:x}, name={1}, address=0x{2:x}", idx,
+    PLOGD << fmt::format("idx=0x{0:x}, name={1}, ptr=0x{2:x}", idx,
                          _register->name(), (long)_register);
     return _register;
   }
