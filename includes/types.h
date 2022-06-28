@@ -430,6 +430,11 @@ public:
     return *this;
   }
 
+  Register &operator-=(uint16_t offset) {
+    _register -= offset;
+    return *this;
+  }
+
   Register &operator=(uint16_t val) {
     _register = val;
     return *this;
@@ -462,7 +467,7 @@ struct Segment final : public Register {
     return Address((uint32_t)(((uint32_t) * this) * 0x10 + eff_addr));
   }
 
-  Address address(const uint16_t &eff_addr) {
+  Address address(uint16_t eff_addr) {
     return Address((uint32_t)(((uint32_t) * this) * 0x10 + eff_addr));
   }
 };

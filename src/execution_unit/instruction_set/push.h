@@ -84,7 +84,7 @@ protected:
 
     IO *reader(const Instruction &instruction) override {
       auto mode = instruction.mode_to<mod_reg_rm_t>();
-      assert(mode.REG == 0x5);
+      assert(mode.REG == 0x6);
       return _mem_selector.get(instruction);
     }
   };
