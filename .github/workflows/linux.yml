@@ -33,6 +33,6 @@ jobs:
 
       - name: Test
         working-directory: ${{runner.workspace}}/build
-        run: ctest -C Debug
+        run: ctest build/tests/unitTests
         env:
           CTEST_OUTPUT_ON_FAILURE: True
