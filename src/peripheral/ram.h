@@ -46,13 +46,13 @@ class RAM : public BUS {
 public:
   RAM(uint32_t size = 1024 * 1024) : _buffer(size){};
 
-  virtual ~RAM();
+  ~RAM() override {}
 
-  uint16_t write(Address *address, const Bytes &bytes) {
+  uint16_t write(Address *address, const Bytes &bytes) override {
     return _buffer.write(address, bytes);
   }
 
-  Bytes read(Address *address, uint16_t len) {
+  Bytes read(Address *address, uint16_t len) override {
     return _buffer.read(address, len);
   }
 };
