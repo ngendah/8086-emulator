@@ -1,9 +1,16 @@
 # 8086 Emulator
 ======================
 
+<<<<<<< HEAD
 ### Clone the project:
 
 1. git submodules fmt, plog and googletest
+=======
+### Dependencies:
+1. googletest
+
+2. git submodules fmt and plog
+>>>>>>> 1ad45fc (Remove googletest as submodule and install its binary)
 
 ## References
 =====================

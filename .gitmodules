@@ -4,6 +4,3 @@
 [submodule "libraries/fmt"]
 	path = libraries/fmt
 	url = git@github.com:fmtlib/fmt.git
-[submodule "libraries/googletest"]
-	path = libraries/googletest
-	url = git@github.com:google/googletest.git
