@@ -1,0 +1,38 @@
+name: linux
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Create Build Environment
+        run: |
+          sudo apt update
+          sudo apt install clang libc++-dev libc++abi-dev
+          sudo apt install locales-all
+          cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Configure
+        working-directory: ${{runner.workspace}}/build
+        env:
+          CXX: clang
+          CXXFLAGS: -stdlib=libc++
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Debug \
+                -DCMAKE_CXX_STANDARD=14 -DFMT_DOC=OFF \
+                -DCMAKE_CXX_VISIBILITY_PRESET=hidden -DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+                -DFMT_PEDANTIC=ON -DFMT_WERROR=ON $GITHUB_WORKSPACE
+
+      - name: Test
+        working-directory: ${{runner.workspace}}/build
+        run: ctest -C Debug
+        env:
+          CTEST_OUTPUT_ON_FAILURE: True
