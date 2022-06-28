@@ -7,6 +7,7 @@ include_directories(
   includes
   libraries/plog/include
   libraries/fmt/include
+  libraries/googletest/googletest/include
 )
 add_subdirectory(src)
 add_subdirectory(libraries)

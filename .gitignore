@@ -16,4 +16,6 @@ unitTests
 build
 .vscode
 *.d
-libraries/**
+libraries/plog
+libraries/fmt
+libraries/googletest
