@@ -17,9 +17,26 @@ jobs:
         run: |
           sudo apt update
           sudo apt install clang libc++-dev libc++abi-dev
-          cmake --build .
+          cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Configure
+        working-directory: ${{runner.workspace}}/build
+        env:
+          CXX: clang
+          CXXFLAGS: -stdlib=libc++
+        run: |
+          cmake -DCMAKE_CXX_STANDARD=14 -DFMT_DOC=OFF \
+              -DCMAKE_CXX_VISIBILITY_PRESET=hidden -DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
+              -DFMT_PEDANTIC=ON -DFMT_WERROR=ON $GITHUB_WORKSPACE
+
+      - name: Build
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          threads=`nproc`
+          cmake --build . --parallel $threads
 
       - name: Test
-        run: ctest tests/unitTests
+        working-directory: ${{runner.workspace}}/build
+        run: ctest unitTests
         env:
           CTEST_OUTPUT_ON_FAILURE: True
