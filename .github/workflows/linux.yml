@@ -16,27 +16,21 @@ jobs:
       - name: Create Build Environment
         run: |
           sudo apt update
-          sudo apt install clang libc++-dev libc++abi-dev
+          sudo apt install cmake clang libc++-dev libc++abi-dev libgtest-dev
           cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure
         working-directory: ${{runner.workspace}}/build
-        env:
-          CXX: clang
-          CXXFLAGS: -stdlib=libc++
         run: |
-          cmake -DCMAKE_CXX_STANDARD=14 -DFMT_DOC=OFF \
-              -DCMAKE_CXX_VISIBILITY_PRESET=hidden -DCMAKE_VISIBILITY_INLINES_HIDDEN=ON \
-              -DFMT_PEDANTIC=ON -DFMT_WERROR=ON $GITHUB_WORKSPACE
+          cmake -DBUILD_SHARED_LIBS=ON $GITHUB_WORKSPACE
 
       - name: Build
         working-directory: ${{runner.workspace}}/build
         run: |
-          threads=`nproc`
-          cmake --build . --parallel $threads
+          cmake --build .
 
       - name: Test
         working-directory: ${{runner.workspace}}/build
-        run: ctest unitTests
+        run: ctest
         env:
           CTEST_OUTPUT_ON_FAILURE: True

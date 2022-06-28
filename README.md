@@ -2,7 +2,9 @@
 ======================
 
 ### Dependencies:
-git submodules fmt, plog and googletest
+1. googletest
+
+2. git submodules fmt and plog
 
 ## References
 =====================
