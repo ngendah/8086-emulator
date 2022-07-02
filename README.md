@@ -1,10 +1,9 @@
 # 8086 Emulator
 ======================
 
-### Dependencies:
-1. googletest
+### Clone the project:
 
-2. git submodules fmt and plog
+1. git submodules fmt, plog and googletest
 
 ## References
 =====================

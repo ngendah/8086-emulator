@@ -9,6 +9,10 @@ include_directories(
   "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set"
 )
 
+include_directories(
+  $PROJECT_SOURCE_DIR/libraries/googletest/googletest/include
+)
+
 add_subdirectory(peripheral_tests)
 add_subdirectory(instruction_set_tests)
 
