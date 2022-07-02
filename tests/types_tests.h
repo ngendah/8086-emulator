@@ -34,7 +34,7 @@ TEST(SegmentTest, test_segment_address_2) {
   auto segment = Segment(0x2345);
   auto reg = Register(0x123c);
   auto addr = segment.address(reg);
-  EXPECT_EQ((uint32_t)addr, 0x2468c);
+  EXPECT_EQ((uint32_t)addr, (uint32_t)0x2468c);
 }
 
 #endif /* TYPES_TESTS_H_ */

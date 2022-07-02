@@ -16,33 +16,21 @@ jobs:
       - name: Create Build Environment
         run: |
           sudo apt update
-<<<<<<< HEAD
           sudo apt install cmake clang libc++-dev libc++abi-dev
           cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure
         working-directory: ${{runner.workspace}}/build
-=======
-          sudo apt install build-essential cmake clang libc++-dev libc++abi-dev libgtest-dev
-
-      - name: Configure
->>>>>>> 1ad45fc (Remove googletest as submodule and install its binary)
         run: |
           cmake -DBUILD_SHARED_LIBS=ON $GITHUB_WORKSPACE
 
       - name: Build
+        working-directory: ${{runner.workspace}}/build
         run: |
-<<<<<<< HEAD
           cmake --build .
 
       - name: Test
         working-directory: ${{runner.workspace}}/build
         run: ctest
-=======
-          cmake --build $GITHUB_WORKSPACE
-
-      - name: Test
-        run: ctest unitTests
->>>>>>> 1ad45fc (Remove googletest as submodule and install its binary)
         env:
           CTEST_OUTPUT_ON_FAILURE: True

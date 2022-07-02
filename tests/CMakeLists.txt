@@ -11,7 +11,7 @@ include_directories(
 )
 
 include_directories(
-  $PROJECT_SOURCE_DIR/libraries/googletest/googletest/include
+  ${PROJECT_SOURCE_DIR}/libraries/googletest/googletest/include
 )
 
 add_subdirectory(peripheral_tests)
@@ -19,7 +19,7 @@ add_subdirectory(instruction_set_tests)
 
 target_link_libraries(
   unitTests
-  gtest
+  gtest_main
   pthread
   plog
   fmt
