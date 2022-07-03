@@ -1,7 +1,7 @@
-/*
- * RAM.h
- *
- */
+//
+// Copyright (c) 2022 Ngenda Henry
+//
+// For the license information refer to LICENSE.
 
 #ifndef RAM_H_
 #define RAM_H_

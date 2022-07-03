@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2022 Ngenda Henry
+//
+// For the license information refer to LICENSE.
+
 #ifndef _MOV_OPERATORS_H_
 #define _MOV_OPERATORS_H_
 

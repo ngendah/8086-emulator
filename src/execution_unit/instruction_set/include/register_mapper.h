@@ -1,3 +1,9 @@
+//
+// Copyright (c) 2022 Ngenda Henry
+// All rights reserved.
+//
+// For the license information refer to LICENSE.
+
 #ifndef INSTRUCTION_SET_REGISTER_MAPPER_H_
 #define INSTRUCTION_SET_REGISTER_MAPPER_H_
 

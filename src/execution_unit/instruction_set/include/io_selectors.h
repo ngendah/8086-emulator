@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2022 Ngenda Henry
+//
+// For the license information refer to LICENSE.
+
 #ifndef _IO_SELECTORS_H_
 #define _IO_SELECTORS_H_
 

@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2022 Ngenda Henry
+//
+// For the license information refer to LICENSE.
+
 #ifndef SEGMENT_MAPPING_TYPES_H_
 #define SEGMENT_MAPPING_TYPES_H_
 
@@ -8,6 +13,6 @@ enum SegmentMappingTypes {
   indexed,
 };
 
-static const std::string _SegmentMappingTypes [] = {"defaults", "indexed"};
+static const std::string _SegmentMappingTypes[] = {"defaults", "indexed"};
 
 #endif // SEGMENT_MAPPING_TYPES_H_

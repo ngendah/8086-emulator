@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2022 Ngenda Henry
+//
+// For the license information refer to LICENSE.
+
 #ifndef INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_
 #define INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_
 
