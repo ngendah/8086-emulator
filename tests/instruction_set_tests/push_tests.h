@@ -11,7 +11,7 @@ TEST(PushRegisterTests, test_execute) {
   registers.SS = 0x10;
   registers.SI = 0x37;
   auto ram = RAM(512);
-  auto io = PushRegister(&registers, &ram);
+  auto io = PushRegister(&registers, &ram, &stack_full_ascending);
   io.execute(Instruction(0xff, 0x5600));
   auto address = Address((uint16_t)0x100);
   auto bytes = ram.read(&address, sizeof(uint16_t));
@@ -26,7 +26,7 @@ TEST(PushMemoryTests, test_execute) {
   auto address = Address((uint16_t)0x0083);
   auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
   ram.write(&address, bytes);
-  auto io = PushMemory(&registers, &ram);
+  auto io = PushMemory(&registers, &ram, &stack_full_ascending);
   io.execute(Instruction(0xff, 0xFFB4, address));
   {
     auto address = Address((uint16_t)0x100);
@@ -40,7 +40,7 @@ TEST(PushSegmentTests, test_execute) {
   registers.SS = 0x10;
   registers.DS = 0x37;
   auto ram = RAM(512);
-  auto io = PushSegment(&registers, &ram);
+  auto io = PushSegment(&registers, &ram, &stack_full_ascending);
   io.execute(Instruction(0xff, 0x1E00));
   auto address = Address((uint16_t)0x100);
   auto bytes = ram.read(&address, sizeof(uint16_t));
@@ -55,7 +55,7 @@ TEST(PushTests, test_execute) {
   registers.SP = 0x2;
   {
     registers.BX = 0xE45B;
-    auto io = PushRegister(&registers, &ram);
+    auto io = PushRegister(&registers, &ram, &stack_full_ascending);
     io.execute(Instruction(0xff, 0x5300));
   }
 
@@ -64,7 +64,7 @@ TEST(PushTests, test_execute) {
     auto address = Address((uint16_t)0x0083);
     auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
     ram.write(&address, bytes);
-    auto io = PushMemory(&registers, &ram);
+    auto io = PushMemory(&registers, &ram, &stack_full_ascending);
     io.execute(Instruction(0xff, 0xFFB4, address));
   }
 

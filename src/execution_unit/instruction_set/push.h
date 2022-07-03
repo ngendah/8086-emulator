@@ -9,11 +9,13 @@
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "mov_operators.h"
+#include "stack_strategy.h"
 #include "types.h"
 
 class Push {
 public:
-  Push(Registers *registers, BUS *bus) : _registers(registers), _bus(bus) {}
+  Push(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
+      : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
 
   virtual void execute(const Instruction &instruction) = 0;
 
@@ -30,11 +32,16 @@ protected:
       return _stack_mem_selector.get(instruction);
     }
   };
+
+public:
+  StackStrategy const *_stack_strategy;
 };
 
 class PushRegister : public Push {
 public:
-  PushRegister(Registers *registers, BUS *bus) : Push(registers, bus) {}
+  PushRegister(Registers *registers, BUS *bus,
+               StackStrategy const *stack_stragegy = &stack_full_descending)
+      : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
     auto op_selector = WordMovOpTypeSelector();
@@ -44,7 +51,7 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
-    _registers->SP += sizeof(uint16_t);
+    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
 protected:
@@ -68,7 +75,9 @@ protected:
 
 class PushMemory : public Push {
 public:
-  PushMemory(Registers *registers, BUS *bus) : Push(registers, bus) {}
+  PushMemory(Registers *registers, BUS *bus,
+             StackStrategy const *stack_stragegy = &stack_full_descending)
+      : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
     auto op_selector = WordMovOpTypeSelector();
@@ -78,7 +87,7 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
-    _registers->SP += sizeof(uint16_t);
+    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
 protected:
@@ -97,7 +106,9 @@ protected:
 
 class PushSegment : public Push {
 public:
-  PushSegment(Registers *registers, BUS *bus) : Push(registers, bus) {}
+  PushSegment(Registers *registers, BUS *bus,
+              StackStrategy const *stack_stragegy = &stack_full_descending)
+      : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
     auto op_selector = WordMovOpTypeSelector();
@@ -107,7 +118,7 @@ public:
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
     mov_operator.mov(instruction);
-    _registers->SP += sizeof(uint16_t);
+    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
 protected:
