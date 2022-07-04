@@ -9,22 +9,30 @@
 #include "instruction_templates.h"
 #include "operators.h"
 
-struct MovOperator : public Operator {
-  MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : Operator(source, destination, selector) {}
-
-  // TODO refactor by moving to base class
-  virtual void execute(const Instruction &instruction) {
-    auto _op_type = _selector->op_type(instruction);
-    PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
-                         (long)_source, (long)_destination);
-    PLOGD << fmt::format("mov operation type={}", _OpTypes[_op_type]);
-    if (_op_type == word) {
-      WordOpType(_source, _destination).execute();
-    } else {
-      ByteOpType(_op_type, _source, _destination).execute();
+struct MovOpType : OpType {
+  void execute(const OpType::Params &params) const override {
+    switch (params._op_type) {
+    case byte:
+      params._destination->write(params._source->read_byte());
+      break;
+    case high_byte:
+      params._destination->write_hi(params._source->read_hi());
+      break;
+    case low_byte:
+      params._destination->write_lo(params._source->read_lo());
+      break;
+    default:
+      params._destination->write(params._source->read());
+      break;
     }
   }
+};
+
+static const auto mov_op_type_operator = MovOpType();
+
+struct MovOperator : public Operator {
+  MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
+      : Operator(source, destination, selector, &mov_op_type_operator) {}
 };
 
 struct RegisterMovOpTypeSelector : OpTypeSelector {

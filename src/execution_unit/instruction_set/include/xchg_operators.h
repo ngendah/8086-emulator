@@ -9,61 +9,38 @@
 #include "instruction_templates.h"
 #include "operators.h"
 
-class XCHGWordOpType : protected OpType {
-public:
-  XCHGWordOpType(IO *source, IO *destination) : OpType(source, destination) {}
-  void execute() override {
-    auto val = (uint16_t)_destination->read();
-    _destination->write(_source->read());
-    return _source->write(val);
-  }
-};
-
-class XCHGByteOpType : protected OpType {
-protected:
-  OpTypes _op_type;
-
-public:
-  XCHGByteOpType(OpTypes op_type, IO *source, IO *destination)
-      : OpType(source, destination), _op_type(op_type) {}
-
-  void execute() override {
-    switch (_op_type) {
+struct XCHGOpType : OpType {
+  void execute(const OpType::Params &params) const override {
+    switch (params._op_type) {
+    case byte:
+      auto val = (uint8_t)params._source->read_byte();
+      params._destination->write(params._source->read_byte());
+      params._souce->write(val);
+      break;
     case high_byte:
-      auto val = (uint8_t)_source->read_hi();
-      _destination->write_hi(_source->read_hi());
-      _source->write_hi(val);
+      auto val = (uint8_t)params._source->read_hi();
+      params._destination->write_hi(params._source->read_hi());
+      params._source->write_hi(val);
       break;
     case low_byte:
-      auto val = (uint8_t)_source->read_lo();
-      _destination->write_lo(_source->read_lo());
-      _source->write_lo(val);
+      auto val = (uint8_t)params._source->read_lo();
+      params._destination->write_lo(params._source->read_lo());
+      params._source->write_lo(val);
       break;
     default:
-      auto val = (uint8_t)_source->read_byte();
-      _destination->write(_source->read_byte());
-      _souce->write(val);
+      auto val = (uint16_t)params._destination->read();
+      params._destination->write(params._source->read());
+      params._source->write(val);
       break;
     }
   }
 };
+
+static const auto xchg_op_type_operator = XCHGOpType();
 
 struct XCHGOperator : public Operator {
   XCHGOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : Operator(source, destination, selector) {}
-
-  // TODO refactor by moving to base class
-  virtual void xchg(const Instruction &instruction) {
-    auto _op_type = _selector->op_type(instruction);
-    PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
-                         (long)_source, (long)_destination);
-    PLOGD << fmt::format("mov operation type={}", _OpTypes[_op_type]);
-    if (_op_type == word) {
-      XCHGWordOpType(_source, _destination).execute();
-    } else {
-      XCHGByteOpType(_op_type, _source, _destination).execute();
-    }
-  }
+      : Operator(source, destination, selector, &xchg_op_type_operator) {}
 };
 
 #endif // _XCHG_OPERATORS_H_
