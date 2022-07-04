@@ -79,7 +79,7 @@ protected:
     auto mov_operator =
         MovOperator(_IOReader(_registers).reader(instruction),
                     _IOWriter(_registers).writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
   }
 };
 
@@ -91,7 +91,7 @@ public:
     auto op_selector = ImmediateMovOpTypeSelector();
     return MovOperator(_IOReader().reader(instruction),
                        _IOWriter(_registers).writer(instruction), &op_selector)
-        .mov(instruction);
+        .execute(instruction);
   }
 
 protected:
@@ -142,7 +142,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
   }
 
 protected:
@@ -211,7 +211,7 @@ public:
     auto mov_operator =
         MovOperator(_IOReader(_registers).reader(instruction),
                     _IOWriter(_registers).writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
   }
 
 protected:
@@ -275,7 +275,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
   }
 
 protected:
@@ -333,7 +333,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
   }
 
 protected:

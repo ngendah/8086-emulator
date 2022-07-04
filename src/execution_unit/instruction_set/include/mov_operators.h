@@ -14,7 +14,7 @@ struct MovOperator : public Operator {
       : Operator(source, destination, selector) {}
 
   // TODO refactor by moving to base class
-  virtual void mov(const Instruction &instruction) {
+  virtual void execute(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);
     PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
                          (long)_source, (long)_destination);

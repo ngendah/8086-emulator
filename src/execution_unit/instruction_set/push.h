@@ -50,7 +50,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
@@ -86,7 +86,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
@@ -117,7 +117,7 @@ public:
     auto mov_operator =
         MovOperator(io_reader.reader(instruction),
                     io_writer.writer(instruction), &op_selector);
-    mov_operator.mov(instruction);
+    mov_operator.execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
