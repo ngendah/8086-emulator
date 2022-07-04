@@ -9,12 +9,13 @@
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "mov_operators.h"
+#include "stack_strategy.h"
 #include "types.h"
 
 class Pop {
 public:
   Pop(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
-      : _registers(registers), _bus(bus), _stack_stragegy(stack_stragegy) {}
+      : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
 
   virtual void execute(const Instruction &instruction) = 0;
 
@@ -65,7 +66,7 @@ protected:
     Registers *_registers;
     explicit _IOWriter(Registers *registers) : _registers(registers) {}
 
-    IO *reader(const Instruction &instruction) override {
+    IO *writer(const Instruction &instruction) override {
       auto reg_selector = _RegisterSelector1();
       return RegisterIOSelector(_registers, &reg_selector).get(instruction);
     }
@@ -123,9 +124,9 @@ public:
 protected:
   struct _IOWriter final : IOWriter {
     Registers *_registers;
-    explicit _IOReader(Registers *registers) : _registers(registers) {}
+    explicit _IOWriter(Registers *registers) : _registers(registers) {}
 
-    IO *reader(const Instruction &instruction) override {
+    IO *writer(const Instruction &instruction) override {
       auto seg_selector = OpCodeSegmentSelector();
       return SegmentIOSelector(_registers, &seg_selector).get(instruction);
     }

@@ -6,72 +6,14 @@
 #ifndef _MOV_OPERATORS_H_
 #define _MOV_OPERATORS_H_
 
-#include <string>
-
 #include "instruction_templates.h"
-#include "types.h"
+#include "operators.h"
 
-enum OpTypes {
-  word,
-  byte,
-  high_byte,
-  low_byte,
-};
-
-static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte"};
-
-class OpType {
-protected:
-  IO *_source;
-  IO *_destination;
-
-public:
-  OpType(IO *source, IO *destination)
-      : _source(source), _destination(destination) {}
-  virtual void execute() = 0;
-};
-
-class WordOpType : protected OpType {
-public:
-  WordOpType(IO *source, IO *destination) : OpType(source, destination) {}
-  void execute() override { return _destination->write(_source->read()); }
-};
-
-class ByteOpType : protected OpType {
-protected:
-  OpTypes _op_type;
-
-public:
-  ByteOpType(OpTypes op_type, IO *source, IO *destination)
-      : OpType(source, destination), _op_type(op_type) {}
-  void execute() override {
-    switch (_op_type) {
-    case high_byte:
-      _destination->write_hi(_source->read_hi());
-      break;
-    case low_byte:
-      _destination->write_lo(_source->read_lo());
-      break;
-    default:
-      _destination->write(_source->read_byte());
-      break;
-    }
-  }
-};
-
-struct OpTypeSelector {
-  virtual OpTypes op_type(const Instruction &instruction) const = 0;
-};
-
-class MovOperator {
-protected:
-  IO *_source, *_destination;
-  OpTypeSelector *_selector;
-
-public:
+struct MovOperator : public Operator {
   MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : _source(source), _destination(destination), _selector(selector) {}
+      : Operator(source, destination, selector) {}
 
+  // TODO refactor by moving to base class
   virtual void mov(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);
     PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
