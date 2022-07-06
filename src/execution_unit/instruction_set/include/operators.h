@@ -39,6 +39,18 @@ struct OpTypeSelector {
   virtual OpTypes op_type(const Instruction &instruction) const = 0;
 };
 
+struct WordOrByteOpcodeOpTypeSelector : OpTypeSelector {
+  OpTypes op_type(const Instruction &instruction) const override {
+    return instruction.opcode_to<opcode_w_t>().W == 1 ? word : byte;
+  }
+};
+
+struct WordOpTypeSelector : OpTypeSelector {
+  OpTypes op_type(__attribute__((unused)) const Instruction &) const override {
+    return word;
+  }
+};
+
 class Operator {
 protected:
   IO *_source, *_destination;
