@@ -9,7 +9,7 @@
 struct MovRegisterRegisterTests : ::testing::Test {
   struct MovRegisterRegisterT : public MovRegisterRegister {
     MovRegisterRegisterT(Registers *registers)
-        : MovRegisterRegister(registers) {}
+        : MovRegisterRegister(nullptr, registers) {}
     using MovRegisterRegister::_IOReader;
     using MovRegisterRegister::_IOWriter;
   };
@@ -32,7 +32,7 @@ TEST_F(MovRegisterRegisterTests, test__IOWriter_writer) {
 TEST_F(MovRegisterRegisterTests, test_execute) {
   auto registers = Registers();
   registers.BX += 0x56;
-  auto io = MovRegisterRegister(&registers);
+  auto io = MovRegisterRegister(nullptr, &registers);
   io.execute(Instruction(0xff, 0x8BC3));
   EXPECT_EQ((uint16_t)registers.AX, 0x56);
 }
@@ -40,21 +40,21 @@ TEST_F(MovRegisterRegisterTests, test_execute) {
 TEST_F(MovRegisterRegisterTests, test_execute_2) {
   auto registers = Registers();
   registers.BX += 0x56;
-  auto io = MovRegisterRegister(&registers);
+  auto io = MovRegisterRegister(nullptr, &registers);
   io.execute(Instruction(0xff, 0x89D8));
   EXPECT_EQ((uint16_t)registers.AX, 0x56);
 }
 
 TEST(MovRegisterImmediateTests, test_execute) {
   auto registers = Registers();
-  auto io = MovRegisterImmediate(&registers);
+  auto io = MovRegisterImmediate(nullptr, &registers);
   io.execute(Instruction(0xff, 0xB8, 0x0U, 0x0025));
   EXPECT_EQ((uint16_t)registers.AX, 0x25);
 }
 
 TEST(MovRegisterImmediateTests, test_execute_2) {
   auto registers = Registers();
-  auto io = MovRegisterImmediate(&registers);
+  auto io = MovRegisterImmediate(nullptr, &registers);
   io.execute(Instruction(0xff, 0xB1, 0x0U, 0xF2));
   EXPECT_EQ((uint16_t)registers.AX, 0xF2);
 }
@@ -63,7 +63,7 @@ TEST(MovRegisterMemoryTests, test_execute) {
   auto registers = Registers();
   registers.DX += 0x12;
   auto ram = RAM(512);
-  auto io = MovRegisterMemory(&registers, &ram);
+  auto io = MovRegisterMemory(&ram, &registers);
   auto address = Address((uint16_t)0x0100);
   io.execute(Instruction(0xff, 0x8996, (uint16_t)address));
   auto bytes = ram.read(&address, sizeof(uint16_t));
@@ -73,7 +73,7 @@ TEST(MovRegisterMemoryTests, test_execute) {
 TEST(MovRegisterSegmentTests, test_execute) {
   auto registers = Registers();
   registers.BX += 0x12;
-  auto io = MovRegisterSegment(&registers);
+  auto io = MovRegisterSegment(nullptr, &registers);
   io.execute(Instruction(0xff, 0x8EDB));
   EXPECT_EQ(registers.DS, 0x12);
 }
@@ -81,7 +81,7 @@ TEST(MovRegisterSegmentTests, test_execute) {
 TEST(MovRegisterSegmentTests, test_execute_2) {
   auto registers = Registers();
   registers.DS += 0x12;
-  auto io = MovRegisterSegment(&registers);
+  auto io = MovRegisterSegment(nullptr, &registers);
   io.execute(Instruction(0xff, 0x8CDB));
   EXPECT_EQ(registers.BX, 0x12);
 }
@@ -133,7 +133,7 @@ TEST(MovAccumulatorTests, test_execute) {
   auto address = Address((uint16_t)(0x010));
   ram.write(&address, bytes);
   PLOGD << fmt::format("source=0x{:x}", (long)&ram);
-  auto io = MovAccumulator(&registers, &ram);
+  auto io = MovAccumulator(&ram, &registers);
   io.execute(Instruction(0xff, 0xA100, address));
   PLOGD << fmt::format("destination=0x{:x}", (long)&registers.AX);
   EXPECT_EQ((uint16_t)registers.AX, val);

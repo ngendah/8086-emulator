@@ -12,7 +12,7 @@
 #include "stack_strategy.h"
 #include "types.h"
 
-class Pop {
+class Pop : public MicroOp {
 public:
   Pop(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
       : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
@@ -39,8 +39,11 @@ public:
 
 class PopRegister : public Pop {
 public:
-  PopRegister(Registers *registers, BUS *bus,
-              StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PopRegister(BUS *bus, Registers *registers)
+      : Pop(registers, bus, &stack_full_descending) {}
+
+  PopRegister(BUS *bus, Registers *registers,
+              StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -53,6 +56,8 @@ public:
     mov_operator.execute(instruction);
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
+
+  MICRO_OP_INSTRUCTION(PopRegister)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {
@@ -75,8 +80,10 @@ protected:
 
 class PopMemory : public Pop {
 public:
-  PopMemory(Registers *registers, BUS *bus,
-            StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PopMemory(BUS *bus, Registers *registers)
+      : Pop(registers, bus, &stack_full_descending) {}
+
+  PopMemory(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -89,6 +96,8 @@ public:
     mov_operator.execute(instruction);
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
+
+  MICRO_OP_INSTRUCTION(PopMemory)
 
 protected:
   struct _IOWriter final : IOWriter {
@@ -106,8 +115,11 @@ protected:
 
 class PopSegment : public Pop {
 public:
-  PopSegment(Registers *registers, BUS *bus,
-             StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PopSegment(BUS *bus, Registers *registers)
+      : Pop(registers, bus, &stack_full_descending) {}
+
+  PopSegment(BUS *bus, Registers *registers,
+             StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -120,6 +132,8 @@ public:
     mov_operator.execute(instruction);
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
+
+  MICRO_OP_INSTRUCTION(PopSegment)
 
 protected:
   struct _IOWriter final : IOWriter {

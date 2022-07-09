@@ -11,11 +11,9 @@
 #include "types.h"
 #include "xchg_operators.h"
 
-class XCHG {
+class XCHG : public MicroOp {
 public:
-  XCHG(Registers *registers, BUS *bus) : _registers(registers), _bus(bus) {}
-
-  virtual void execute(const Instruction &instruction) = 0;
+  XCHG(BUS *bus, Registers *registers) : _registers(registers), _bus(bus) {}
 
 protected:
   Registers *_registers;
@@ -24,7 +22,7 @@ protected:
 
 class XCHGAccumulator : public XCHG {
 public:
-  XCHGAccumulator(Registers *registers) : XCHG(registers, nullptr) {}
+  XCHGAccumulator(BUS *bus, Registers *registers) : XCHG(bus, registers) {}
 
   void execute(const Instruction &instruction) override {
     auto op_type_selector = WordOpTypeSelector();
@@ -35,6 +33,8 @@ public:
                      io_writer.writer(instruction), &op_type_selector);
     return xchg_operator.execute(instruction);
   }
+
+  MICRO_OP_INSTRUCTION(XCHGAccumulator)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {
@@ -70,7 +70,7 @@ protected:
 
 class XCHGRegisterMemory : public XCHG {
 public:
-  XCHGRegisterMemory(Registers *registers, BUS *bus) : XCHG(registers, bus) {}
+  XCHGRegisterMemory(BUS *bus, Registers *registers) : XCHG(bus, registers) {}
 
   void execute(const Instruction &instruction) override {
     auto op_type_selector = WordOrByteOpcodeOpTypeSelector();
@@ -81,6 +81,8 @@ public:
                      io_writer.writer(instruction), &op_type_selector);
     return xchg_operator.execute(instruction);
   }
+
+  MICRO_OP_INSTRUCTION(XCHGRegisterMemory)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {

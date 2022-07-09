@@ -12,6 +12,8 @@
 #include <cstring>
 #include <fmt/core.h>
 #include <iostream>
+#include <map>
+#include <memory>
 
 #define len(x) sizeof(x) * CHAR_BIT
 
@@ -491,5 +493,46 @@ struct IOReader {
 struct IOWriter {
   virtual IO *writer(const Instruction &) = 0;
 };
+
+struct MicroOp {
+
+  struct Params {
+    BUS *bus;
+    Registers *registers;
+    Params(BUS *bus = nullptr, Registers *registers = nullptr)
+        : bus(bus), registers(registers) {}
+  };
+
+  class Key {
+  protected:
+    uint8_t _opcode;
+    uint8_t _mask;
+
+  public:
+    explicit Key(uint8_t opcode = 0x0, uint8_t mask = 0xff)
+        : _opcode(opcode), _mask(mask) {}
+
+    Key(const Key &rhs) : _opcode(rhs._opcode), _mask(rhs._mask) {}
+
+    uint8_t opcode() const { return _opcode & _mask; }
+
+    operator uint8_t() const { return this->opcode(); }
+
+    bool operator<(const Key &rhs) const {
+      auto _rhs = rhs.opcode() & _mask;
+      return opcode() < _rhs;
+    }
+  };
+
+  virtual void execute(const Instruction &) = 0;
+
+  virtual ~MicroOp() = default;
+};
+
+#define MICRO_OP_INSTRUCTION(cls)                                              \
+  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
+    PLOGD << #cls << "::create";                                               \
+    return std::make_shared<cls>(params.bus, params.registers);                \
+  }
 
 #endif /* RAM_H_ */

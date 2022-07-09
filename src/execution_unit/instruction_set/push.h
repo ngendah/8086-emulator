@@ -12,12 +12,10 @@
 #include "stack_strategy.h"
 #include "types.h"
 
-class Push {
+class Push : public MicroOp {
 public:
   Push(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
       : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
-
-  virtual void execute(const Instruction &instruction) = 0;
 
 protected:
   Registers *_registers;
@@ -39,8 +37,11 @@ public:
 
 class PushRegister : public Push {
 public:
-  PushRegister(Registers *registers, BUS *bus,
-               StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PushRegister(BUS *bus, Registers *registers)
+      : Push(registers, bus, &stack_full_descending) {}
+
+  PushRegister(BUS *bus, Registers *registers,
+               StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -54,6 +55,7 @@ public:
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
+  MICRO_OP_INSTRUCTION(PushRegister)
 protected:
   struct _RegisterSelector1 : RegisterSelector {
     virtual uint8_t REG(const Instruction &instruction) const {
@@ -75,8 +77,11 @@ protected:
 
 class PushMemory : public Push {
 public:
-  PushMemory(Registers *registers, BUS *bus,
-             StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PushMemory(BUS *bus, Registers *registers)
+      : Push(registers, bus, &stack_full_descending) {}
+
+  PushMemory(BUS *bus, Registers *registers,
+             StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -89,6 +94,8 @@ public:
     mov_operator.execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
+
+  MICRO_OP_INSTRUCTION(PushMemory)
 
 protected:
   struct _IOReader final : IOReader {
@@ -106,8 +113,11 @@ protected:
 
 class PushSegment : public Push {
 public:
-  PushSegment(Registers *registers, BUS *bus,
-              StackStrategy const *stack_stragegy = &stack_full_descending)
+  explicit PushSegment(BUS *bus, Registers *registers)
+      : Push(registers, bus, &stack_full_descending) {}
+
+  PushSegment(BUS *bus, Registers *registers,
+              StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
   void execute(const Instruction &instruction) override {
@@ -120,6 +130,8 @@ public:
     mov_operator.execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
+
+  MICRO_OP_INSTRUCTION(PushSegment)
 
 protected:
   struct _IOReader final : IOReader {
