@@ -429,4 +429,47 @@ protected:
   };
 };
 
+class MovMemoryImmediate : public Mov {
+public:
+  explicit MovMemoryImmediate(BUS *bus, Registers *registers)
+      : Mov(bus, registers) {}
+
+  void execute(const Instruction &instruction) {
+    auto op_selector = WordOrByteMovOpTypeSelector();
+    auto io_reader = _IOReader().reader(instruction);
+    auto io_writer = _IOWriter(_bus, _registers).writer(instruction);
+    return MovOperator(io_reader, io_writer, &op_selector).execute(instruction);
+  }
+
+  MICRO_OP_INSTRUCTION(MovMemoryImmediate)
+
+protected:
+  struct _IOReader : IOReader {
+    ValueIO _value_io;
+    explicit _IOReader() = default;
+
+    IO *reader(const Instruction &instruction) override {
+      auto opcode_w = instruction.opcode_to<opcode_w_t>();
+      if (opcode_w.W == 1)
+        _value_io = instruction.data<uint16_t>();
+      else
+        _value_io = instruction.data<uint8_t>();
+      return &_value_io;
+    }
+  };
+
+  struct _IOWriter final : IOWriter {
+    MemoryIOSelector _io_selector;
+
+    explicit _IOWriter(BUS *bus, Registers *registers)
+        : _io_selector(bus, registers) {}
+
+    IO *writer(const Instruction &instruction) override {
+      auto mode = instruction.mode_to<mod_reg_rm_t>();
+      assert(mode.REG == 0);
+      return _io_selector.get(instruction);
+    }
+  };
+};
+
 #endif // _MOV_H_

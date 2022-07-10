@@ -139,4 +139,16 @@ TEST(MovAccumulatorTests, test_execute) {
   EXPECT_EQ((uint16_t)registers.AX, val);
 }
 
+TEST(MovMemoryImmediateTests, test_execute) {
+  auto registers = Registers();
+  auto ram = RAM(64);
+  uint16_t val = 0x2310;
+  uint16_t offset = 0x10;
+  auto io = MovMemoryImmediate(&ram, &registers);
+  io.execute(Instruction(0x3E, 0xC786, offset, val));
+  auto address = registers.DS.address(offset);
+  auto bytes = ram.read(&address, sizeof(uint16_t));
+  EXPECT_EQ((uint16_t)bytes, val);
+}
+
 #endif // _MOV_TESTS_H_

@@ -10,6 +10,7 @@ InstructionSet::InstructionSet() {
   register_instruction<MovRegisterImmediate>(MicroOp::Key(0xC6, 0xF6));
   register_instruction<MovAccumulator>(MicroOp::Key(0xA0, 0xF0));
   register_instruction<MovSegmentAndRegisterMemory>(MicroOp::Key(0x8E, 0xFC));
+  register_instruction<MovMemoryImmediate>(MicroOp::Key(0xC6, 0xFE));
 }
 
 std::shared_ptr<MicroOp> InstructionSet::decode(uint8_t opcode,
