@@ -15,18 +15,22 @@ struct Comparator {
 };
 
 struct InstructionSet {
-  typedef std::shared_ptr<MicroOp> (*create_func)(const MicroOp::Params &);
-  std::map<MicroOp::Key, create_func, Comparator> instructions;
+  typedef std::shared_ptr<MicroOp> (*create_func_t)(const MicroOp::Params &);
 
   template <typename TDerived>
   void register_instruction(const MicroOp::Key &key) {
     instructions[key] = &TDerived::create;
   }
 
+  InstructionSet::create_func_t find(const MicroOp::Key &);
+
   std::shared_ptr<MicroOp> decode(uint8_t opcode,
                                   const MicroOp::Params &params);
 
   InstructionSet();
+
+protected:
+  std::map<MicroOp::Key, create_func_t, Comparator> instructions;
 };
 
 #endif // _INSTRUCTION_SET_H_

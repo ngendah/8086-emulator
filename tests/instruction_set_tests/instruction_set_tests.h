@@ -15,7 +15,7 @@ struct Compare {
 
 TEST(InstructionSetTests, test_decode_1) {
   InstructionSet instructions;
-  auto cls_create = instructions.instructions.find(MicroOp::Key(0x8B))->second;
+  auto cls_create = instructions.find(MicroOp::Key(0x8B));
   EXPECT_EQ(cls_create, &MovRegisterAndMemory::create);
   auto micro_op = instructions.decode(0x8B, MicroOp::Params());
   EXPECT_NE(micro_op.get(), nullptr);
