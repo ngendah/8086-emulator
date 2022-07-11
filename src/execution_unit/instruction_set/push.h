@@ -23,7 +23,7 @@ protected:
 
   struct _IOWriter final : IOWriter {
     StackMemoryIOSelector _stack_mem_selector;
-    explicit _IOWriter(BUS *bus, Registers *registers)
+    _IOWriter(BUS *bus, Registers *registers)
         : _stack_mem_selector(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
@@ -100,8 +100,8 @@ public:
 protected:
   struct _IOReader final : IOReader {
     MemoryIOSelector _mem_selector;
-    explicit _IOReader(BUS *bus, Registers *registers)
-        : _mem_selector(bus, registers) {}
+
+    _IOReader(BUS *bus, Registers *registers) : _mem_selector(bus, registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto mode = instruction.mode_to<mod_reg_rm_t>();

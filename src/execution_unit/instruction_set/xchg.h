@@ -45,7 +45,9 @@ protected:
 
   struct _IOReader : IOReader {
     Registers *_registers;
+
     _IOReader(Registers *registers) : _registers(registers) {}
+
     IO *reader(const Instruction &instruction) {
       auto reg_selector = _RegisterSelector1();
       return RegisterIOSelector(_registers, &reg_selector).get(instruction);
@@ -60,7 +62,9 @@ protected:
 
   struct _IOWriter : IOWriter {
     Registers *_registers;
+
     _IOWriter(Registers *registers) : _registers(registers) {}
+
     IO *writer(const Instruction &instruction) {
       auto reg_selector = _RegisterSelector2();
       return RegisterIOSelector(_registers, &reg_selector).get(instruction);
@@ -101,7 +105,7 @@ protected:
     Registers *_registers;
     MemoryIOSelector _io_selector;
 
-    explicit _RWIO(BUS *bus, Registers *registers)
+    _RWIO(BUS *bus, Registers *registers)
         : _registers(registers), _io_selector(bus, registers) {}
 
     IO *memory_selector(const Instruction &instruction) {
@@ -110,8 +114,7 @@ protected:
   };
 
   struct _IOReader final : _RWIO, IOReader {
-    explicit _IOReader(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOReader(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *register_selector(const Instruction &instruction) {
       auto register_selector = _RegisterSelector1();
@@ -127,8 +130,7 @@ protected:
   };
 
   struct _IOWriter final : _RWIO, IOWriter {
-    explicit _IOWriter(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *register_selector(const Instruction &instruction) {
       auto register_selector = _RegisterSelector2();

@@ -32,9 +32,8 @@ protected:
   RegisterSelector const *_selector;
 
 public:
-  explicit RegisterIOSelector(
-      Registers *registers,
-      RegisterSelector const *selector = &default_register_selector)
+  RegisterIOSelector(Registers *registers, RegisterSelector const *selector =
+                                               &default_register_selector)
       : _registerMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {

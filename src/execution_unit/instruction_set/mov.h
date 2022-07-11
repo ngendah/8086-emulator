@@ -23,8 +23,7 @@ protected:
 
 class MovRegisterRegister : public Mov {
 public:
-  explicit MovRegisterRegister(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovRegisterRegister(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) {
     auto mod = instruction.mode_to<mod_reg_rm_t>();
@@ -96,8 +95,7 @@ protected:
 
 class MovRegisterMemory : public Mov {
 public:
-  explicit MovRegisterMemory(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovRegisterMemory(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   virtual void execute(const Instruction &instruction) {
     auto opcode = instruction.opcode_to<d_w_t>();
@@ -124,7 +122,7 @@ protected:
     Registers *_registers;
     MemoryIOSelector _io_selector;
 
-    explicit _RWIO(BUS *bus, Registers *registers)
+    _RWIO(BUS *bus, Registers *registers)
         : _registers(registers), _io_selector(bus, registers) {}
 
     IO *register_selector(const Instruction &instruction) {
@@ -139,8 +137,7 @@ protected:
   };
 
   struct _IOReader final : _RWIO, IOReader {
-    explicit _IOReader(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOReader(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -152,8 +149,7 @@ protected:
 
   struct _IOWriter final : _RWIO, IOWriter {
 
-    explicit _IOWriter(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -164,8 +160,7 @@ protected:
 };
 
 struct MovRegisterAndMemory : public Mov {
-  explicit MovRegisterAndMemory(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovRegisterAndMemory(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) override {
     auto mode = instruction.mode_to<mod_reg_rm_t>();
@@ -181,8 +176,7 @@ struct MovRegisterAndMemory : public Mov {
 
 class MovRegisterImmediate : public Mov {
 public:
-  explicit MovRegisterImmediate(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovRegisterImmediate(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) {
     auto op_selector = ImmediateMovOpTypeSelector();
@@ -226,8 +220,7 @@ protected:
 
 class MovRegisterSegment : public Mov {
 public:
-  explicit MovRegisterSegment(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovRegisterSegment(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) {
     PLOGD << instruction;
@@ -289,8 +282,7 @@ protected:
 
 class MovMemorySegment : public Mov {
 public:
-  explicit MovMemorySegment(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovMemorySegment(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) {
     auto op_selector = WordMovOpTypeSelector();
@@ -312,7 +304,7 @@ protected:
     Registers *_registers;
     MemoryIOSelector _io_selector;
 
-    explicit _RWIO(BUS *bus, Registers *registers)
+    _RWIO(BUS *bus, Registers *registers)
         : _registers(registers), _io_selector(bus, registers) {}
 
     IO *segment_selector(const Instruction &instruction) {
@@ -325,8 +317,7 @@ protected:
   };
 
   struct _IOReader final : _RWIO, IOReader {
-    explicit _IOReader(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOReader(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -336,8 +327,7 @@ protected:
   };
 
   struct _IOWriter final : _RWIO, IOWriter {
-    explicit _IOWriter(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -365,8 +355,7 @@ struct MovSegmentAndRegisterMemory : public Mov {
 
 class MovAccumulator : public Mov {
 public:
-  explicit MovAccumulator(BUS *bus, Registers *registers)
-      : Mov(bus, registers) {}
+  MovAccumulator(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
   void execute(const Instruction &instruction) {
     auto op_selector = WordOrByteMovOpTypeSelector();
@@ -391,7 +380,7 @@ protected:
     Registers *_registers;
     DirectMemoryIOSelector _io_selector;
 
-    explicit _RWIO(BUS *bus, Registers *registers)
+    _RWIO(BUS *bus, Registers *registers)
         : _registers(registers), _io_selector(bus, registers) {}
 
     IO *register_selector(const Instruction &instruction) {
@@ -406,8 +395,7 @@ protected:
   };
 
   struct _IOReader final : _RWIO, IOReader {
-    explicit _IOReader(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOReader(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -418,8 +406,7 @@ protected:
 
   struct _IOWriter final : _RWIO, IOWriter {
 
-    explicit _IOWriter(BUS *bus, Registers *registers)
-        : _RWIO(bus, registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _RWIO(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
       auto opcode = instruction.opcode_to<d_w_t>();
@@ -461,8 +448,7 @@ protected:
   struct _IOWriter final : IOWriter {
     MemoryIOSelector _io_selector;
 
-    explicit _IOWriter(BUS *bus, Registers *registers)
-        : _io_selector(bus, registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _io_selector(bus, registers) {}
 
     IO *writer(const Instruction &instruction) override {
       auto mode = instruction.mode_to<mod_reg_rm_t>();
