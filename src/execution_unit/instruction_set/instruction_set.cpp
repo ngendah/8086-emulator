@@ -10,7 +10,7 @@
 
 InstructionSet::InstructionSet() {
   _INSTRUCTION(0x88, 0xFC, MovRegisterAndMemory);
-  _INSTRUCTION(0xC6, 0xF6, MovRegisterImmediate);
+  _INSTRUCTION(0xB0, 0xF0, MovRegisterImmediate);
   _INSTRUCTION(0xA0, 0xF0, MovAccumulator);
   _INSTRUCTION(0x8E, 0xFC, MovSegmentAndRegisterMemory);
   _INSTRUCTION(0xC6, 0xFE, MovMemoryImmediate);
