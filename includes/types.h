@@ -507,12 +507,15 @@ struct MicroOp {
   protected:
     uint8_t _opcode;
     uint8_t _mask;
+    std::string _memonic;
 
   public:
-    explicit Key(uint8_t opcode = 0x0, uint8_t mask = 0xff)
-        : _opcode(opcode), _mask(mask) {}
+    explicit Key(uint8_t opcode = 0x0, uint8_t mask = 0xff,
+                 std::string memonic = "")
+        : _opcode(opcode), _mask(mask), _memonic(memonic) {}
 
-    Key(const Key &rhs) : _opcode(rhs._opcode), _mask(rhs._mask) {}
+    Key(const Key &rhs)
+        : _opcode(rhs._opcode), _mask(rhs._mask), _memonic(rhs._memonic) {}
 
     uint8_t opcode() const { return _opcode & _mask; }
 
@@ -521,6 +524,18 @@ struct MicroOp {
     bool operator<(const Key &rhs) const {
       auto _rhs = rhs.opcode() & _mask;
       return opcode() < _rhs;
+    }
+
+    bool operator==(const Key &rhs) const {
+      auto _rhs = rhs.opcode() & _mask;
+      return opcode() == _rhs;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const Key &key) {
+      os << fmt::format(
+          "memonic={0}, opcode=0x{1:x}, mask=0x{2:x}, opcode&mask={3:d}",
+          key._memonic, key._opcode, key._mask, key.opcode());
+      return os;
     }
   };
 

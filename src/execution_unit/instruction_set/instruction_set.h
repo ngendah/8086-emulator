@@ -7,6 +7,7 @@
 #define _INSTRUCTION_SET_H_
 
 #include "types.h"
+#include <list>
 
 struct Comparator {
   bool operator()(const MicroOp::Key &lhs, const MicroOp::Key &rhs) const {
@@ -19,7 +20,8 @@ struct InstructionSet {
 
   template <typename TDerived>
   void register_instruction(const MicroOp::Key &key) {
-    instructions[key] = &TDerived::create;
+    instructions.push_back(
+        std::make_pair(key, (create_func_t)&TDerived::create));
   }
 
   InstructionSet::create_func_t find(const MicroOp::Key &);
@@ -30,7 +32,7 @@ struct InstructionSet {
   InstructionSet();
 
 protected:
-  std::map<MicroOp::Key, create_func_t, Comparator> instructions;
+  std::list<std::pair<MicroOp::Key, create_func_t>> instructions;
 };
 
 #endif // _INSTRUCTION_SET_H_
