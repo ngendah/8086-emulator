@@ -45,22 +45,25 @@ private:
   uint8_t _mode;
   uint16_t _offset;
   uint16_t _data;
+  uint8_t _port;
 
 public:
-  Instruction() : _sop(0xff), _opcode(0), _mode(0), _offset(0), _data(0) {}
+  Instruction()
+      : _sop(0xff), _opcode(0), _mode(0), _offset(0), _data(0), _port(0) {}
 
   Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset = 0,
-              uint16_t data = 0)
+              uint16_t data = 0, uint8_t port = 0)
       : _sop(sop), _opcode((uint8_t)(opcode_mode >> 8)),
-        _mode((uint8_t)opcode_mode), _offset(offset), _data(data) {}
+        _mode((uint8_t)opcode_mode), _offset(offset), _data(data), _port(port) {
+  }
 
   Instruction(const Instruction &rhs)
       : _sop(rhs._sop), _opcode(rhs._opcode), _mode(rhs._mode),
-        _offset(rhs._offset), _data(rhs._data) {}
+        _offset(rhs._offset), _data(rhs._data), _port(rhs._port) {}
 
   Instruction(Instruction &rhs)
       : _sop(rhs._sop), _opcode(rhs._opcode), _mode(rhs._mode),
-        _offset(rhs._offset), _data(rhs._data) {}
+        _offset(rhs._offset), _data(rhs._data), _port(rhs._port) {}
 
   ~Instruction() = default;
 
@@ -89,6 +92,11 @@ public:
     return *this;
   }
 
+  Instruction port(uint16_t port) {
+    _port = port;
+    return *this;
+  }
+
   operator sop_t() const { return _sop; }
 
   uint16_t sop() const { return _sop; }
@@ -100,6 +108,8 @@ public:
   uint16_t offset() const { return _offset; }
 
   template <typename T> T data() const { return (T)_data; }
+
+  uint8_t port() const { return _port; }
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const Instruction &instruction) {

@@ -1,4 +1,5 @@
 #include "instruction_set.h"
+#include "in.h"
 #include "mov.h"
 #include "pop.h"
 #include "push.h"
@@ -24,6 +25,8 @@ InstructionSet::InstructionSet() {
   // _INSTRUCTION(0x9D, 0xFF, "POP", PopFlags);
   _INSTRUCTION(0x90, 0xF8, "XCHG", XCHGAccumulator);
   _INSTRUCTION(0x86, 0xFE, "XCHG", XCHGRegisterMemory);
+  _INSTRUCTION(0xE4, 0xFE, "IN", INPort);
+  _INSTRUCTION(0xEC, 0xFE, "IN", INDX);
 }
 
 InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
