@@ -8,4 +8,5 @@ add_library(
   xchg.cpp
   instruction_set.cpp
   in.cpp
+  out.cpp
 )

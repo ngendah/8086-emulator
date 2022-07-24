@@ -50,7 +50,7 @@ protected:
     _IOReader(BUS *bus, UNUSED_PARAM registers_ptr_t) : _io(bus) {}
 
     IO *reader(const Instruction &instruction) override {
-      _io.set_address(Address((uint16_t)instruction.port()));
+      _io.set_address(Address((uint8_t)instruction.port()));
       return &_io;
     }
   };

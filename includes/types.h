@@ -94,7 +94,7 @@ public:
     return *this;
   }
 
-  Instruction port(uint16_t port) {
+  Instruction port(uint8_t port) {
     _port = port;
     return *this;
   }
@@ -635,7 +635,7 @@ protected:
     after_execute(_instruction);                                               \
   }
 
-typedef BUS *const bus_ptr_t;
-typedef Registers *const registers_ptr_t;
+typedef BUS *bus_ptr_t;             // TODO refactor to BUS *const
+typedef Registers *registers_ptr_t; // TODO refactor to Registers *const
 
 #endif /* TYPES_H_ */
