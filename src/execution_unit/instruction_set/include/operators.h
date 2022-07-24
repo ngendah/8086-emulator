@@ -6,38 +6,8 @@
 #ifndef _OPERATORS_H_
 #define _OPERATORS_H_
 
-#include <string>
-
 #include "types.h"
-
-enum OpTypes {
-  word,
-  byte,
-  high_byte,
-  low_byte,
-};
-
-static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte"};
-
-struct OpType {
-  struct Params {
-    OpTypes _op_type;
-    IO *_source, *_destination;
-    Params(OpTypes op_type, IO *source, IO *destination)
-        : _op_type(op_type), _source(source), _destination(destination) {}
-    Params &operator=(const Params &rhs) {
-      _op_type = rhs._op_type;
-      _source = rhs._source;
-      _destination = rhs._destination;
-      return *this;
-    }
-  };
-  virtual void execute(const OpType::Params &params) const = 0;
-};
-
-struct OpTypeSelector {
-  virtual OpTypes op_type(const Instruction &instruction) const = 0;
-};
+#include <string>
 
 struct WordOrByteOpcodeOpTypeSelector : OpTypeSelector {
   OpTypes op_type(const Instruction &instruction) const override {
