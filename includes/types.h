@@ -17,6 +17,7 @@
 
 #define len(x) sizeof(x) * CHAR_BIT
 #define UNUSED(expr) (void)(expr)
+#define UNUSED_PARAM __attribute__((unused))
 
 typedef struct {
   uint8_t _X1 : 4;
@@ -608,9 +609,7 @@ protected:
     return instruction;
   }
 
-  virtual void after_execute(const Instruction &instruction) {
-    UNUSED(instruction);
-  }
+  virtual void after_execute(UNUSED_PARAM const Instruction &instruction) {}
 };
 
 #define MICRO_OP_INSTRUCTION(cls)                                              \
@@ -635,5 +634,8 @@ protected:
     _execute(_instruction);                                                    \
     after_execute(_instruction);                                               \
   }
+
+typedef BUS *const bus_ptr_t;
+typedef Registers *const registers_ptr_t;
 
 #endif /* TYPES_H_ */

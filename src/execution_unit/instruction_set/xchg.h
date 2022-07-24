@@ -11,8 +11,7 @@
 #include "types.h"
 #include "xchg_operators.h"
 
-class XCHG : public MicroOp {
-public:
+struct XCHG : public MicroOp {
   XCHG(BUS *bus, Registers *registers) : _registers(registers), _bus(bus) {}
 
 protected:
@@ -20,21 +19,10 @@ protected:
   BUS *_bus;
 };
 
-class XCHGAccumulator : public XCHG {
-public:
+struct XCHGAccumulator : public XCHG {
   XCHGAccumulator(BUS *bus, Registers *registers) : XCHG(bus, registers) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_type_selector = WordOpTypeSelector();
-    auto io_reader = _IOReader(_registers);
-    auto io_writer = _IOWriter(_registers);
-    auto xchg_operator =
-        XCHGOperator(io_reader.reader(instruction),
-                     io_writer.writer(instruction), &op_type_selector);
-    return xchg_operator.execute(instruction);
-  }
-
-  MICRO_OP_INSTRUCTION(XCHGAccumulator)
+  MICRO_OP_INSTRUCTION_OVR(XCHGAccumulator, WordOpTypeSelector, XCHGOperator)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {
@@ -46,7 +34,9 @@ protected:
   struct _IOReader : IOReader {
     Registers *_registers;
 
-    _IOReader(Registers *registers) : _registers(registers) {}
+    _IOReader(BUS *bus, Registers *registers) : _registers(registers) {
+      UNUSED(bus);
+    }
 
     IO *reader(const Instruction &instruction) {
       auto reg_selector = _RegisterSelector1();
@@ -63,7 +53,9 @@ protected:
   struct _IOWriter : IOWriter {
     Registers *_registers;
 
-    _IOWriter(Registers *registers) : _registers(registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _registers(registers) {
+      UNUSED(bus);
+    }
 
     IO *writer(const Instruction &instruction) {
       auto reg_selector = _RegisterSelector2();
@@ -72,21 +64,11 @@ protected:
   };
 };
 
-class XCHGRegisterMemory : public XCHG {
-public:
+struct XCHGRegisterMemory : public XCHG {
   XCHGRegisterMemory(BUS *bus, Registers *registers) : XCHG(bus, registers) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_type_selector = WordOrByteOpcodeOpTypeSelector();
-    auto io_reader = _IOReader(_bus, _registers);
-    auto io_writer = _IOWriter(_bus, _registers);
-    auto xchg_operator =
-        XCHGOperator(io_reader.reader(instruction),
-                     io_writer.writer(instruction), &op_type_selector);
-    return xchg_operator.execute(instruction);
-  }
-
-  MICRO_OP_INSTRUCTION(XCHGRegisterMemory)
+  MICRO_OP_INSTRUCTION_OVR(XCHGRegisterMemory, WordOrByteOpcodeOpTypeSelector,
+                           XCHGOperator)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {

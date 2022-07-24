@@ -12,8 +12,7 @@
 #include "stack_strategy.h"
 #include "types.h"
 
-class Push : public MicroOp {
-public:
+struct Push : public MicroOp {
   Push(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
       : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
 
@@ -35,8 +34,7 @@ public:
   StackStrategy const *_stack_strategy;
 };
 
-class PushRegister : public Push {
-public:
+struct PushRegister : public Push {
   explicit PushRegister(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -44,18 +42,12 @@ public:
                StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_registers);
-    auto io_writer = _IOWriter(_bus, _registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(const Instruction &instruction) override {
+    Push::after_execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PushRegister)
+  MICRO_OP_INSTRUCTION_OVR(PushRegister, WordMovOpTypeSelector, MovOperator)
 protected:
   struct _RegisterSelector1 : RegisterSelector {
     virtual uint8_t REG(const Instruction &instruction) const {
@@ -66,7 +58,8 @@ protected:
 
   struct _IOReader final : IOReader {
     Registers *_registers;
-    explicit _IOReader(Registers *registers) : _registers(registers) {}
+    explicit _IOReader(UNUSED_PARAM bus_ptr_t, Registers *registers)
+        : _registers(registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto reg_selector = _RegisterSelector1();
@@ -75,8 +68,7 @@ protected:
   };
 };
 
-class PushMemory : public Push {
-public:
+struct PushMemory : public Push {
   explicit PushMemory(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -84,18 +76,12 @@ public:
              StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_bus, _registers);
-    auto io_writer = _IOWriter(_bus, _registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(const Instruction &instruction) override {
+    Push::after_execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PushMemory)
+  MICRO_OP_INSTRUCTION_OVR(PushMemory, WordMovOpTypeSelector, MovOperator)
 
 protected:
   struct _IOReader final : IOReader {
@@ -111,8 +97,7 @@ protected:
   };
 };
 
-class PushSegment : public Push {
-public:
+struct PushSegment : public Push {
   explicit PushSegment(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -120,23 +105,18 @@ public:
               StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_registers);
-    auto io_writer = _IOWriter(_bus, _registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(const Instruction &instruction) override {
+    Push::after_execute(instruction);
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PushSegment)
+  MICRO_OP_INSTRUCTION_OVR(PushSegment, WordMovOpTypeSelector, MovOperator)
 
 protected:
   struct _IOReader final : IOReader {
     Registers *_registers;
-    explicit _IOReader(Registers *registers) : _registers(registers) {}
+    explicit _IOReader(UNUSED_PARAM bus_ptr_t, Registers *registers)
+        : _registers(registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto seg_selector = OpCodeSegmentSelector();

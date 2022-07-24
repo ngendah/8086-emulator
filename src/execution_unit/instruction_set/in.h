@@ -27,7 +27,8 @@ protected:
   struct _IOWriter : IOWriter {
     Registers *_registers;
 
-    _IOWriter(Registers *registers) : _registers(registers) {}
+    _IOWriter(UNUSED_PARAM bus_ptr_t, Registers *registers)
+        : _registers(registers) {}
 
     IO *writer(const Instruction &instruction) override {
       auto register_selector = _RegisterSelector1();
@@ -40,23 +41,13 @@ protected:
 struct INPort : IN {
   INPort(BUS *bus, Registers *registers) : IN(registers, bus) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordOrByteMovOpTypeSelector();
-    auto io_reader = _IOReader(_bus);
-    auto io_writer = _IOWriter(_registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
-  }
-
-  MICRO_OP_INSTRUCTION(INPort)
+  MICRO_OP_INSTRUCTION_OVR(INPort, WordOrByteMovOpTypeSelector, MovOperator)
 
 protected:
   struct _IOReader : IOReader {
     BUSIO _io;
 
-    _IOReader(BUS *bus) : _io(bus) {}
+    _IOReader(BUS *bus, UNUSED_PARAM registers_ptr_t) : _io(bus) {}
 
     IO *reader(const Instruction &instruction) override {
       _io.set_address(Address((uint16_t)instruction.port()));
@@ -66,20 +57,9 @@ protected:
 };
 
 struct INDX : IN {
-
   INDX(BUS *bus, Registers *registers) : IN(registers, bus) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordOrByteMovOpTypeSelector();
-    auto io_reader = _IOReader(_registers);
-    auto io_writer = _IOWriter(_registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
-  }
-
-  MICRO_OP_INSTRUCTION(INPort)
+  MICRO_OP_INSTRUCTION_OVR(INPort, WordOrByteMovOpTypeSelector, MovOperator)
 
 protected:
   struct _RegisterSelector2 : RegisterSelector {
@@ -91,7 +71,8 @@ protected:
   struct _IOReader : IOReader {
     Registers *_registers;
 
-    _IOReader(Registers *registers) : _registers(registers) {}
+    _IOReader(UNUSED_PARAM BUS *bus, Registers *registers)
+        : _registers(registers) {}
 
     IO *reader(const Instruction &instruction) override {
       auto register_selector = _RegisterSelector2();

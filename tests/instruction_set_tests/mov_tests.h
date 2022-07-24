@@ -17,14 +17,14 @@ struct MovRegisterRegisterTests : ::testing::Test {
 
 TEST_F(MovRegisterRegisterTests, test__IOReader_reader) {
   auto registers = Registers();
-  auto io_reader = MovRegisterRegisterT::_IOReader(&registers);
+  auto io_reader = MovRegisterRegisterT::_IOReader(nullptr, &registers);
   auto io = io_reader.reader(Instruction(0xff, 0x8BC3));
   EXPECT_EQ(&registers.BX, io);
 }
 
 TEST_F(MovRegisterRegisterTests, test__IOWriter_writer) {
   auto registers = Registers();
-  auto io_writer = MovRegisterRegisterT::_IOWriter(&registers);
+  auto io_writer = MovRegisterRegisterT::_IOWriter(nullptr, &registers);
   auto io = io_writer.writer(Instruction(0xff, 0x8BC3));
   EXPECT_EQ(&registers.AX, io);
 }

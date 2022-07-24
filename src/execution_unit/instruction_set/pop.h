@@ -12,12 +12,9 @@
 #include "stack_strategy.h"
 #include "types.h"
 
-class Pop : public MicroOp {
-public:
+struct Pop : public MicroOp {
   Pop(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
       : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
-
-  virtual void execute(const Instruction &instruction) = 0;
 
 protected:
   Registers *_registers;
@@ -38,8 +35,7 @@ public:
   StackStrategy const *_stack_strategy;
 };
 
-class PopRegister : public Pop {
-public:
+struct PopRegister : public Pop {
   explicit PopRegister(BUS *bus, Registers *registers)
       : Pop(registers, bus, &stack_full_descending) {}
 
@@ -47,18 +43,11 @@ public:
               StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_bus, _registers);
-    auto io_writer = _IOWriter(_registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(__attribute__((unused)) const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PopRegister)
+  MICRO_OP_INSTRUCTION_OVR(PopRegister, WordMovOpTypeSelector, MovOperator)
 
 protected:
   struct _RegisterSelector1 : RegisterSelector {
@@ -70,7 +59,9 @@ protected:
 
   struct _IOWriter final : IOWriter {
     Registers *_registers;
-    _IOWriter(Registers *registers) : _registers(registers) {}
+    _IOWriter(BUS *bus, Registers *registers) : _registers(registers) {
+      UNUSED(bus);
+    }
 
     IO *writer(const Instruction &instruction) override {
       auto reg_selector = _RegisterSelector1();
@@ -79,26 +70,18 @@ protected:
   };
 };
 
-class PopMemory : public Pop {
-public:
+struct PopMemory : public Pop {
   explicit PopMemory(BUS *bus, Registers *registers)
       : Pop(registers, bus, &stack_full_descending) {}
 
   PopMemory(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_bus, _registers);
-    auto io_writer = _IOWriter(_bus, _registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(__attribute__((unused)) const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PopMemory)
+  MICRO_OP_INSTRUCTION_OVR(PopMemory, WordMovOpTypeSelector, MovOperator)
 
 protected:
   struct _IOWriter final : IOWriter {
@@ -113,8 +96,7 @@ protected:
   };
 };
 
-class PopSegment : public Pop {
-public:
+struct PopSegment : public Pop {
   explicit PopSegment(BUS *bus, Registers *registers)
       : Pop(registers, bus, &stack_full_descending) {}
 
@@ -122,23 +104,19 @@ public:
              StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void execute(const Instruction &instruction) override {
-    auto op_selector = WordMovOpTypeSelector();
-    auto io_reader = _IOReader(_bus, _registers);
-    auto io_writer = _IOWriter(_registers);
-    auto mov_operator =
-        MovOperator(io_reader.reader(instruction),
-                    io_writer.writer(instruction), &op_selector);
-    mov_operator.execute(instruction);
+  void after_execute(__attribute__((unused)) const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION(PopSegment)
+  MICRO_OP_INSTRUCTION_OVR(PopSegment, WordMovOpTypeSelector, MovOperator)
 
 protected:
   struct _IOWriter final : IOWriter {
     Registers *_registers;
-    explicit _IOWriter(Registers *registers) : _registers(registers) {}
+
+    explicit _IOWriter(BUS *bus, Registers *registers) : _registers(registers) {
+      UNUSED(bus);
+    }
 
     IO *writer(const Instruction &instruction) override {
       auto seg_selector = OpCodeSegmentSelector();
