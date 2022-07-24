@@ -16,6 +16,7 @@
 #include <memory>
 
 #define len(x) sizeof(x) * CHAR_BIT
+#define UNUSED(expr) (void)(expr)
 
 typedef struct {
   uint8_t _X1 : 4;
@@ -581,12 +582,58 @@ struct MicroOp {
   virtual void execute(const Instruction &) = 0;
 
   virtual ~MicroOp() = default;
+
+protected:
+  template <class T> struct ExecutorT {
+    typedef typename T::_IOReader io_reader_t;
+    typedef typename T::_IOWriter io_writer_t;
+
+    T *const _parent;
+
+    ExecutorT(T *const parent) : _parent(parent) {}
+
+    template <class OpTypeSelectorT, class OperatorT>
+    void execute(const Instruction &instruction) {
+      auto op_selector = OpTypeSelectorT();
+      auto _io_reader = io_reader_t(_parent->_bus, _parent->_registers);
+      auto _io_writer = io_writer_t(_parent->_bus, _parent->_registers);
+      auto uop_operator =
+          OperatorT(_io_reader.reader(instruction),
+                    _io_writer.writer(instruction), &op_selector);
+      uop_operator.execute(instruction);
+    }
+  };
+
+  virtual Instruction before_execute(const Instruction &instruction) {
+    return instruction;
+  }
+
+  virtual void after_execute(const Instruction &instruction) {
+    UNUSED(instruction);
+  }
 };
 
 #define MICRO_OP_INSTRUCTION(cls)                                              \
+  friend struct MicroOp::ExecutorT<cls>;                                       \
   static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
     PLOGD << #cls << "::create";                                               \
     return std::make_shared<cls>(params.bus, params.registers);                \
+  }
+
+#define MICRO_OP_INSTRUCTION_EX(cls, op_type_selector_cls, operator_type_cls)  \
+  MICRO_OP_INSTRUCTION(cls)                                                    \
+  void _execute(const Instruction &instruction) {                              \
+    auto executor = ExecutorT<cls>((cls *)this);                               \
+    executor.template execute<op_type_selector_cls, operator_type_cls>(        \
+        instruction);                                                          \
+  }
+
+#define MICRO_OP_INSTRUCTION_OVR(cls, op_type_selector_cls, operator_type_cls) \
+  MICRO_OP_INSTRUCTION_EX(cls, op_type_selector_cls, operator_type_cls)        \
+  void execute(const Instruction &instruction) override {                      \
+    auto _instruction = before_execute(instruction);                           \
+    _execute(_instruction);                                                    \
+    after_execute(_instruction);                                               \
   }
 
 #endif /* TYPES_H_ */
