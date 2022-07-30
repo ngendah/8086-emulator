@@ -58,7 +58,7 @@ protected:
 struct OUTDX : public OUT {
   OUTDX(bus_ptr_t bus, registers_ptr_t registers) : OUT(bus, registers) {}
 
-  MICRO_OP_INSTRUCTION_OVR(OUTPort, WordOrByteMovOpTypeSelector, MovOperator)
+  MICRO_OP_INSTRUCTION_OVR(OUTDX, WordOrByteMovOpTypeSelector, MovOperator)
 protected:
   struct _RegisterSelector2 final : RegisterSelector {
     uint8_t REG(UNUSED_PARAM const Instruction &) const override {

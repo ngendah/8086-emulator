@@ -59,11 +59,11 @@ protected:
 struct INDX : IN {
   INDX(BUS *bus, Registers *registers) : IN(registers, bus) {}
 
-  MICRO_OP_INSTRUCTION_OVR(INPort, WordOrByteMovOpTypeSelector, MovOperator)
+  MICRO_OP_INSTRUCTION_OVR(INDX, WordOrByteMovOpTypeSelector, MovOperator)
 
 protected:
   struct _RegisterSelector2 : RegisterSelector {
-    virtual uint8_t REG(__attribute__((unused)) const Instruction &) const {
+    virtual uint8_t REG(UNUSED_PARAM const Instruction &) const {
       return RegisterMapper::DX_INDEX;
     }
   };
