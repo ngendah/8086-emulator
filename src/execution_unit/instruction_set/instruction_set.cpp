@@ -1,6 +1,7 @@
 #include "instruction_set.h"
 #include "in.h"
 #include "mov.h"
+#include "out.h"
 #include "pop.h"
 #include "push.h"
 #include "xchg.h"
@@ -27,6 +28,8 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0x86, 0xFE, "XCHG", XCHGRegisterMemory);
   _INSTRUCTION(0xE4, 0xFE, "IN", INPort);
   _INSTRUCTION(0xEC, 0xFE, "IN", INDX);
+  _INSTRUCTION(0xE6, 0xFE, "OUT", OUTPort);
+  _INSTRUCTION(0xEE, 0xFE, "OUT", OUTDX);
 }
 
 InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
