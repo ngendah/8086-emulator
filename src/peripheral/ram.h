@@ -29,6 +29,17 @@ public:
     return bytes._size;
   }
 
+  uint16_t write(Address *address, Extensions::Bytes bytes) {
+    auto begin = _memory.data();
+    auto end = begin + _memory.size();
+    if (begin + ((uint32_t)*address) + bytes.size() >= end) {
+      assert(false);
+    }
+    auto at = begin + (uint32_t)*address;
+    std::memcpy((void *)at, bytes.ptr(), bytes.size());
+    return bytes.size();
+  }
+
   Bytes read(Address *address, uint16_t len) {
     auto begin = _memory.data();
     auto end = begin + _memory.size();
@@ -49,6 +60,10 @@ public:
   ~RAM() override {}
 
   uint16_t write(Address *address, const Bytes &bytes) override {
+    return _buffer.write(address, bytes);
+  }
+
+  uint16_t write(Address *address, const Extensions::Bytes &bytes) override {
     return _buffer.write(address, bytes);
   }
 

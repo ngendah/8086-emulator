@@ -236,9 +236,114 @@ struct Bytes {
   }
 };
 
+namespace Extensions {
+class Bytes {
+protected:
+  struct _uint {
+    virtual ~_uint(){};
+    virtual uint8_t to_uint8() const = 0;
+    virtual uint16_t to_uint16() const = 0;
+    virtual uint8_t *to_ptr() = 0;
+    virtual uint16_t size() const = 0;
+  };
+
+  struct _uint8 : _uint {
+    typedef uint8_t uint_t;
+    uint_t _val;
+    _uint8() : _val(0) {}
+    _uint8(uint_t val, UNUSED_PARAM uint16_t size = 0) : _val(val) {}
+    _uint8(const _uint8 &rhs) : _val(rhs._val) {}
+
+    _uint8 &operator=(const _uint8 &val) {
+      _val = val._val;
+      return *this;
+    }
+
+    uint8_t to_uint8() const override { return _val; }
+    uint16_t to_uint16() const override { return _val; }
+    uint8_t *to_ptr() override { return &_val; }
+    uint16_t size() const override { return sizeof(uint8_t); }
+  };
+
+  struct _uint8_ptr : _uint {
+    typedef uint8_t *uint_t;
+    uint_t _val;
+    uint16_t _size;
+    _uint8_ptr() : _val(nullptr), _size(0) {}
+    _uint8_ptr(uint_t val, uint16_t size) : _val(val), _size(size) {}
+    _uint8_ptr(const _uint8_ptr &rhs) : _val(rhs._val), _size(rhs._size) {}
+
+    _uint8_ptr &operator=(const _uint8_ptr &val) {
+      _val = val._val;
+      _size = val._size;
+      return *this;
+    }
+
+    uint8_t to_uint8() const override { return _val[0]; }
+
+    uint16_t to_uint16() const override {
+      assert(_size >= 2);
+      return (uint16_t)((_val[1] << 8) | _val[0]);
+    }
+
+    uint8_t *to_ptr() override { return _val; }
+    uint16_t size() const override { return sizeof(uint8_t); }
+  };
+
+  struct _uint16 : _uint {
+    typedef uint16_t uint_t;
+    uint_t _val;
+    _uint16() : _val(0) {}
+    _uint16(const _uint16 &rhs) : _val(rhs._val) {}
+    _uint16(uint_t val, UNUSED_PARAM uint16_t size = 0) : _val(val) {}
+    _uint16 &operator=(const _uint16 &val) {
+      _val = val._val;
+      return *this;
+    }
+    uint8_t to_uint8() const override { return (uint8_t)_val; }
+    uint16_t to_uint16() const override { return _val; }
+    uint8_t *to_ptr() override { return (uint8_t *)&_val; }
+    uint16_t size() const override { return sizeof(uint16_t); }
+  };
+
+  std::shared_ptr<_uint> _val;
+
+public:
+  Bytes() = default;
+  Bytes(const Bytes &rhs) : _val(rhs._val) {}
+  Bytes(uint8_t val) { _val = std::make_shared<_uint8>(val); }
+  explicit Bytes(uint16_t val) { _val = std::make_shared<_uint16>(val); }
+
+  Bytes(uint8_t *val, uint8_t size) {
+    if (size == 1) {
+      uint8_t ival;
+      std::memcpy(&ival, val, size);
+      _val = std::make_shared<_uint8>(ival);
+    } else if (size == 2) {
+      uint16_t ival;
+      std::memcpy(&ival, val, size);
+      _val = std::make_shared<_uint16>(ival);
+    } else {
+      _val = std::make_shared<_uint8_ptr>(val, size);
+    }
+  }
+
+  Bytes &operator=(const Bytes &byte) {
+    _val = byte._val;
+    return *this;
+  }
+
+  operator uint8_t() const { return _val->to_uint8(); }
+  operator uint16_t() const { return _val->to_uint16(); }
+  uint16_t size() const { return _val->size(); };
+  uint8_t *ptr() const { return _val->to_ptr(); }
+};
+} // namespace Extensions
+
 struct BUS {
   virtual ~BUS() = default;
   virtual uint16_t write(Address *, const Bytes &) = 0;
+  virtual uint16_t write(Address *, const Extensions::Bytes &) = 0;
   virtual Bytes read(Address *, uint16_t size) = 0;
 };
 
