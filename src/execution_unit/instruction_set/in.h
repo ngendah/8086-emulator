@@ -19,7 +19,7 @@ protected:
   BUS *_bus;
 
   struct _RegisterSelector1 : RegisterSelector {
-    virtual uint8_t REG(__attribute__((unused)) const Instruction &) const {
+    virtual uint8_t REG(UNUSED_PARAM const Instruction &) const {
       return RegisterMapper::AX_INDEX;
     }
   };

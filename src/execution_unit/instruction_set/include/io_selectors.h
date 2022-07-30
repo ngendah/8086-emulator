@@ -42,21 +42,27 @@ public:
 };
 
 struct MemorySelector {
-  virtual uint8_t MOD(const Instruction &instruction) const {
+  virtual uint8_t MOD(const Instruction &instruction) const = 0;
+  virtual uint8_t RM(const Instruction &instruction) const = 0;
+  virtual SegmentMappingTypes segment_mapping_type() const = 0;
+};
+
+struct DefaultMemorySelector final : MemorySelector {
+  uint8_t MOD(const Instruction &instruction) const override {
     mod_reg_rm_t mode = instruction.mode_to<mod_reg_rm_t>();
     PLOGD << mode;
     return mode.MOD;
   }
 
-  virtual uint8_t RM(const Instruction &instruction) const {
+  uint8_t RM(const Instruction &instruction) const override {
     mod_reg_rm_t mode = instruction.mode_to<mod_reg_rm_t>();
     return mode.RM;
   }
 
-  virtual SegmentMappingTypes segment_mapping_type() const { return defaults; }
+  SegmentMappingTypes segment_mapping_type() const override { return defaults; }
 };
 
-static const auto default_memory_selector = MemorySelector();
+static const auto default_memory_selector = DefaultMemorySelector();
 
 class MemoryIOSelector : protected IOSelector {
 protected:

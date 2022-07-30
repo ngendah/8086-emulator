@@ -9,4 +9,5 @@ add_library(
   instruction_set.cpp
   in.cpp
   out.cpp
+  xlat.cpp
 )

@@ -5,6 +5,7 @@
 #include "pop.h"
 #include "push.h"
 #include "xchg.h"
+#include "xlat.h"
 #include <algorithm>
 
 #define _INSTRUCTION(opcode, mask, memonic, cls)                               \
@@ -30,6 +31,7 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0xEC, 0xFE, "IN", INDX);
   _INSTRUCTION(0xE6, 0xFE, "OUT", OUTPort);
   _INSTRUCTION(0xEE, 0xFE, "OUT", OUTDX);
+  _INSTRUCTION(0xD7, 0xD6, "XLAT", XLAT);
 }
 
 InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {

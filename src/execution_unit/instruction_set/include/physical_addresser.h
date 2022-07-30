@@ -18,7 +18,6 @@ class EffectiveAddresser {
 protected:
   Registers *_registers;
   std::array<fn_t, 8> _eff_mapper;
-  std::array<std::string, 8> _eff_memonics;
 
   Address _address(const Register &r1, const Register &r2,
                    const uint16_t &offset) {
@@ -71,23 +70,34 @@ public:
         &EffectiveAddresser::_e4, &EffectiveAddresser::_e5,
         &EffectiveAddresser::_e6, &EffectiveAddresser::_e7,
     };
-    _eff_memonics = {
-        "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]",
-        "[SI]",      "[DI]",      "[BP]",      "[BX]",
-    };
   }
+
+  static const uint8_t BX_SI_INDEX = 0;
+  static const uint8_t BX_DI_INDEX = 1;
+  static const uint8_t BP_SI_INDEX = 2;
+  static const uint8_t BP_DI_INDEX = 3;
+  static const uint8_t SI_INDEX = 4;
+  static const uint8_t DI_INDEX = 5;
+  static const uint8_t BP_INDEX = 6;
+  static const uint8_t BX_INDEX = 7;
 };
 
 class PhysicalAddresser : EffectiveAddresser {
   typedef Address (PhysicalAddresser::*fn_t)(Segment *, const uint16_t &);
 
 protected:
-  std::array<fn_t, 8> _phy_mapper;
+  std::array<fn_t, 9> _phy_mapper;
+  std::array<std::string, 9> _eff_memonics;
 
   Address _f_1(Segment *segment, const uint16_t &eff_addr) {
     PLOGD << *segment << ", "
           << fmt::format("effective_address=0x{:x}", eff_addr);
     return segment->address(eff_addr);
+  }
+
+  Address _f_2(Segment *segment, const Register &register1,
+               const Register &register2) {
+    return segment->address(register1, register2.read());
   }
 
   Address _f0(Segment *segment, const uint16_t &offset) {
@@ -122,6 +132,10 @@ protected:
     return _f_1(segment, _e7(offset));
   }
 
+  Address _f8(Segment *segment, UNUSED_PARAM const uint16_t &) {
+    return _f_2(segment, _registers->AX, _registers->BX);
+  }
+
 public:
   PhysicalAddresser(Registers *registers) : EffectiveAddresser(registers) {
     _phy_mapper = {
@@ -129,6 +143,11 @@ public:
         &PhysicalAddresser::_f2, &PhysicalAddresser::_f3,
         &PhysicalAddresser::_f4, &PhysicalAddresser::_f5,
         &PhysicalAddresser::_f6, &PhysicalAddresser::_f7,
+        &PhysicalAddresser::_f8,
+    };
+    _eff_memonics = {
+        "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]", "[SI]",
+        "[DI]",      "[BP]",      "[BX]",      "[AX][BX]",
     };
   }
 
@@ -161,6 +180,9 @@ public:
     fn_t _map_fn = &PhysicalAddresser::_f_1;
     return (this->*_map_fn)(segment, offset);
   }
+
+  // custom
+  static const uint8_t AX_BX_INDEX = 8;
 };
 
 #endif // INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_

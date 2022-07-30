@@ -12,6 +12,7 @@
 #include "instruction_set_tests/push_tests.h"
 #include "instruction_set_tests/segment_mapper_tests.h"
 #include "instruction_set_tests/xchg_tests.h"
+#include "instruction_set_tests/xlat_tests.h"
 #include "peripheral_tests/ram_tests.h"
 #include "types_tests.h"
 
