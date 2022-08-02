@@ -12,12 +12,21 @@
 #include "logger.h"
 #include "types.h"
 
-class EffectiveAddresser {
+struct Addresser {
+  virtual ~Addresser() {}
+  virtual Address address(Segment *segment, uint8_t idx, uint16_t offset) = 0;
+  virtual Address address(Segment *segment, uint8_t idx, uint8_t offset) = 0;
+  virtual Address address(Segment *segment, uint8_t idx) = 0;
+  virtual Address address(Segment *segment, uint16_t offset) = 0;
+};
+
+class EffectiveAddresser : public Addresser {
   typedef Address (EffectiveAddresser::*fn_t)(const uint16_t &);
 
 protected:
   Registers *_registers;
   std::array<fn_t, 8> _eff_mapper;
+  std::array<std::string, 8> _eff_memonics;
 
   Address _address(const Register &r1, const Register &r2,
                    const uint16_t &offset) {
@@ -70,7 +79,40 @@ public:
         &EffectiveAddresser::_e4, &EffectiveAddresser::_e5,
         &EffectiveAddresser::_e6, &EffectiveAddresser::_e7,
     };
+    _eff_memonics = {
+        "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]",
+        "[SI]",      "[DI]",      "[BP]",      "[BX]",
+    };
   }
+
+  virtual Address address(UNUSED_PARAM Segment *, uint8_t idx) override {
+    PLOGD << "mapping: "
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
+                         _eff_memonics[idx]);
+    fn_t _map_fn = _eff_mapper[idx];
+    return (this->*_map_fn)(0x0);
+  }
+
+  virtual Address address(UNUSED_PARAM Segment *, uint8_t idx,
+                          uint16_t offset) override {
+    PLOGD << "mapping: "
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
+                         _eff_memonics[idx]);
+    fn_t _map_fn = _eff_mapper[idx];
+    return (this->*_map_fn)(offset);
+  };
+
+  virtual Address address(UNUSED_PARAM Segment *, UNUSED_PARAM uint8_t,
+                          UNUSED_PARAM uint8_t) override {
+    assert(false);
+    return Address();
+  };
+
+  virtual Address address(UNUSED_PARAM Segment *,
+                          UNUSED_PARAM uint16_t) override {
+    assert(false);
+    return Address();
+  };
 
   static const uint8_t BX_SI_INDEX = 0;
   static const uint8_t BX_DI_INDEX = 1;
@@ -82,12 +124,12 @@ public:
   static const uint8_t BX_INDEX = 7;
 };
 
-class PhysicalAddresser : EffectiveAddresser {
+class PhysicalAddresser : public EffectiveAddresser {
   typedef Address (PhysicalAddresser::*fn_t)(Segment *, const uint16_t &);
 
 protected:
   std::array<fn_t, 9> _phy_mapper;
-  std::array<std::string, 9> _eff_memonics;
+  std::array<std::string, 9> _phy_memonics;
 
   Address _f_1(Segment *segment, const uint16_t &eff_addr) {
     PLOGD << *segment << ", "
@@ -145,37 +187,37 @@ public:
         &PhysicalAddresser::_f6, &PhysicalAddresser::_f7,
         &PhysicalAddresser::_f8,
     };
-    _eff_memonics = {
+    _phy_memonics = {
         "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]", "[SI]",
         "[DI]",      "[BP]",      "[BX]",      "[AX][BX]",
     };
   }
 
-  Address address(Segment *segment, uint8_t idx, uint16_t offset) {
+  Address address(Segment *segment, uint8_t idx, uint16_t offset) override {
     PLOGD << "mapping: "
-          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
-                         _eff_memonics[idx]);
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}:{2}", idx,
+                         segment->name(), _phy_memonics[idx]);
     fn_t _map_fn = _phy_mapper[idx];
     return (this->*_map_fn)(segment, offset);
   }
 
-  Address address(Segment *segment, uint8_t idx, uint8_t offset) {
+  Address address(Segment *segment, uint8_t idx, uint8_t offset) override {
     PLOGD << "mapping: "
-          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
-                         _eff_memonics[idx]);
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}:{2}", idx,
+                         segment->name(), _phy_memonics[idx]);
     fn_t _map_fn = _phy_mapper[idx];
     return (this->*_map_fn)(segment, offset);
   }
 
-  Address address(Segment *segment, uint8_t idx) {
+  Address address(Segment *segment, uint8_t idx) override {
     PLOGD << "mapping: "
-          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
-                         _eff_memonics[idx]);
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}:{2}", idx,
+                         segment->name(), _phy_memonics[idx]);
     fn_t _map_fn = _phy_mapper[idx];
     return (this->*_map_fn)(segment, 0x0);
   }
 
-  Address address(Segment *segment, uint16_t offset = 0) {
+  Address address(Segment *segment, uint16_t offset = 0) override {
     PLOGD << "direct: " << fmt::format("offset=0x{:x}", offset);
     fn_t _map_fn = &PhysicalAddresser::_f_1;
     return (this->*_map_fn)(segment, offset);

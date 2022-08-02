@@ -64,44 +64,32 @@ struct DefaultMemorySelector final : MemorySelector {
 
 static const auto default_memory_selector = DefaultMemorySelector();
 
-class MemoryIOSelector : protected IOSelector {
-protected:
-  BUSIO _bus;
-  Registers *_registers;
-  MemorySelector const *_selector;
+struct IOAddresser {
+  IOAddresser(Registers *registers, MemorySelector const *selector)
+      : _registers(registers), _selector(selector) {}
 
-public:
-  MemoryIOSelector(BUS *bus, Registers *registers,
-                   MemorySelector const *selector = &default_memory_selector)
-      : _bus(bus), _registers(registers), _selector(selector) {}
-
-  MemoryIOSelector(const MemoryIOSelector &rhs)
-      : _bus(rhs._bus), _registers(rhs._registers), _selector(rhs._selector) {}
-
-  virtual IO *get(const Instruction &instruction) override {
+  template <class T = PhysicalAddresser>
+  Address address(const Instruction &instruction) {
+    auto _addresser = T(_registers);
     Segment *_segment = segment(instruction, _selector);
     auto MOD = _selector->MOD(instruction);
     auto RM = _selector->RM(instruction);
     if (MOD == 0x0) {
-      _bus.set_address(PhysicalAddresser(_registers).address(_segment, RM));
+      return _addresser.address(_segment, RM);
     } else if (MOD == 0x1) {
       auto offset = instruction.offset();
-      _bus.set_address(
-          PhysicalAddresser(_registers).address(_segment, RM, (uint8_t)offset));
+      return _addresser.address(_segment, RM, (uint8_t)offset);
     } else if (MOD == 0x2) {
       auto offset = instruction.offset();
-      _bus.set_address(PhysicalAddresser(_registers)
-                           .address(_segment, RM, (uint16_t)offset));
+      return _addresser.address(_segment, RM, (uint16_t)offset);
     } else {
       PLOGD << "mod=0x3(0b11) is register selector mode";
       assert(false);
     }
-    PLOGD << _bus;
-    return &_bus;
   }
 
-  virtual Segment *segment(const Instruction &instruction,
-                           MemorySelector const *selector) {
+  Segment *segment(const Instruction &instruction,
+                   MemorySelector const *selector) {
     if (instruction.sop() == 0xff) {
       return SegmentMapper(_registers)
           .get(selector->RM(instruction), selector->segment_mapping_type());
@@ -110,6 +98,31 @@ public:
     PLOGD << fmt::format("idx: 0x{:x}", idx);
     return SegmentMapper(_registers).get(idx, indexed);
   }
+
+protected:
+  Registers *_registers;
+  MemorySelector const *_selector;
+};
+
+struct MemoryIOSelector final : IOSelector {
+  MemoryIOSelector(BUS *bus, Registers *registers,
+                   MemorySelector const *selector = &default_memory_selector)
+      : _bus(bus), _registers(registers), _selector(selector) {}
+
+  MemoryIOSelector(const MemoryIOSelector &rhs)
+      : _bus(rhs._bus), _registers(rhs._registers), _selector(rhs._selector) {}
+
+  virtual IO *get(const Instruction &instruction) override {
+    auto io_addresser = IOAddresser(_registers, _selector);
+    _bus.set_address(io_addresser.address<PhysicalAddresser>(instruction));
+    PLOGD << _bus;
+    return &_bus;
+  }
+
+protected:
+  BUSIO _bus;
+  Registers *_registers;
+  MemorySelector const *_selector;
 };
 
 struct MemorySegmentSelector : MemorySelector {
@@ -136,28 +149,34 @@ struct MemorySegmentSelector : MemorySelector {
 
 static const auto direct_memory_selector = MemorySegmentSelector();
 
-struct DirectMemoryIOSelector : public MemoryIOSelector {
+struct DirectMemoryIOSelector final : IOSelector {
   DirectMemoryIOSelector(
       BUS *bus, Registers *registers,
       MemorySelector const *selector = &direct_memory_selector)
-      : MemoryIOSelector(bus, registers, selector) {}
+      : _bus(bus), _registers(registers), _selector(selector) {}
 
   virtual IO *get(const Instruction &instruction) override {
-    Segment *_segment = segment(instruction, _selector);
+    auto io_addresser = IOAddresser(_registers, _selector);
+    Segment *_segment = io_addresser.segment(instruction, _selector);
     uint16_t offset = instruction.offset();
     _bus.set_address(PhysicalAddresser(_registers).address(_segment, offset));
     PLOGD << _bus;
     return &_bus;
   }
+
+protected:
+  BUSIO _bus;
+  Registers *_registers;
+  MemorySelector const *_selector;
 };
 
 static const auto stack_memory_segment_selector =
     MemorySegmentSelector(SegmentMapper::SS_INDEX);
 
-struct StackMemoryIOSelector : public DirectMemoryIOSelector {
+struct StackMemoryIOSelector final : IOSelector {
   StackMemoryIOSelector(BUS *bus, Registers *registers)
-      : DirectMemoryIOSelector(bus, registers, &stack_memory_segment_selector) {
-  }
+      : _bus(bus), _registers(registers),
+        _selector(&stack_memory_segment_selector) {}
 
   IO *get(const Instruction &instruction) override {
     Segment *_segment = segment(instruction, _selector);
@@ -167,10 +186,15 @@ struct StackMemoryIOSelector : public DirectMemoryIOSelector {
   }
 
   Segment *segment(const Instruction &instruction,
-                   MemorySelector const *selector) override {
+                   MemorySelector const *selector) {
     return SegmentMapper(_registers)
         .get(selector->RM(instruction), selector->segment_mapping_type());
   }
+
+protected:
+  BUSIO _bus;
+  Registers *_registers;
+  MemorySelector const *_selector;
 };
 
 struct SegmentSelector {
@@ -196,12 +220,7 @@ struct OpCodeSegmentSelector : SegmentSelector {
 
 static const auto default_segment_selector = ModeSegmentSelector();
 
-class SegmentIOSelector : public IOSelector {
-protected:
-  SegmentMapper _segmentMapper;
-  SegmentSelector const *_selector;
-
-public:
+struct SegmentIOSelector : public IOSelector {
   explicit SegmentIOSelector(
       Registers *registers,
       SegmentSelector const *selector = &default_segment_selector)
@@ -211,6 +230,10 @@ public:
     return _segmentMapper.get(_selector->SR(instruction),
                               _selector->map_type());
   }
+
+protected:
+  SegmentMapper _segmentMapper;
+  SegmentSelector const *_selector;
 };
 
 #endif // _IO_SELECTORS_H_
