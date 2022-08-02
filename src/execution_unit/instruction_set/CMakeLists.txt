@@ -10,4 +10,5 @@ add_library(
   in.cpp
   out.cpp
   xlat.cpp
+  lea.cpp
 )
