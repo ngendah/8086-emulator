@@ -616,9 +616,11 @@ enum OpTypes {
   byte,
   high_byte,
   low_byte,
+  nop,
 };
 
-static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte"};
+static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte",
+                                       "nop"};
 
 struct OpType {
   struct Params {

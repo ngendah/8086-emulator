@@ -21,8 +21,10 @@ struct MovOpType : OpType {
     case low_byte:
       params._destination->write_lo(params._source->read_lo());
       break;
-    default:
+    case word:
       params._destination->write(params._source->read());
+      break;
+    default: // NOP
       break;
     }
   }
