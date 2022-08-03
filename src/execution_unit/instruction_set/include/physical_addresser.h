@@ -102,10 +102,13 @@ public:
     return (this->*_map_fn)(offset);
   };
 
-  virtual Address address(UNUSED_PARAM Segment *, UNUSED_PARAM uint8_t,
-                          UNUSED_PARAM uint8_t) override {
-    assert(false);
-    return Address();
+  virtual Address address(UNUSED_PARAM Segment *, uint8_t idx,
+                          uint8_t offset) override {
+    PLOGD << "mapping: "
+          << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
+                         _eff_memonics[idx]);
+    fn_t _map_fn = _eff_mapper[idx];
+    return (this->*_map_fn)(offset);
   };
 
   virtual Address address(UNUSED_PARAM Segment *,

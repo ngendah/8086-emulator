@@ -6,6 +6,7 @@
 #include "instruction_set_tests/in_tests.h"
 #include "instruction_set_tests/instruction_set_tests.h"
 #include "instruction_set_tests/io_selectors_tests.h"
+#include "instruction_set_tests/lea_tests.h"
 #include "instruction_set_tests/mov_tests.h"
 #include "instruction_set_tests/out_tests.h"
 #include "instruction_set_tests/pop_tests.h"

@@ -1,5 +1,6 @@
 #include "instruction_set.h"
 #include "in.h"
+#include "lea.h"
 #include "mov.h"
 #include "out.h"
 #include "pop.h"
@@ -32,6 +33,7 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0xE6, 0xFE, "OUT", OUTPort);
   _INSTRUCTION(0xEE, 0xFE, "OUT", OUTDX);
   _INSTRUCTION(0xD7, 0xD6, "XLAT", XLAT);
+  _INSTRUCTION(0x8D, 0xFF, "LEA", LEA);
 }
 
 InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
