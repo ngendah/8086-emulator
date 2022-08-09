@@ -1,6 +1,7 @@
 #ifndef _MOV_TESTS_H_
 #define _MOV_TESTS_H_
 
+#include "decoders.h"
 #include "logger.h"
 #include "mov.h"
 #include "ram.h"
@@ -10,20 +11,19 @@ struct MovRegisterRegisterTests : ::testing::Test {
   struct MovRegisterRegisterT : public MovRegisterRegister {
     MovRegisterRegisterT(Registers *registers)
         : MovRegisterRegister(nullptr, registers) {}
-    using MovRegisterRegister::_Decoder;
   };
 };
 
 TEST_F(MovRegisterRegisterTests, test__IOReader_reader) {
   auto registers = Registers();
-  auto io_reader = MovRegisterRegisterT::_Decoder(nullptr, &registers);
+  auto io_reader = RR_Decoder(nullptr, &registers);
   auto io = io_reader.source(Instruction(0xff, 0x8BC3));
   EXPECT_EQ(&registers.BX, io);
 }
 
 TEST_F(MovRegisterRegisterTests, test__IOWriter_writer) {
   auto registers = Registers();
-  auto io_writer = MovRegisterRegisterT::_Decoder(nullptr, &registers);
+  auto io_writer = RR_Decoder(nullptr, &registers);
   auto io = io_writer.destination(Instruction(0xff, 0x8BC3));
   EXPECT_EQ(&registers.AX, io);
 }

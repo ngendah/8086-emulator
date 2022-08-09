@@ -8,6 +8,7 @@ include_directories(
   "${PROJECT_SOURCE_DIR}/src/execution_unit"
   "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set"
   "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set/include"
+  "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set/decoders"
 )
 
 include_directories(

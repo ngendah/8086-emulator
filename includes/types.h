@@ -790,4 +790,20 @@ protected:
     after_execute(_instruction);                                               \
   }
 
+#define MICRO_OP_INSTRUCTION_DCR2(cls, op_type_selector_cls,                   \
+                                  operator_type_cls, decoder_cls)              \
+  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
+    PLOGD << #cls << "::create";                                               \
+    return std::make_shared<cls>(params.bus, params.registers);                \
+  }                                                                            \
+  std::shared_ptr<Decoder> decoder() override {                                \
+    return std::make_shared<decoder_cls>(_bus, _registers);                    \
+  }                                                                            \
+  void execute(const Instruction &instruction) override {                      \
+    auto _instruction = before_execute(instruction);                           \
+    auto executor = Executor(decoder());                                       \
+    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
+    after_execute(_instruction);                                               \
+  }
+
 #endif /* TYPES_H_ */

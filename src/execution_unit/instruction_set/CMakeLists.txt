@@ -1,4 +1,6 @@
-include_directories(include)
+add_subdirectory(decoders)
+
+include_directories(include decoders)
 
 add_library(
   instruction_set
@@ -13,3 +15,6 @@ add_library(
   lea.cpp
   les.cpp
 )
+
+target_link_libraries(instruction_set PUBLIC decoders)
+target_include_directories(instruction_set PUBLIC decoders)
