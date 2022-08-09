@@ -40,6 +40,7 @@ typedef uint8_t sop_t; // segment override prefix
 static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
   return ((uint16_t)((hi << 8) | (lo & 0x00FF)));
 }
+
 class Instruction final {
 private:
   uint8_t _sop;
@@ -200,12 +201,6 @@ public:
 
 struct Clock {
   virtual ~Clock();
-};
-
-struct Decoder {
-  virtual ~Decoder() = default;
-  virtual void decodeAndExecute();
-  virtual uint16_t fetch(uint16_t);
 };
 
 struct Bytes {
@@ -611,6 +606,26 @@ struct IOWriter {
   virtual IO *writer(const Instruction &) = 0;
 };
 
+typedef BUS *bus_ptr_t;             // TODO refactor to BUS *const
+typedef Registers *registers_ptr_t; // TODO refactor to Registers *const
+
+struct Decoder {
+  Decoder(bus_ptr_t bus = nullptr, registers_ptr_t registers = nullptr)
+      : _bus(bus), _registers(registers) {}
+
+  virtual ~Decoder() = default;
+  virtual std::pair<IO *, IO *> decode(const Instruction &instruction) {
+    return {source(instruction), destination(instruction)};
+  };
+
+protected:
+  virtual IO *source(const Instruction &) = 0;
+  virtual IO *destination(const Instruction &) = 0;
+
+  bus_ptr_t _bus;
+  registers_ptr_t _registers;
+};
+
 enum OpTypes {
   word,
   byte,
@@ -689,6 +704,10 @@ struct MicroOp {
 
   virtual void execute(const Instruction &) = 0;
 
+  virtual std::shared_ptr<Decoder> decoder() {
+    return std::shared_ptr<Decoder>(nullptr);
+  };
+
   virtual ~MicroOp() = default;
 
 protected:
@@ -708,6 +727,20 @@ protected:
       auto uop_operator =
           OperatorT(_io_reader.reader(instruction),
                     _io_writer.writer(instruction), &op_selector);
+      uop_operator.execute(instruction);
+    }
+  };
+
+  struct Executor {
+    std::shared_ptr<Decoder> _decoder;
+    Executor(std::shared_ptr<Decoder> decoder) : _decoder(decoder) {}
+
+    template <class OpTypeSelectorT, class OperatorT>
+    void execute(const Instruction &instruction) {
+      auto op_selector = OpTypeSelectorT();
+      auto src_dest = _decoder->decode(instruction);
+      auto uop_operator =
+          OperatorT(src_dest.first, src_dest.second, &op_selector);
       uop_operator.execute(instruction);
     }
   };
@@ -742,7 +775,19 @@ protected:
     after_execute(_instruction);                                               \
   }
 
-typedef BUS *bus_ptr_t;             // TODO refactor to BUS *const
-typedef Registers *registers_ptr_t; // TODO refactor to Registers *const
+#define MICRO_OP_INSTRUCTION_DCR(cls, op_type_selector_cls, operator_type_cls) \
+  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
+    PLOGD << #cls << "::create";                                               \
+    return std::make_shared<cls>(params.bus, params.registers);                \
+  }                                                                            \
+  std::shared_ptr<Decoder> decoder() override {                                \
+    return std::make_shared<_Decoder>(_bus, _registers);                       \
+  }                                                                            \
+  void execute(const Instruction &instruction) override {                      \
+    auto _instruction = before_execute(instruction);                           \
+    auto executor = Executor(decoder());                                       \
+    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
+    after_execute(_instruction);                                               \
+  }
 
 #endif /* TYPES_H_ */

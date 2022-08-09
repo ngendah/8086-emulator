@@ -11,4 +11,5 @@ add_library(
   out.cpp
   xlat.cpp
   lea.cpp
+  les.cpp
 )

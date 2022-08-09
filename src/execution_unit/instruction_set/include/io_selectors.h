@@ -19,6 +19,7 @@ struct IOSelector {
 };
 
 struct RegisterSelector {
+  virtual ~RegisterSelector() = default;
   virtual uint8_t REG(const Instruction &instruction) const {
     return instruction.mode_to<opcode_reg_t>().REG;
   }
