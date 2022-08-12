@@ -775,23 +775,8 @@ protected:
     after_execute(_instruction);                                               \
   }
 
-#define MICRO_OP_INSTRUCTION_DCR(cls, op_type_selector_cls, operator_type_cls) \
-  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
-    PLOGD << #cls << "::create";                                               \
-    return std::make_shared<cls>(params.bus, params.registers);                \
-  }                                                                            \
-  std::shared_ptr<Decoder> decoder() override {                                \
-    return std::make_shared<_Decoder>(_bus, _registers);                       \
-  }                                                                            \
-  void execute(const Instruction &instruction) override {                      \
-    auto _instruction = before_execute(instruction);                           \
-    auto executor = Executor(decoder());                                       \
-    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
-    after_execute(_instruction);                                               \
-  }
-
-#define MICRO_OP_INSTRUCTION_DCR2(cls, op_type_selector_cls,                   \
-                                  operator_type_cls, decoder_cls)              \
+#define MICRO_OP_INSTRUCTION_DCR(cls, op_type_selector_cls, operator_type_cls, \
+                                 decoder_cls)                                  \
   static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
     PLOGD << #cls << "::create";                                               \
     return std::make_shared<cls>(params.bus, params.registers);                \
@@ -802,8 +787,13 @@ protected:
   void execute(const Instruction &instruction) override {                      \
     auto _instruction = before_execute(instruction);                           \
     auto executor = Executor(decoder());                                       \
-    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
+    executor.execute<op_type_selector_cls, operator_type_cls>(_instruction);   \
     after_execute(_instruction);                                               \
   }
+
+#define MICRO_OP_INSTRUCTION_DCR2(cls, op_type_selector_cls,                   \
+                                  operator_type_cls, decoder_cls)              \
+  MICRO_OP_INSTRUCTION_DCR(cls, op_type_selector_cls, operator_type_cls,       \
+                           decoder_cls)
 
 #endif /* TYPES_H_ */

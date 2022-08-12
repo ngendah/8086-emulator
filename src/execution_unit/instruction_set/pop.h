@@ -6,6 +6,7 @@
 #ifndef _POP_H_
 #define _POP_H_
 
+#include "decoders.h"
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "mov_operators.h"
@@ -20,17 +21,6 @@ protected:
   Registers *_registers;
   BUS *_bus;
 
-  struct _IOReader final : IOReader {
-    StackMemoryIOSelector _stack_mem_selector;
-
-    _IOReader(BUS *bus, Registers *registers)
-        : _stack_mem_selector(bus, registers) {}
-
-    IO *reader(const Instruction &instruction) override {
-      return _stack_mem_selector.get(instruction);
-    }
-  };
-
 public:
   StackStrategy const *_stack_strategy;
 };
@@ -43,31 +33,12 @@ struct PopRegister : public Pop {
               StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void after_execute(__attribute__((unused)) const Instruction &) override {
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION_OVR(PopRegister, WordMovOpTypeSelector, MovOperator)
-
-protected:
-  struct _RegisterSelector1 : RegisterSelector {
-    virtual uint8_t REG(const Instruction &instruction) const {
-      auto mode = instruction.opcode_to<opcode_reg_t>();
-      return mode.REG;
-    }
-  };
-
-  struct _IOWriter final : IOWriter {
-    Registers *_registers;
-    _IOWriter(BUS *bus, Registers *registers) : _registers(registers) {
-      UNUSED(bus);
-    }
-
-    IO *writer(const Instruction &instruction) override {
-      auto reg_selector = _RegisterSelector1();
-      return RegisterIOSelector(_registers, &reg_selector).get(instruction);
-    }
-  };
+  MICRO_OP_INSTRUCTION_DCR(PopRegister, WordMovOpTypeSelector, MovOperator,
+                           STKR_Decoder)
 };
 
 struct PopMemory : public Pop {
@@ -77,23 +48,12 @@ struct PopMemory : public Pop {
   PopMemory(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void after_execute(__attribute__((unused)) const Instruction &) override {
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION_OVR(PopMemory, WordMovOpTypeSelector, MovOperator)
-
-protected:
-  struct _IOWriter final : IOWriter {
-    MemoryIOSelector _mem_selector;
-    _IOWriter(BUS *bus, Registers *registers) : _mem_selector(bus, registers) {}
-
-    IO *writer(const Instruction &instruction) override {
-      auto mode = instruction.mode_to<mod_reg_rm_t>();
-      assert(mode.REG == 0x0);
-      return _mem_selector.get(instruction);
-    }
-  };
+  MICRO_OP_INSTRUCTION_DCR(PopMemory, WordMovOpTypeSelector, MovOperator,
+                           STKM_Decoder)
 };
 
 struct PopSegment : public Pop {
@@ -104,25 +64,12 @@ struct PopSegment : public Pop {
              StackStrategy const *stack_stragegy)
       : Pop(registers, bus, stack_stragegy) {}
 
-  void after_execute(__attribute__((unused)) const Instruction &) override {
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
   }
 
-  MICRO_OP_INSTRUCTION_OVR(PopSegment, WordMovOpTypeSelector, MovOperator)
-
-protected:
-  struct _IOWriter final : IOWriter {
-    Registers *_registers;
-
-    explicit _IOWriter(BUS *bus, Registers *registers) : _registers(registers) {
-      UNUSED(bus);
-    }
-
-    IO *writer(const Instruction &instruction) override {
-      auto seg_selector = OpCodeSegmentSelector();
-      return SegmentIOSelector(_registers, &seg_selector).get(instruction);
-    }
-  };
+  MICRO_OP_INSTRUCTION_DCR(PopSegment, WordMovOpTypeSelector, MovOperator,
+                           STKS_Decoder)
 };
 
 // TODO pop flags
