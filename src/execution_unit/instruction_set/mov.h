@@ -32,8 +32,8 @@ struct MovRegisterRegister : public Mov {
     return Mov::before_execute(instruction);
   }
 
-  MICRO_OP_INSTRUCTION_DCR2(MovRegisterRegister, RegisterMovOpTypeSelector,
-                            MovOperator, RR_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovRegisterRegister, RegisterMovOpTypeSelector,
+                           MovOperator, RR_Decoder)
 };
 
 struct MovRegisterMemory : public Mov {
@@ -45,8 +45,8 @@ struct MovRegisterMemory : public Mov {
     return Mov::before_execute(instruction);
   }
 
-  MICRO_OP_INSTRUCTION_DCR2(MovRegisterMemory, WordMovOpTypeSelector,
-                            MovOperator, RM_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovRegisterMemory, WordMovOpTypeSelector,
+                           MovOperator, RM_Decoder)
 };
 
 struct MovRegisterAndMemory : public Mov {
@@ -67,8 +67,8 @@ struct MovRegisterAndMemory : public Mov {
 struct MovRegisterImmediate : public Mov {
   MovRegisterImmediate(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  MICRO_OP_INSTRUCTION_DCR2(MovRegisterImmediate, ImmediateMovOpTypeSelector,
-                            MovOperator, RI_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovRegisterImmediate, ImmediateMovOpTypeSelector,
+                           MovOperator, RI_Decoder)
 };
 
 struct MovRegisterSegment : public Mov {
@@ -82,8 +82,8 @@ struct MovRegisterSegment : public Mov {
     return Mov::before_execute(instruction);
   }
 
-  MICRO_OP_INSTRUCTION_DCR2(MovRegisterSegment, WordMovOpTypeSelector,
-                            MovOperator, RS_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovRegisterSegment, WordMovOpTypeSelector,
+                           MovOperator, RS_Decoder)
 };
 
 struct MovMemorySegment : public Mov {
@@ -96,8 +96,8 @@ struct MovMemorySegment : public Mov {
     return Mov::before_execute(instruction);
   }
 
-  MICRO_OP_INSTRUCTION_DCR2(MovMemorySegment, WordMovOpTypeSelector,
-                            MovOperator, MS_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovMemorySegment, WordMovOpTypeSelector, MovOperator,
+                           MS_Decoder)
 };
 
 struct MovSegmentAndRegisterMemory : public Mov {
@@ -119,16 +119,16 @@ struct MovSegmentAndRegisterMemory : public Mov {
 struct MovAccumulator : public Mov {
   MovAccumulator(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  MICRO_OP_INSTRUCTION_DCR2(MovAccumulator, WordOrByteMovOpTypeSelector,
-                            MovOperator, MA_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovAccumulator, WordOrByteMovOpTypeSelector,
+                           MovOperator, MA_Decoder)
 };
 
 struct MovMemoryImmediate : public Mov {
   explicit MovMemoryImmediate(BUS *bus, Registers *registers)
       : Mov(bus, registers) {}
 
-  MICRO_OP_INSTRUCTION_DCR2(MovMemoryImmediate, WordOrByteMovOpTypeSelector,
-                            MovOperator, MI_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(MovMemoryImmediate, WordOrByteMovOpTypeSelector,
+                           MovOperator, MI_Decoder)
 };
 
 #endif // _MOV_H_

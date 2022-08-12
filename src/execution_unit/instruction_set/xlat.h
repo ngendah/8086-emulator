@@ -19,8 +19,8 @@ struct XLAT : MicroOp {
     return Instruction(SegmentMapper::SOP_DS_INDEX, 0x0);
   }
 
-  MICRO_OP_INSTRUCTION_DCR2(XLAT, WordOrByteMovOpTypeSelector, MovOperator,
-                            AXMXLAT_Decoder)
+  MICRO_OP_INSTRUCTION_DCR(XLAT, WordOrByteMovOpTypeSelector, MovOperator,
+                           AXMXLAT_Decoder)
 protected:
   bus_ptr_t _bus;
   registers_ptr_t _registers;
