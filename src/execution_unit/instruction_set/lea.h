@@ -12,14 +12,9 @@
 #include "types.h"
 
 struct LEA : MicroOp {
-  LEA(bus_ptr_t bus, registers_ptr_t registers)
-      : _bus(bus), _registers(registers) {}
+  LEA(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 
   MICRO_OP_INSTRUCTION_DCR(LEA, WordMovOpTypeSelector, MovOperator, REA_Decoder)
-
-protected:
-  bus_ptr_t _bus;
-  registers_ptr_t _registers;
 };
 
 #endif // _LEA_H_

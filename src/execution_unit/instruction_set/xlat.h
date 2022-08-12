@@ -12,8 +12,7 @@
 #include "types.h"
 
 struct XLAT : MicroOp {
-  XLAT(bus_ptr_t bus, registers_ptr_t registers)
-      : _bus(bus), _registers(registers) {}
+  XLAT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 
   Instruction before_execute(UNUSED_PARAM const Instruction &) override {
     return Instruction(SegmentMapper::SOP_DS_INDEX, 0x0);
@@ -21,9 +20,6 @@ struct XLAT : MicroOp {
 
   MICRO_OP_INSTRUCTION_DCR(XLAT, WordOrByteMovOpTypeSelector, MovOperator,
                            AXMXLAT_Decoder)
-protected:
-  bus_ptr_t _bus;
-  registers_ptr_t _registers;
 };
 
 #endif // _XLAT_H_

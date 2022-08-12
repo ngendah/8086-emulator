@@ -13,11 +13,7 @@
 #include "types.h"
 
 struct IN : MicroOp {
-  IN(Registers *registers, BUS *bus) : _registers(registers), _bus(bus) {}
-
-protected:
-  Registers *_registers;
-  BUS *_bus;
+  IN(Registers *registers, BUS *bus) : MicroOp(bus, registers) {}
 };
 
 struct INPort : IN {

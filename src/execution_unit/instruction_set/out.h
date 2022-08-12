@@ -12,12 +12,7 @@
 #include "types.h"
 
 struct OUT : public MicroOp {
-  OUT(bus_ptr_t bus, registers_ptr_t registers)
-      : _registers(registers), _bus(bus) {}
-
-protected:
-  registers_ptr_t _registers;
-  bus_ptr_t _bus;
+  OUT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 };
 
 struct OUTPort : public OUT {

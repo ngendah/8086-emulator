@@ -13,12 +13,7 @@
 #include "types.h"
 
 struct Mov : public MicroOp {
-  explicit Mov(BUS *bus, Registers *registers)
-      : _bus(bus), _registers(registers) {}
-
-protected:
-  BUS *_bus;
-  Registers *_registers;
+  explicit Mov(BUS *bus, Registers *registers) : MicroOp(bus, registers) {}
 };
 
 struct MovRegisterRegister : public Mov {

@@ -15,11 +15,7 @@
 
 struct Pop : public MicroOp {
   Pop(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
-      : _registers(registers), _bus(bus), _stack_strategy(stack_stragegy) {}
-
-protected:
-  Registers *_registers;
-  BUS *_bus;
+      : MicroOp(bus, registers), _stack_strategy(stack_stragegy) {}
 
 public:
   StackStrategy const *_stack_strategy;

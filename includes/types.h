@@ -702,18 +702,19 @@ struct MicroOp {
     }
   };
 
-  virtual void execute(const Instruction &) = 0;
+  MicroOp(bus_ptr_t bus = nullptr, registers_ptr_t registers = nullptr)
+      : _bus(bus), _registers(registers) {}
 
-  virtual std::shared_ptr<Decoder> decoder() {
-    return std::shared_ptr<Decoder>(nullptr);
-  };
+  MicroOp(const MicroOp &rhs) : _bus(rhs._bus), _registers(rhs._registers) {}
 
   virtual ~MicroOp() = default;
 
+  virtual void execute(const Instruction &) = 0;
+
 protected:
   struct Executor {
-    std::shared_ptr<Decoder> _decoder;
-    Executor(std::shared_ptr<Decoder> decoder) : _decoder(decoder) {}
+    Decoder *const _decoder;
+    Executor(Decoder *const decoder) : _decoder(decoder) {}
 
     template <class OpTypeSelectorT, class OperatorT>
     void execute(const Instruction &instruction) {
@@ -730,6 +731,10 @@ protected:
   }
 
   virtual void after_execute(UNUSED_PARAM const Instruction &instruction) {}
+
+protected:
+  bus_ptr_t _bus;
+  registers_ptr_t _registers;
 };
 
 #define MICRO_OP_INSTRUCTION(cls)                                              \
@@ -744,12 +749,10 @@ protected:
     PLOGD << #cls << "::create";                                               \
     return std::make_shared<cls>(params.bus, params.registers);                \
   }                                                                            \
-  std::shared_ptr<Decoder> decoder() override {                                \
-    return std::make_shared<decoder_cls>(_bus, _registers);                    \
-  }                                                                            \
   void execute(const Instruction &instruction) override {                      \
     auto _instruction = before_execute(instruction);                           \
-    auto executor = Executor(decoder());                                       \
+    auto decoder = decoder_cls(_bus, _registers);                              \
+    auto executor = Executor(&decoder);                                        \
     executor.execute<op_type_selector_cls, operator_type_cls>(_instruction);   \
     after_execute(_instruction);                                               \
   }

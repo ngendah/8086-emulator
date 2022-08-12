@@ -13,7 +13,7 @@
 #include "xchg_operators.h"
 
 struct XCHG : public MicroOp {
-  XCHG(BUS *bus, Registers *registers) : _registers(registers), _bus(bus) {}
+  XCHG(BUS *bus, Registers *registers) : MicroOp(bus, registers) {}
 
 protected:
   Registers *_registers;
