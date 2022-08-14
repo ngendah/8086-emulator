@@ -16,22 +16,22 @@ struct WordOrByteOpcodeOpTypeSelector : OpTypeSelector {
 };
 
 struct WordOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(__attribute__((unused)) const Instruction &) const override {
+  OpTypes op_type(UNUSED_PARAM const Instruction &) const override {
     return word;
   }
 };
 
 class Operator {
 protected:
-  IO *_source, *_destination;
-  OpTypeSelector *_selector;
-  OpType const *_op_type_operator;
+  IO *const _source, *const _destination;
+  OpTypeSelector *const _selector;
+  OpType *const _op_type_operator;
 
 public:
   Operator(IO *source, IO *destination, OpTypeSelector *selector,
-           OpType const *op_type_operator)
+           const OpType *const op_type_operator)
       : _source(source), _destination(destination), _selector(selector),
-        _op_type_operator(op_type_operator) {}
+        _op_type_operator((OpType *const)op_type_operator) {}
 
   virtual void execute(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);

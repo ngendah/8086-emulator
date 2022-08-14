@@ -8,6 +8,24 @@
 
 #include "types.h"
 
+typedef struct _flags_t {
+  uint8_t _X1 : 4;
+  uint8_t O : 1;
+  uint8_t D : 1;
+  uint8_t I : 1;
+  uint8_t T : 1;
+  uint8_t S : 1;
+  uint8_t Z : 1;
+  uint8_t _X2 : 1;
+  uint8_t A : 1;
+  uint8_t _X3 : 1;
+  uint8_t P : 1;
+  uint8_t _X4 : 1;
+  uint8_t C : 1;
+
+  operator uint16_t() const { return *(uint16_t *)this; }
+} flags_t;
+
 typedef struct _opcode_w_t final {
   uint8_t W : 1;
   uint8_t OPCODE : 7;

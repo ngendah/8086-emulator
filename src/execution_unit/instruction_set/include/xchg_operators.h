@@ -6,7 +6,6 @@
 #ifndef _XCHG_OPERATORS_H_
 #define _XCHG_OPERATORS_H_
 
-#include "instruction_templates.h"
 #include "operators.h"
 
 struct XCHGOpType : OpType {

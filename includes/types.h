@@ -20,23 +20,6 @@
 #define UNUSED_PARAM __attribute__((unused))
 
 typedef void *const void_ptr_t;
-
-typedef struct {
-  uint8_t _X1 : 4;
-  uint8_t O : 1;
-  uint8_t D : 1;
-  uint8_t I : 1;
-  uint8_t T : 1;
-  uint8_t S : 1;
-  uint8_t Z : 1;
-  uint8_t _X2 : 1;
-  uint8_t A : 1;
-  uint8_t _X3 : 1;
-  uint8_t P : 1;
-  uint8_t _X4 : 1;
-  uint8_t C : 1;
-} flags_t;
-
 typedef uint8_t sop_t; // segment override prefix
 
 static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
@@ -184,6 +167,21 @@ public:
   Address operator+(const Address &rhs) {
     return Address(_address + rhs._address);
   }
+};
+
+struct Flags final {
+  Flags() : _flags(0) {}
+
+  Flags(const uint16_t &flags) : _flags(flags) {}
+
+  Flags(const Flags &rhs) : _flags(rhs._flags) {}
+
+  void set(uint16_t flags) { _flags = flags; }
+
+  template <typename T> T bits() const { return *(T *)&_flags; }
+
+protected:
+  uint16_t _flags;
 };
 
 class InstructionCode final {
@@ -594,7 +592,7 @@ struct Segment final : public Register {
 struct Registers final {
   Register AX, BX, CX, DX, SP, BP, SI, DI, IP;
   Segment CS, DS, SS, ES;
-  flags_t FLAGS;
+  Flags FLAGS;
   Registers()
       : AX("AX"), BX("BX"), CX("CX"), DX("DX"), SP("SP"), BP("BP"), SI("SI"),
         DI("DI"), IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES") {}
@@ -635,15 +633,25 @@ struct OpType {
   struct Params {
     OpTypes _op_type;
     IO *_source, *_destination;
+    Flags *_flags;
+
     Params(OpTypes op_type, IO *source, IO *destination)
-        : _op_type(op_type), _source(source), _destination(destination) {}
+        : _op_type(op_type), _source(source), _destination(destination),
+          _flags(nullptr) {}
+
+    Params(OpTypes op_type, IO *source, IO *destination, Flags *flags)
+        : _op_type(op_type), _source(source), _destination(destination),
+          _flags(flags) {}
+
     Params &operator=(const Params &rhs) {
       _op_type = rhs._op_type;
       _source = rhs._source;
       _destination = rhs._destination;
+      _flags = rhs._flags;
       return *this;
     }
   };
+
   virtual void execute(const OpType::Params &params) const = 0;
 };
 
@@ -724,6 +732,20 @@ protected:
       uop_operator.execute(_instruction);
       _op->after_execute(_instruction);
     }
+
+    template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
+    void execute(const Instruction &instruction) const {
+      auto op_selector = OpTypeSelectorT();
+      auto op_type = OpTypeT();
+      auto _instruction = _op->before_decode(instruction);
+      auto src_dest = _decoder->decode(_instruction);
+      auto registers = _op->_registers;
+      _op->before_execute(_instruction);
+      auto uop_operator = OperatorT(src_dest.first, src_dest.second,
+                                    &op_selector, &op_type, &registers->FLAGS);
+      uop_operator.execute(_instruction);
+      _op->after_execute(_instruction);
+    }
   };
 
   virtual Instruction before_decode(const Instruction &instruction) {
@@ -755,6 +777,19 @@ protected:
     auto decoder = decoder_cls(_bus, _registers);                              \
     auto executor = Executor(&decoder, (MicroOp *)this);                       \
     executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
+  }
+
+#define MICRO_OP_INSTRUCTION_DCRE(cls, op_type_selector_cls,                   \
+                                  operator_type_cls, op_type_cls, decoder_cls) \
+  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
+    PLOGD << #cls << "::create";                                               \
+    return std::make_shared<cls>(params.bus, params.registers);                \
+  }                                                                            \
+  void execute(const Instruction &instruction) override {                      \
+    auto decoder = decoder_cls(_bus, _registers);                              \
+    auto executor = Executor(&decoder, (MicroOp *)this);                       \
+    executor.execute<op_type_selector_cls, operator_type_cls, op_type_cls>(    \
+        instruction);                                                          \
   }
 
 #endif /* TYPES_H_ */
