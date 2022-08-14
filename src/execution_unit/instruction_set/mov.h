@@ -19,12 +19,11 @@ struct Mov : public MicroOp {
 struct MovRegisterRegister : public Mov {
   MovRegisterRegister(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  Instruction before_execute(const Instruction &instruction) override {
+  void before_execute(const Instruction &instruction) override {
     auto mod = instruction.mode_to<mod_reg_rm_t>();
     PLOGD << instruction;
     PLOGD << mod;
     assert(mod.MOD == 0x3);
-    return Mov::before_execute(instruction);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovRegisterRegister, RegisterMovOpTypeSelector,
@@ -34,10 +33,9 @@ struct MovRegisterRegister : public Mov {
 struct MovRegisterMemory : public Mov {
   MovRegisterMemory(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  Instruction before_execute(const Instruction &instruction) override {
+  void before_execute(const Instruction &instruction) override {
     auto opcode = instruction.opcode_to<d_w_t>();
     assert(opcode.W == 1);
-    return Mov::before_execute(instruction);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovRegisterMemory, WordMovOpTypeSelector,
@@ -69,12 +67,11 @@ struct MovRegisterImmediate : public Mov {
 struct MovRegisterSegment : public Mov {
   MovRegisterSegment(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  Instruction before_execute(const Instruction &instruction) override {
+  void before_execute(const Instruction &instruction) override {
     PLOGD << instruction;
     auto ins_temp = InstructionTemplate<d_w_t, mod_sr_rm_t>(instruction);
     assert(ins_temp.opcode().W == 0);
     assert(ins_temp.mode().MOD == 0x3);
-    return Mov::before_execute(instruction);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovRegisterSegment, WordMovOpTypeSelector,
@@ -84,11 +81,10 @@ struct MovRegisterSegment : public Mov {
 struct MovMemorySegment : public Mov {
   MovMemorySegment(BUS *bus, Registers *registers) : Mov(bus, registers) {}
 
-  Instruction before_execute(const Instruction &instruction) override {
+  void before_execute(const Instruction &instruction) override {
     auto opcode = instruction.opcode_to<d_w_t>();
     PLOGD << opcode;
     assert(opcode.W == 0);
-    return Mov::before_execute(instruction);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovMemorySegment, WordMovOpTypeSelector, MovOperator,

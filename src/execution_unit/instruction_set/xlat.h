@@ -14,7 +14,7 @@
 struct XLAT : MicroOp {
   XLAT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 
-  Instruction before_execute(UNUSED_PARAM const Instruction &) override {
+  Instruction before_decode(UNUSED_PARAM const Instruction &) override {
     return Instruction(SegmentMapper::SOP_DS_INDEX, 0x0);
   }
 

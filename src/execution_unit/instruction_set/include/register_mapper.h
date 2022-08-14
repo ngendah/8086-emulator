@@ -39,13 +39,14 @@ class RegisterMapper {
    * 1 111 DI->7
    *
    */
-  std::array<Register *, 8> _mapper{};
+  std::array<Register *, 9> _mapper{};
 
 public:
   RegisterMapper(Registers *registers) {
     _mapper = {
-        &registers->AX, &registers->CX, &registers->DX, &registers->BX,
-        &registers->SP, &registers->BP, &registers->SI, &registers->DI,
+        &registers->AX, &registers->CX, &registers->DX,
+        &registers->BX, &registers->SP, &registers->BP,
+        &registers->SI, &registers->DI, &registers->ES,
     };
   }
 
@@ -65,7 +66,9 @@ public:
   static const uint8_t SP_INDEX = 4;
   static const uint8_t BP_INDEX = 5;
   static const uint8_t SI_INDEX = 6;
+  // custom extensions
   static const uint8_t DI_INDEX = 7;
+  static const uint8_t ES_INDEX = 8;
 };
 
 #endif // INSTRUCTION_SET_REGISTER_MAPPER_H_

@@ -29,8 +29,7 @@ struct PushRegister : public Push {
                StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void after_execute(const Instruction &instruction) override {
-    Push::after_execute(instruction);
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
@@ -46,8 +45,7 @@ struct PushMemory : public Push {
              StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void after_execute(const Instruction &instruction) override {
-    Push::after_execute(instruction);
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 
@@ -63,8 +61,7 @@ struct PushSegment : public Push {
               StackStrategy const *stack_stragegy)
       : Push(registers, bus, stack_stragegy) {}
 
-  void after_execute(const Instruction &instruction) override {
-    Push::after_execute(instruction);
+  void after_execute(UNUSED_PARAM const Instruction &) override {
     _stack_strategy->next(_registers->SP, sizeof(uint16_t));
   }
 

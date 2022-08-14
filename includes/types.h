@@ -19,6 +19,8 @@
 #define UNUSED(expr) (void)(expr)
 #define UNUSED_PARAM __attribute__((unused))
 
+typedef void *const void_ptr_t;
+
 typedef struct {
   uint8_t _X1 : 4;
   uint8_t O : 1;
@@ -598,14 +600,6 @@ struct Registers final {
         DI("DI"), IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES") {}
 };
 
-struct IOReader {
-  virtual IO *reader(const Instruction &) = 0;
-};
-
-struct IOWriter {
-  virtual IO *writer(const Instruction &) = 0;
-};
-
 typedef BUS *bus_ptr_t;             // TODO refactor to BUS *const
 typedef Registers *registers_ptr_t; // TODO refactor to Registers *const
 
@@ -714,21 +708,29 @@ struct MicroOp {
 protected:
   struct Executor {
     Decoder *const _decoder;
-    Executor(Decoder *const decoder) : _decoder(decoder) {}
+    MicroOp *const _op;
+
+    Executor(Decoder *const decoder, MicroOp *const op)
+        : _decoder(decoder), _op(op) {}
 
     template <class OpTypeSelectorT, class OperatorT>
-    void execute(const Instruction &instruction) {
+    void execute(const Instruction &instruction) const {
       auto op_selector = OpTypeSelectorT();
-      auto src_dest = _decoder->decode(instruction);
+      auto _instruction = _op->before_decode(instruction);
+      auto src_dest = _decoder->decode(_instruction);
+      _op->before_execute(_instruction);
       auto uop_operator =
           OperatorT(src_dest.first, src_dest.second, &op_selector);
-      uop_operator.execute(instruction);
+      uop_operator.execute(_instruction);
+      _op->after_execute(_instruction);
     }
   };
 
-  virtual Instruction before_execute(const Instruction &instruction) {
+  virtual Instruction before_decode(const Instruction &instruction) {
     return instruction;
   }
+
+  virtual void before_execute(UNUSED_PARAM const Instruction &instruction) {}
 
   virtual void after_execute(UNUSED_PARAM const Instruction &instruction) {}
 
@@ -750,11 +752,9 @@ protected:
     return std::make_shared<cls>(params.bus, params.registers);                \
   }                                                                            \
   void execute(const Instruction &instruction) override {                      \
-    auto _instruction = before_execute(instruction);                           \
     auto decoder = decoder_cls(_bus, _registers);                              \
-    auto executor = Executor(&decoder);                                        \
-    executor.execute<op_type_selector_cls, operator_type_cls>(_instruction);   \
-    after_execute(_instruction);                                               \
+    auto executor = Executor(&decoder, (MicroOp *)this);                       \
+    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
   }
 
 #endif /* TYPES_H_ */
