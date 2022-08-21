@@ -12,34 +12,35 @@
 #include "mov_operators.h"
 #include "types.h"
 
-struct _INCR : MicroOp {
-  _INCR(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+/*
+LES DX, [DI]
+1. load DX with EA of DI. (MOV DX, [DI])
+2. Increment DX by word size i.e. DX+=2. [(INCR DX), (INCR DX)]
+3. load ES with contents of DS:[DX]. (MOV ES, DX)
 
-  MICRO_OP_INSTRUCTION_DCRE(_INCR, WordMovOpTypeSelector, MathOperator,
-                            IncrOpType, DRR_Decoder)
+Test cases:
+LES DX, [DI]
+LES DX, 52h[DI]
+LES BX, 42H[SI]
 
-  // Direct Register-Register move decoder
-  struct DRR_Decoder : Decoder {
-    struct _RegisterSelector1 final : RegisterSelector {
-      uint8_t REG(UNUSED_PARAM const Instruction &) const override {
-        return RegisterMapper::BX_INDEX;
-      }
-    };
+Implementation:
+step 1.
+MovRegisterAndMemory.execute(instruction);
 
-    DRR_Decoder(bus_ptr_t bus, registers_ptr_t registers)
-        : Decoder(bus, registers) {}
+step 2.
+reg = instruction.mode_to<mod_reg_t>().REG;
+opcode_reg_t opcode = {.OPCODE=0x5, .REG=reg};
+instruction = Instruction(0xff, make_word(opcode, 0));
+Incr.execute(instruction);
+Incr.execute(instruction);
 
-    IO *source(const Instruction &instruction) override {
-      auto selector = _RegisterSelector1();
-      return RegisterIOSelector(_registers, &selector).get(instruction);
-    }
-
-    IO *destination(const Instruction &instruction) override {
-      auto selector = _RegisterSelector1();
-      return RegisterIOSelector(_registers, &selector).get(instruction);
-    }
-  };
-};
+step 3.
+-- intel-format, set d bit to 1
+opcode_d_w_t opcode = {.opcode=0x0, .d=1, .w=1};
+mode_reg_rm mode = {.mode=0x3, .reg=ES_INDEX, .rm=reg};
+instruction = Instruction(0xff, make_word(opcode, mode));
+MovRegisterRegister.execute(instruction);
+ */
 
 struct LES : MicroOp {
   LES(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}

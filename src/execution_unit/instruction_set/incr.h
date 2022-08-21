@@ -20,6 +20,10 @@ struct INCRRegister : MicroOp {
   MICRO_OP_INSTRUCTION_DCRE(INCRRegister, WordMovOpTypeSelector, MathOperator,
                             IncrOpType, DRR_Decoder)
 
+  void after_execute(UNUSED_PARAM const Instruction &) override {
+    PLOGD << _registers->FLAGS.bits<flags_t>();
+  }
+
   // Register-Register move decoder
   struct DRR_Decoder : Decoder {
     struct _RegisterSelector1 final : RegisterSelector {

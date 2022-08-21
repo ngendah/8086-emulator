@@ -25,13 +25,14 @@ class Operator {
 protected:
   IO *const _source, *const _destination;
   OpTypeSelector *const _selector;
+  // TODO convert to const OpType *const
   OpType *const _op_type_operator;
 
 public:
   Operator(IO *source, IO *destination, OpTypeSelector *selector,
            const OpType *const op_type_operator)
       : _source(source), _destination(destination), _selector(selector),
-        _op_type_operator((OpType *const)op_type_operator) {}
+        _op_type_operator((OpType *)op_type_operator) {}
 
   virtual void execute(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);

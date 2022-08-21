@@ -180,23 +180,14 @@ struct Flags final {
 
   template <typename T> T bits() const { return *(T *)&_flags; }
 
+  friend std::ostream &operator<<(std::ostream &os, const Flags &flags) {
+    // instead do: os << flags.bits<flags_t>();
+    assert(false);
+    return os;
+  }
+
 protected:
   uint16_t _flags;
-};
-
-class InstructionCode final {
-  uint8_t _code;
-  uint8_t _mask;
-
-public:
-  InstructionCode(uint8_t code = 0x0, uint8_t mask = 0x0)
-      : _code(code), _mask(mask) {}
-
-  virtual ~InstructionCode() = default;
-
-  virtual bool operator==(const uint8_t &code) {
-    return this->_code == (this->_mask & code);
-  }
 };
 
 struct Clock {
