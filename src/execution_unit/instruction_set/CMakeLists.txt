@@ -14,6 +14,7 @@ add_library(
   xlat.cpp
   lea.cpp
   les.cpp
+  incr.cpp
 )
 
 target_link_libraries(instruction_set PUBLIC decoders)

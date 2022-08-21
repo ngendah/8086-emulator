@@ -24,6 +24,15 @@ typedef struct _flags_t {
   uint8_t C : 1;
 
   operator uint16_t() const { return *(uint16_t *)this; }
+
+  friend std::ostream &operator<<(std::ostream &os, const _flags_t &t) {
+    os << " flags_t{"
+       << fmt::format("O=0b{0:b}, D=0b{1:b}, I=0b{2:b}, T=0b{3:b}, S=0b{4:b}, "
+                      "Z=0b{5:b}, A=0b{6:b}, P=0b{7:b}, C=0b{8:b}",
+                      t.O, t.D, t.I, t.T, t.S, t.Z, t.A, t.P, t.C)
+       << "} ";
+    return os;
+  }
 } flags_t;
 
 typedef struct _opcode_w_t final {
