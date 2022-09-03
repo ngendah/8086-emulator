@@ -69,7 +69,6 @@ struct RM_Decoder final : Decoder {
 
   IO *source(const Instruction &instruction) override {
     auto opcode = instruction.opcode_to<d_w_t>();
-    assert(opcode.D == 0);
     return opcode.D == 1 ? memory_selector(instruction)
                          : register_selector(instruction);
   }

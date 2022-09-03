@@ -13,6 +13,7 @@ add_library(
   out.cpp
   xlat.cpp
   lea.cpp
+  lpa.cpp
   les.cpp
   incr.cpp
 )

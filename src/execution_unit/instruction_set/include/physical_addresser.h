@@ -230,4 +230,22 @@ public:
   static const uint8_t AX_BX_INDEX = 8;
 };
 
+struct AddressingModes final {
+  struct RM {
+    static const uint8_t BX_SI = EffectiveAddresser::BP_SI_INDEX;
+    static const uint8_t BX_DI = EffectiveAddresser::BX_DI_INDEX;
+    static const uint8_t BP_SI = EffectiveAddresser::BP_SI_INDEX;
+    static const uint8_t SI = EffectiveAddresser::SI_INDEX;
+    static const uint8_t DI = EffectiveAddresser::DI_INDEX;
+    static const uint8_t _X = 6; // TODO implement
+    static const uint8_t BX = EffectiveAddresser::BX_INDEX;
+  };
+  struct MOD {
+    static const uint8_t REG = 0x3;
+    static const uint8_t MEM_NO_DISPLACEMENT = 0x0;
+    static const uint8_t MEM_DISPLACEMENT_8 = 0x1;
+    static const uint8_t MEM_DISPLACEMENT_16 = 0x2;
+  };
+};
+
 #endif // INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_

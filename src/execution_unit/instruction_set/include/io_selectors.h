@@ -76,6 +76,7 @@ struct IOAddresser {
     auto MOD = _selector->MOD(instruction);
     auto RM = _selector->RM(instruction);
     if (MOD == 0x0) {
+      assert(RM != AddressingModes::RM::_X); // Not yet implemented
       return _addresser.address(_segment, RM);
     } else if (MOD == 0x1) {
       auto offset = instruction.offset();

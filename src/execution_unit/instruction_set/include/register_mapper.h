@@ -68,7 +68,6 @@ public:
   static const uint8_t SI_INDEX = 6;
   // custom extensions
   static const uint8_t DI_INDEX = 7;
-  static const uint8_t ES_INDEX = 8;
 };
 
 #endif // INSTRUCTION_SET_REGISTER_MAPPER_H_

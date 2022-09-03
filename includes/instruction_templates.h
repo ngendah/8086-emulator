@@ -57,6 +57,7 @@ typedef struct _opcode_reg_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } opcode_reg_t;
 
 typedef struct _opcode_w_reg_t final {
@@ -71,6 +72,7 @@ typedef struct _opcode_w_reg_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } opcode_w_reg_t;
 
 typedef struct _mod_reg_rm_t final {
@@ -85,6 +87,7 @@ typedef struct _mod_reg_rm_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } mod_reg_rm_t;
 
 typedef struct _mod_sr_rm_t final {
@@ -100,6 +103,7 @@ typedef struct _mod_sr_rm_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } mod_sr_rm_t;
 
 typedef struct _sr_t final {
@@ -114,6 +118,7 @@ typedef struct _sr_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } sr_t;
 
 typedef struct _d_w_t final {
@@ -128,6 +133,7 @@ typedef struct _d_w_t final {
        << "} ";
     return os;
   }
+  operator uint8_t() const { return *(uint8_t *)this; }
 } d_w_t;
 
 #endif // INSTRUCTION_TEMPLATES_H_
