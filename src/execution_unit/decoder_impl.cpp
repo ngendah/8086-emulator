@@ -12,10 +12,6 @@
 
 DecoderImpl::DecoderImpl(BUS *bus, Clock *clock, Registers *registers)
     : _registers(registers), _bus(bus), _clock(clock) {
-  _instructions = {
-      INVALID,
-      NOP,
-  };
   _clock = nullptr;
 }
 
@@ -35,14 +31,4 @@ uint16_t DecoderImpl::fetch(uint16_t len) {
   uint16_t data = _bus->read(&addr, len);
   _registers->IP += len;
   return data;
-}
-
-InstructionCode DecoderImpl::executioner(uint8_t opcode) {
-  auto opcodeToInstruction =
-      std::find(_instructions.begin(), _instructions.end(), opcode);
-  if (opcodeToInstruction != std::end(_instructions)) {
-    return *opcodeToInstruction;
-  } else {
-    return _instructions[0];
-  }
 }

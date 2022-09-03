@@ -180,7 +180,7 @@ struct Flags final {
 
   template <typename T> T bits() const { return *(T *)&_flags; }
 
-  friend std::ostream &operator<<(std::ostream &os, const Flags &flags) {
+  friend std::ostream &operator<<(std::ostream &os, UNUSED_PARAM const Flags &) {
     // instead do: os << flags.bits<flags_t>();
     assert(false);
     return os;

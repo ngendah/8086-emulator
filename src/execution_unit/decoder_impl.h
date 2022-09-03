@@ -15,7 +15,6 @@ class DecoderImpl : public Decoder {
   Registers *_registers;
   BUS *_bus;
   Clock *_clock;
-  std::vector<InstructionCode> _instructions;
 
 public:
   DecoderImpl(BUS *, Clock *, Registers *);
@@ -24,7 +23,6 @@ public:
 
 protected:
   uint16_t fetch(uint16_t);
-  InstructionCode executioner(uint8_t);
 };
 
 #endif /* INSTRUCTION_DECODER_H_ */
