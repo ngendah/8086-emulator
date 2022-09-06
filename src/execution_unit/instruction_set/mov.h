@@ -23,7 +23,7 @@ struct MovRegisterRegister : public Mov {
     auto mod = instruction.mode_to<mod_reg_rm_t>();
     PLOGD << instruction;
     PLOGD << mod;
-    assert(mod.MOD == 0x3);
+    assert(mod.MOD == AddressingModes::MOD::REG);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovRegisterRegister, RegisterMovOpTypeSelector,
@@ -48,7 +48,7 @@ struct MovRegisterAndMemory : public Mov {
   void execute(const Instruction &instruction) override {
     auto mode = instruction.mode_to<mod_reg_rm_t>();
     auto params = MicroOp::Params(_bus, _registers);
-    if (mode.MOD == 0x3) {
+    if (mode.MOD == AddressingModes::MOD::REG) {
       return MovRegisterRegister::create(params)->execute(instruction);
     }
     return MovRegisterMemory::create(params)->execute(instruction);
@@ -71,7 +71,7 @@ struct MovRegisterSegment : public Mov {
     PLOGD << instruction;
     auto ins_temp = InstructionTemplate<d_w_t, mod_sr_rm_t>(instruction);
     assert(ins_temp.opcode().W == 0);
-    assert(ins_temp.mode().MOD == 0x3);
+    assert(ins_temp.mode().MOD == AddressingModes::MOD::REG);
   }
 
   MICRO_OP_INSTRUCTION_DCR(MovRegisterSegment, WordMovOpTypeSelector,
@@ -98,7 +98,7 @@ struct MovSegmentAndRegisterMemory : public Mov {
   void execute(const Instruction &instruction) override {
     auto mode = instruction.mode_to<mod_reg_rm_t>();
     auto params = MicroOp::Params(_bus, _registers);
-    if (mode.MOD == 0x3) {
+    if (mode.MOD == AddressingModes::MOD::REG) {
       return MovRegisterSegment::create(params)->execute(instruction);
     }
     return MovMemorySegment::create(params)->execute(instruction);
