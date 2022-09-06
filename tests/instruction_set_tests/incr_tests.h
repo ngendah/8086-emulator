@@ -11,7 +11,7 @@ TEST(INCRTests, test_execute) {
   auto registers = Registers();
   auto io = INCRRegister(&ram, &registers);
   io.execute(Instruction(0xff, 0x4100));
-  EXPECT_EQ((uint16_t)registers.CX, 0x1);
+  EXPECT_EQ((uint16_t)registers.CX, 0x2);
 }
 
 #endif // _INCR_TESTS_H_
