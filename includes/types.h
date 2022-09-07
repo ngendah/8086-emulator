@@ -26,6 +26,26 @@ static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
   return ((uint16_t)((hi << 8) | (lo & 0x00FF)));
 }
 
+struct IO {
+  virtual ~IO() = default;
+
+  virtual void write_hi(const uint8_t val) = 0;
+
+  virtual void write_lo(const uint8_t val) = 0;
+
+  virtual void write(const uint8_t val) = 0;
+
+  virtual void write(const uint16_t val) = 0;
+
+  virtual uint16_t read() const = 0;
+
+  virtual uint8_t read_byte() const = 0;
+
+  virtual uint8_t read_hi() const = 0;
+
+  virtual uint8_t read_lo() const = 0;
+};
+
 class Instruction final {
 private:
   uint8_t _sop;
@@ -169,7 +189,7 @@ public:
   }
 };
 
-struct Flags final {
+struct Flags final : IO {
   Flags() : _flags(0) {}
 
   Flags(const uint16_t &flags) : _flags(flags) {}
@@ -180,10 +200,40 @@ struct Flags final {
 
   template <typename T> T bits() const { return *(T *)&_flags; }
 
-  friend std::ostream &operator<<(std::ostream &os, UNUSED_PARAM const Flags &) {
+  friend std::ostream &operator<<(std::ostream &os,
+                                  UNUSED_PARAM const Flags &) {
     // instead do: os << flags.bits<flags_t>();
     assert(false);
     return os;
+  }
+
+  void write_hi(const uint8_t val) override {
+    uint8_t lo_flag = (uint8_t)_flags;
+    _flags = make_word(val, lo_flag);
+  }
+
+  void write_lo(const uint8_t val) override {
+    uint8_t hi_flag = (uint8_t)_flags >> 8;
+    _flags = make_word(hi_flag, val);
+  }
+
+  void write(const uint16_t val) override { _flags = val; }
+
+  uint16_t read() const override { return _flags; }
+
+  uint8_t read_hi() const override {
+    uint8_t hi_flag = (uint8_t)_flags >> 8;
+    return hi_flag;
+  }
+
+  uint8_t read_lo() const override { return (uint8_t)_flags; }
+
+protected:
+  void write(const uint8_t val) override { assert(false); }
+
+  uint8_t read_byte() const override {
+    assert(false);
+    return (uint8_t)_flags;
   }
 
 protected:
@@ -331,26 +381,6 @@ struct BUS {
   virtual uint16_t write(Address *, const Bytes &) = 0;
   virtual uint16_t write(Address *, const Extensions::Bytes &) = 0;
   virtual Bytes read(Address *, uint16_t size) = 0;
-};
-
-struct IO {
-  virtual ~IO() = default;
-
-  virtual void write_hi(const uint8_t val) = 0;
-
-  virtual void write_lo(const uint8_t val) = 0;
-
-  virtual void write(const uint8_t val) = 0;
-
-  virtual void write(const uint16_t val) = 0;
-
-  virtual uint16_t read() const = 0;
-
-  virtual uint8_t read_byte() const = 0;
-
-  virtual uint8_t read_hi() const = 0;
-
-  virtual uint8_t read_lo() const = 0;
 };
 
 class ValueIO final : public IO {
@@ -614,11 +644,14 @@ enum OpTypes {
   byte,
   high_byte,
   low_byte,
+  high_low_byte,
+  low_high_byte,
   nop,
 };
 
-static const std::string _OpTypes[] = {"word", "byte", "high_byte", "low_byte",
-                                       "nop"};
+static const std::string _OpTypes[] = {
+    "word",          "byte",          "high_byte", "low_byte",
+    "high_low_byte", "low_high_byte", "nop"};
 
 struct OpType {
   struct Params {

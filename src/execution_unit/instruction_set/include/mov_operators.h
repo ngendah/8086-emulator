@@ -24,6 +24,12 @@ struct MovOpType : OpType {
     case word:
       params._destination->write(params._source->read());
       break;
+    case high_low_byte:
+      params._destination->write_lo(params._source->read_hi());
+      break;
+    case low_high_byte:
+      params._destination->write_hi(params._source->read_lo());
+      break;
     default: // NOP
       break;
     }
@@ -85,7 +91,7 @@ struct WordOrByteMovOpTypeSelector : OpTypeSelector {
 };
 
 struct WordMovOpTypeSelector : OpTypeSelector {
-  OpTypes op_type(__attribute__((unused)) const Instruction &) const override {
+  OpTypes op_type(UNUSED_PARAM const Instruction &) const override {
     return word;
   }
 };
