@@ -229,7 +229,7 @@ struct Flags final : IO {
   uint8_t read_lo() const override { return (uint8_t)_flags; }
 
 protected:
-  void write(const uint8_t val) override { assert(false); }
+  void write(UNUSED_PARAM const uint8_t) override { assert(false); }
 
   uint8_t read_byte() const override {
     assert(false);
