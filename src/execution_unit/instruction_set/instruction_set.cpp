@@ -1,12 +1,15 @@
 #include "instruction_set.h"
 #include "in.h"
+#include "lds.h"
 #include "lea.h"
+#include "les.h"
 #include "mov.h"
 #include "out.h"
 #include "pop.h"
 #include "push.h"
 #include "xchg.h"
 #include "xlat.h"
+
 #include <algorithm>
 
 #define _INSTRUCTION(opcode, mask, memonic, cls)                               \
@@ -34,6 +37,8 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0xEE, 0xFE, "OUT", OUTDX);
   _INSTRUCTION(0xD7, 0xD6, "XLAT", XLAT);
   _INSTRUCTION(0x8D, 0xFF, "LEA", LEA);
+  _INSTRUCTION(0xC4, 0xFF, "LES", LES);
+  _INSTRUCTION(0xC5, 0xFF, "LDS", LDS);
 }
 
 InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {

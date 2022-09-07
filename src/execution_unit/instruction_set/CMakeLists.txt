@@ -15,6 +15,7 @@ add_library(
   lea.cpp
   lpa.cpp
   les.cpp
+  lds.cpp
   incr.cpp
 )
 
