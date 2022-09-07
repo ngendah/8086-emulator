@@ -17,6 +17,7 @@ add_library(
   les.cpp
   lds.cpp
   incr.cpp
+  cmp.cpp
 )
 
 target_link_libraries(instruction_set PUBLIC decoders)
