@@ -19,6 +19,7 @@ add_library(
   incr.cpp
   cmp.cpp
   lahf.cpp
+  sahf.cpp
 )
 
 target_link_libraries(instruction_set PUBLIC decoders)
