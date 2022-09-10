@@ -200,6 +200,8 @@ struct Flags final : IO {
 
   template <typename T> T bits() const { return *(T *)&_flags; }
 
+  operator uint16_t() const { return _flags; }
+
   friend std::ostream &operator<<(std::ostream &os,
                                   UNUSED_PARAM const Flags &) {
     // instead do: os << flags.bits<flags_t>();
@@ -240,10 +242,6 @@ protected:
   uint16_t _flags;
 };
 
-struct Clock {
-  virtual ~Clock();
-};
-
 struct Bytes {
   uint8_t *_bytes;
   uint16_t _size;
@@ -260,6 +258,12 @@ struct Bytes {
   }
 
   ~Bytes() { _bytes = nullptr; }
+
+  Bytes operator=(const Bytes &rhs) {
+    _bytes = rhs._bytes;
+    _size = rhs._size;
+    return *this;
+  }
 
   operator uint16_t() const {
     assert(_size == 2);
