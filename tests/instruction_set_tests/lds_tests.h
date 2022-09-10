@@ -27,12 +27,15 @@ TEST(LDSTests, test_execute_1) {
   auto registers = Registers();
   auto io = LDSTest(&ram, &registers, [](LDS *const les, uint8_t point) {
     auto registers = ((LDSTest *)les)->get();
-    if (point == 0)
+    if (point == 0) {
       EXPECT_EQ((uint16_t)registers->BX, 55);
-    if (point == 1)
+    }
+    if (point == 1) {
       EXPECT_EQ((uint16_t)registers->BX, 57);
-    if (point == 2)
+    }
+    if (point == 2) {
       EXPECT_EQ((uint16_t)registers->SI, 57);
+    }
   });
   // LDS BX, 0x42[SI]
   auto instruction = Instruction(0xff, 0xC55C, 0x42);
