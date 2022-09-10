@@ -90,6 +90,21 @@ typedef struct _mod_reg_rm_t final {
   operator uint8_t() const { return *(uint8_t *)this; }
 } mod_reg_rm_t;
 
+typedef struct _mod_rm_t final {
+  uint8_t RM : 3;
+  uint8_t _X : 3;
+  uint8_t MOD : 2;
+  friend std::ostream &operator<<(std::ostream &os, const _mod_rm_t &t) {
+    os << " mod_rm_t{"
+       << fmt::format("MODE=0x{0:x}(0b{0:b}), _X=0x{1:x}(0b{1:b}), "
+                      "RM=0x{2:x}(0b{2:b})",
+                      t.MOD, t._X, t.RM)
+       << "} ";
+    return os;
+  }
+  operator uint8_t() const { return *(uint8_t *)this; }
+} mod_rm_t;
+
 typedef struct _mod_sr_rm_t final {
   uint8_t RM : 3;
   uint8_t SR : 2;
@@ -135,5 +150,20 @@ typedef struct _d_w_t final {
   }
   operator uint8_t() const { return *(uint8_t *)this; }
 } d_w_t;
+
+typedef struct _s_w_t final {
+  uint8_t W : 1;
+  uint8_t S : 1;
+  uint8_t _X : 6;
+  friend std::ostream &operator<<(std::ostream &os, const _s_w_t &t) {
+    os << " s_w_t{"
+       << fmt::format("_X1=0x{0:x}(0b{0:b}), S=0x{1:x}(0b{1:b}), "
+                      "W=0x{2:x}(0b{2:b})",
+                      t._X, t.S, t.W)
+       << "} ";
+    return os;
+  }
+  operator uint8_t() const { return *(uint8_t *)this; }
+} s_w_t;
 
 #endif // INSTRUCTION_TEMPLATES_H_

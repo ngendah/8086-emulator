@@ -14,10 +14,9 @@
 class DecoderImpl : public Decoder {
   Registers *_registers;
   BUS *_bus;
-  Clock *_clock;
 
 public:
-  DecoderImpl(BUS *, Clock *, Registers *);
+  DecoderImpl(BUS *, Registers *);
   virtual ~DecoderImpl();
   void decodeAndExecute();
 

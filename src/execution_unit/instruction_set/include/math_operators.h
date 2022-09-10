@@ -9,6 +9,14 @@
 #include "instruction_templates.h"
 #include "operators.h"
 
+#include <bitset>
+
+struct WordOrByteWithSignOpTypeSelector : OpTypeSelector {
+  OpTypes op_type(const Instruction &instruction) const override {
+    return instruction.opcode_to<s_w_t>().S == 1 ? word : byte;
+  }
+};
+
 struct MathOperator : Operator {
   MathOperator(IO *source, IO *destination, OpTypeSelector *selector,
                OpType *const optype, Flags *flags)
@@ -35,6 +43,45 @@ struct IncrOpType : OpType {
     flags.C = (val + incr_by) == UINT16_MAX ? 1 : 0;
     val += incr_by;
     params._destination->write(val);
+    params._flags->set((uint16_t)flags);
+  }
+};
+
+struct CompareOpType : OpType {
+  void execute(const OpType::Params &params) const override {
+    if (params._op_type == byte)
+      byte_cmp(params);
+    else
+      word_cmp(params);
+  }
+
+protected:
+  void byte_cmp(const OpType::Params &params) const {
+    // TODO revisit and verify it's correct
+    auto flags = params._flags->bits<flags_t>();
+    int8_t l = params._source->read_byte();
+    int8_t r = params._destination->read_byte();
+    flags.Z = (l - r) > 0 ? 0 : 1;
+    flags.S = 0;
+    flags.C = r > l ? 1 : 0;
+    flags.A = l > r ? 1 : 0;
+    flags.O = 0;
+    flags.P = std::bitset<8>(l - r).count() % 3 == 0 ? 1 : 0;
+    params._flags->set((uint16_t)flags);
+  }
+
+  void word_cmp(const OpType::Params &params) const {
+    // TODO revisit and verify it's correct
+    auto flags = params._flags->bits<flags_t>();
+    int16_t l = params._source->read();
+    int16_t r = params._destination->read();
+    flags.Z = (l - r) > 0 ? 0 : 1;
+    flags.S = 0;
+    flags.C = r > l ? 1 : 0;
+    flags.A =
+        params._source->read_lo() > params._destination->read_lo() ? 1 : 0;
+    flags.O = 0;
+    flags.P = std::bitset<16>(l - r).count() % 3 == 0 ? 1 : 0;
     params._flags->set((uint16_t)flags);
   }
 };

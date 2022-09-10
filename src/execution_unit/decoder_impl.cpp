@@ -10,10 +10,8 @@
 #define INVALID InstructionCode(0x0, 0x0)
 #define NOP InstructionCode(0x90, 0xff)
 
-DecoderImpl::DecoderImpl(BUS *bus, Clock *clock, Registers *registers)
-    : _registers(registers), _bus(bus), _clock(clock) {
-  _clock = nullptr;
-}
+DecoderImpl::DecoderImpl(BUS *bus, Registers *registers)
+    : _registers(registers), _bus(bus) {}
 
 DecoderImpl::~DecoderImpl() {}
 

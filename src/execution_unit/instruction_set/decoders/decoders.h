@@ -112,6 +112,35 @@ protected:
   ValueIO _value_io;
 };
 
+// Register-Immediate compare decoder
+struct CMP_RI_Decoder final : Decoder {
+  struct _RegisterSelector : RegisterSelector {
+    virtual uint8_t REG(const Instruction &instruction) const {
+      return instruction.mode_to<mod_rm_t>().RM;
+    }
+  };
+
+  CMP_RI_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers) {}
+
+  IO *source(const Instruction &instruction) override {
+    auto s_w = instruction.opcode_to<s_w_t>();
+    if (s_w.W == 1)
+      _value_io = instruction.data<uint16_t>();
+    else
+      _value_io = instruction.data<uint8_t>();
+    return &_value_io;
+  }
+
+  IO *destination(const Instruction &instruction) override {
+    auto _selector = _RegisterSelector();
+    return RegisterIOSelector(_registers, &_selector).get(instruction);
+  }
+
+protected:
+  ValueIO _value_io;
+};
+
 // Register-Segment move decoder
 struct RS_Decoder final : Decoder {
   struct _RegisterSelector : RegisterSelector {
@@ -296,6 +325,35 @@ struct AXRXCH_Decoder final : Decoder {
     auto reg_selector = _RegisterSelector2();
     return RegisterIOSelector(_registers, &reg_selector).get(instruction);
   }
+};
+
+// Accumulator
+struct CMP_AXI_Decoder final : Decoder {
+  struct _RegisterSelector : RegisterSelector {
+    virtual uint8_t REG(UNUSED_PARAM const Instruction &) const {
+      return RegisterMapper::AX_INDEX;
+    }
+  };
+
+  CMP_AXI_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers) {}
+
+  IO *source(const Instruction &instruction) override {
+    auto _selector = _RegisterSelector();
+    return RegisterIOSelector(_registers, &_selector).get(instruction);
+  }
+
+  IO *destination(const Instruction &instruction) override {
+    auto s_w = instruction.opcode_to<s_w_t>();
+    if (s_w.W == 1)
+      _value_io = instruction.data<uint16_t>();
+    else
+      _value_io = instruction.data<uint8_t>();
+    return &_value_io;
+  }
+
+protected:
+  ValueIO _value_io;
 };
 
 // Register-Memory exchange decoder
