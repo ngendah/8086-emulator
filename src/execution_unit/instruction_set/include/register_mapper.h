@@ -44,9 +44,8 @@ class RegisterMapper {
 public:
   RegisterMapper(Registers *registers) {
     _mapper = {
-        &registers->AX, &registers->CX, &registers->DX,
-        &registers->BX, &registers->SP, &registers->BP,
-        &registers->SI, &registers->DI, &registers->ES,
+        &registers->AX, &registers->CX, &registers->DX, &registers->BX,
+        &registers->SP, &registers->BP, &registers->SI, &registers->DI,
     };
   }
 
