@@ -666,9 +666,15 @@ enum CJmpOpTypes {
   jo,
   jno,
   jc,
+  jb,
+  jnae,
   jnc,
+  jae,
+  jnb,
   jp,
+  jpe,
   jnp,
+  jpo,
   jbe,
   jna,
   jnbe,
@@ -684,9 +690,9 @@ enum CJmpOpTypes {
 };
 
 static const std::string _CJmpOpTypes[] = {
-    "noj", "je",   "jne", "js",  "jns",  "jo",   "jno", "jc",
-    "jnc", "jp",   "jnp", "jbe", "jna",  "jnbe", "ja",  "jle",
-    "jng", "jnle", "jg",  "jl",  "jnge", "jnl",  "jge",
+    "noj", "je",  "jne", "js",   "jns", "jo",  "jno",  "jc",  "jb",  "jnae",
+    "jnc", "jae", "jnb", "jp",   "jpe", "jnp", "jpo",  "jbe", "jna", "jnbe",
+    "ja",  "jle", "jng", "jnle", "jg",  "jl",  "jnge", "jnl", "jge",
 };
 
 struct OpType {
@@ -814,6 +820,25 @@ protected:
       _op->before_execute(_instruction);
       auto uop_operator =
           OperatorT(src_dest.first, src_dest.second, &op_selector);
+      uop_operator.execute(_instruction);
+      _op->after_execute(_instruction);
+    }
+  };
+
+  template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
+  struct _ExecuteStrategy21 final : ExecuteStrategy {
+    _ExecuteStrategy21(Decoder *const decoder, MicroOp *const op)
+        : ExecuteStrategy(decoder, op) {}
+
+    void execute(const Instruction &instruction) const override {
+      auto op_selector = OpTypeSelectorT();
+      auto op_type = OpTypeT();
+      auto _instruction = _op->before_decode(instruction);
+      auto src_dest = _decoder->decode(_instruction);
+      auto registers = _op->_registers;
+      _op->before_execute(_instruction);
+      auto uop_operator = OperatorT(src_dest.first, src_dest.second,
+                                    &op_selector, &op_type, &registers->FLAGS);
       uop_operator.execute(_instruction);
       _op->after_execute(_instruction);
     }
