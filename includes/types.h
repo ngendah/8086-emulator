@@ -657,22 +657,61 @@ static const std::string _OpTypes[] = {
     "word",          "byte",          "high_byte", "low_byte",
     "high_low_byte", "low_high_byte", "nop"};
 
+enum CJmpOpTypes {
+  noj,
+  je,
+  jne,
+  js,
+  jns,
+  jo,
+  jno,
+  jc,
+  jnc,
+  jp,
+  jnp,
+  jbe,
+  jna,
+  jnbe,
+  ja,
+  jle,
+  jng,
+  jnle,
+  jg,
+  jl,
+  jnge,
+  jnl,
+  jge,
+};
+
+static const std::string _CJmpOpTypes[] = {
+    "noj", "je",   "jne", "js",  "jns",  "jo",   "jno", "jc",
+    "jnc", "jp",   "jnp", "jbe", "jna",  "jnbe", "ja",  "jle",
+    "jng", "jnle", "jg",  "jl",  "jnge", "jnl",  "jge",
+};
+
 struct OpType {
   struct Params {
     OpTypes _op_type;
+    CJmpOpTypes _jmp_type;
     IO *_source, *_destination;
     Flags *_flags;
 
     Params(OpTypes op_type, IO *source, IO *destination)
-        : _op_type(op_type), _source(source), _destination(destination),
-          _flags(nullptr) {}
+        : _op_type(op_type), _jmp_type(noj), _source(source),
+          _destination(destination), _flags(nullptr) {}
 
     Params(OpTypes op_type, IO *source, IO *destination, Flags *flags)
-        : _op_type(op_type), _source(source), _destination(destination),
-          _flags(flags) {}
+        : _op_type(op_type), _jmp_type(noj), _source(source),
+          _destination(destination), _flags(flags) {}
+
+    Params(OpTypes op_type, IO *source, IO *destination, Flags *flags,
+           CJmpOpTypes jmp_type)
+        : _op_type(op_type), _jmp_type(jmp_type), _source(source),
+          _destination(destination), _flags(flags) {}
 
     Params &operator=(const Params &rhs) {
       _op_type = rhs._op_type;
+      _jmp_type = rhs._jmp_type;
       _source = rhs._source;
       _destination = rhs._destination;
       _flags = rhs._flags;
@@ -688,6 +727,16 @@ struct OpTypeSelector {
 };
 
 struct MicroOp {
+
+  struct ExecuteStrategy {
+    ExecuteStrategy(Decoder *const decoder, MicroOp *const op)
+        : _decoder(decoder), _op(op) {}
+
+    virtual void execute(const Instruction &instruction) const = 0;
+
+    Decoder *const _decoder;
+    MicroOp *const _op;
+  };
 
   struct Params {
     BUS *bus;
@@ -741,16 +790,24 @@ struct MicroOp {
 
   virtual void execute(const Instruction &) = 0;
 
+  virtual Instruction before_decode(const Instruction &instruction) {
+    return instruction;
+  }
+
+  virtual void before_execute(UNUSED_PARAM const Instruction &instruction) {}
+
+  virtual void after_execute(UNUSED_PARAM const Instruction &instruction) {}
+
+  bus_ptr_t _bus;
+  registers_ptr_t _registers;
+
 protected:
-  struct Executor {
-    Decoder *const _decoder;
-    MicroOp *const _op;
+  template <class OpTypeSelectorT, class OperatorT>
+  struct _ExecuteStrategy2 : ExecuteStrategy {
+    _ExecuteStrategy2(Decoder *const decoder, MicroOp *const op)
+        : ExecuteStrategy(decoder, op) {}
 
-    Executor(Decoder *const decoder, MicroOp *const op)
-        : _decoder(decoder), _op(op) {}
-
-    template <class OpTypeSelectorT, class OperatorT>
-    void execute(const Instruction &instruction) const {
+    void execute(const Instruction &instruction) const override {
       auto op_selector = OpTypeSelectorT();
       auto _instruction = _op->before_decode(instruction);
       auto src_dest = _decoder->decode(_instruction);
@@ -760,8 +817,13 @@ protected:
       uop_operator.execute(_instruction);
       _op->after_execute(_instruction);
     }
+  };
 
-    template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
+  template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
+  struct _ExecuteStrategy3 : ExecuteStrategy {
+    _ExecuteStrategy3(Decoder *const decoder, MicroOp *const op)
+        : ExecuteStrategy(decoder, op) {}
+
     void execute(const Instruction &instruction) const {
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
@@ -776,23 +838,34 @@ protected:
     }
   };
 
-  virtual Instruction before_decode(const Instruction &instruction) {
-    return instruction;
-  }
+  struct Executor {
+    Executor(ExecuteStrategy *const execute_strategy)
+        : _execute_strategy(execute_strategy) {}
 
-  virtual void before_execute(UNUSED_PARAM const Instruction &instruction) {}
+    void execute(const Instruction &instruction) const {
+      _execute_strategy->execute(instruction);
+    }
 
-  virtual void after_execute(UNUSED_PARAM const Instruction &instruction) {}
-
-protected:
-  bus_ptr_t _bus;
-  registers_ptr_t _registers;
+  protected:
+    ExecuteStrategy *const _execute_strategy;
+  };
 };
 
 #define MICRO_OP_INSTRUCTION(cls)                                              \
   static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
     PLOGD << #cls << "::create";                                               \
     return std::make_shared<cls>(params.bus, params.registers);                \
+  }
+
+#define MICRO_OP_INSTRUCTION_D(cls, execute_strategy_cls, decoder_cls)         \
+  static std::shared_ptr<MicroOp> create(const MicroOp::Params &params) {      \
+    PLOGD << #cls << "::create";                                               \
+    return std::make_shared<cls>(params.bus, params.registers);                \
+  }                                                                            \
+  void execute(const Instruction &instruction) override {                      \
+    auto decoder = decoder_cls(_bus, _registers);                              \
+    auto _strategy = execute_strategy_cls(&decoder, (MicroOp *)this);          \
+    Executor(&_strategy).execute(instruction);                                 \
   }
 
 #define MICRO_OP_INSTRUCTION_DCR(cls, op_type_selector_cls, operator_type_cls, \
@@ -803,8 +876,10 @@ protected:
   }                                                                            \
   void execute(const Instruction &instruction) override {                      \
     auto decoder = decoder_cls(_bus, _registers);                              \
-    auto executor = Executor(&decoder, (MicroOp *)this);                       \
-    executor.execute<op_type_selector_cls, operator_type_cls>(instruction);    \
+    auto _strategy =                                                           \
+        _ExecuteStrategy2<op_type_selector_cls, operator_type_cls>(            \
+            &decoder, (MicroOp *)this);                                        \
+    Executor(&_strategy).execute(instruction);                                 \
   }
 
 #define MICRO_OP_INSTRUCTION_DCRE(cls, op_type_selector_cls,                   \
@@ -815,9 +890,10 @@ protected:
   }                                                                            \
   void execute(const Instruction &instruction) override {                      \
     auto decoder = decoder_cls(_bus, _registers);                              \
-    auto executor = Executor(&decoder, (MicroOp *)this);                       \
-    executor.execute<op_type_selector_cls, operator_type_cls, op_type_cls>(    \
-        instruction);                                                          \
+    auto _strategy =                                                           \
+        _ExecuteStrategy3<op_type_selector_cls, operator_type_cls,             \
+                          op_type_cls>(&decoder, (MicroOp *)this);             \
+    Executor(&_strategy).execute(instruction);                                 \
   }
 
 #endif /* TYPES_H_ */
