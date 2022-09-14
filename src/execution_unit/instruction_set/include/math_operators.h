@@ -49,17 +49,18 @@ struct IncrOpType : OpType {
   }
 };
 
+// TODO fix to correctly account for negative results
 struct DecrOpType : OpType {
   void execute(const OpType::Params &params) const override {
     auto flags = params._flags->bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
-    uint16_t val = params._source->read();
+    int16_t val = params._source->read();
     auto decr_by = params._op_type == OpTypes::word ? 2 : 1;
     flags.C = 0;
     val -= decr_by;
     flags.Z = val == 0 ? 1 : 0;
     flags.S = val < 0 ? 1 : 0;
-    params._destination->write(val);
+    params._destination->write((uint16_t)(flags.S == 1 ? 0 : val));
     params._flags->set((uint16_t)flags);
   }
 };

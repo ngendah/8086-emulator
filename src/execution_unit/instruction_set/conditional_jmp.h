@@ -74,4 +74,65 @@ CONDITIONAL_JMP_MICRO_OP(JNGE, jnge)
 CONDITIONAL_JMP_MICRO_OP(JNL, jnl)
 CONDITIONAL_JMP_MICRO_OP(JGE, jge)
 
+#include "dec.h"
+#include "register_mapper.h"
+
+template <class T> struct LoopT : MicroOp {
+  LoopT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+
+  void execute(const Instruction &instruction) {
+    opcode_reg_t opcode = {};
+    opcode.REG = RegisterMapper::CX_INDEX;
+    DECRegister(_bus, _registers)
+        .execute(Instruction(0xff, make_word((uint8_t)opcode, 0)));
+    T(_bus, _registers).execute(instruction);
+  }
+
+  MICRO_OP_INSTRUCTION(LoopT<T>)
+};
+
+typedef LoopT<JNE> LOOP;
+
+struct JmpC : MicroOp {
+  JmpC(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+
+  void execute(const Instruction &instruction) {
+    if (_registers->CX.read() == 0) {
+      _registers->IP += instruction.data<uint16_t>();
+    }
+  }
+
+  MICRO_OP_INSTRUCTION(JmpC)
+};
+
+struct JmpZ : MicroOp {
+  JmpZ(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+
+  void execute(const Instruction &instruction) {
+    if (_registers->CX.read() != 0 &&
+        _registers->FLAGS.bits<flags_t>().Z == 1) {
+      _registers->IP += instruction.data<uint16_t>();
+    }
+  }
+
+  MICRO_OP_INSTRUCTION(JmpZ)
+};
+
+struct JmpNZ : MicroOp {
+  JmpNZ(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+
+  void execute(const Instruction &instruction) {
+    if (_registers->CX.read() != 0 &&
+        _registers->FLAGS.bits<flags_t>().Z == 0) {
+      _registers->IP += instruction.data<uint16_t>();
+    }
+  }
+
+  MICRO_OP_INSTRUCTION(JmpNZ)
+};
+
+typedef LoopT<JmpC> JCXZ;
+typedef LoopT<JmpZ> LOOPZ;
+typedef LoopT<JmpNZ> LOOPNZ;
+
 #endif // _CONDITIONAL_JMP_H_
