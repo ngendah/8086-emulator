@@ -21,6 +21,7 @@ add_library(
   lahf.cpp
   sahf.cpp
   conditional_jmp.cpp
+  dec.cpp
 )
 
 target_link_libraries(instruction_set PUBLIC decoders)

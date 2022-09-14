@@ -75,13 +75,13 @@ struct IOAddresser {
     Segment *_segment = segment(instruction, _selector);
     auto MOD = _selector->MOD(instruction);
     auto RM = _selector->RM(instruction);
-    if (MOD == 0x0) {
+    if (MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT) {
       assert(RM != AddressingModes::RM::_X); // Not yet implemented
       return _addresser.address(_segment, RM);
-    } else if (MOD == 0x1) {
+    } else if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_8) {
       auto offset = instruction.offset();
       return _addresser.address(_segment, RM, (uint8_t)offset);
-    } else if (MOD == 0x2) {
+    } else if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_16) {
       auto offset = instruction.offset();
       return _addresser.address(_segment, RM, (uint16_t)offset);
     } else {

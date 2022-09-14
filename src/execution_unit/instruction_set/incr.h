@@ -23,28 +23,6 @@ struct INCRRegister : MicroOp {
   void after_execute(UNUSED_PARAM const Instruction &) override {
     PLOGD << _registers->FLAGS.bits<flags_t>();
   }
-
-  // Register-Register move decoder
-  struct DRR_Decoder : Decoder {
-    struct _RegisterSelector1 final : RegisterSelector {
-      uint8_t REG(UNUSED_PARAM const Instruction &instruction) const override {
-        return instruction.opcode_to<opcode_reg_t>().REG;
-      }
-    };
-
-    DRR_Decoder(bus_ptr_t bus, registers_ptr_t registers)
-        : Decoder(bus, registers) {}
-
-    IO *source(const Instruction &instruction) override {
-      auto selector = _RegisterSelector1();
-      return RegisterIOSelector(_registers, &selector).get(instruction);
-    }
-
-    IO *destination(const Instruction &instruction) override {
-      auto selector = _RegisterSelector1();
-      return RegisterIOSelector(_registers, &selector).get(instruction);
-    }
-  };
 };
 
 #endif // _INCR_H_

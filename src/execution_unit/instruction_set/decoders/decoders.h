@@ -47,6 +47,28 @@ protected:
   std::array<std::unique_ptr<RegisterSelector>, 2> _selectors;
 };
 
+// Register-Register move decoder for increment/decrement
+struct DRR_Decoder : Decoder {
+  struct _RegisterSelector1 final : RegisterSelector {
+    uint8_t REG(UNUSED_PARAM const Instruction &instruction) const override {
+      return instruction.opcode_to<opcode_reg_t>().REG;
+    }
+  };
+
+  DRR_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers) {}
+
+  IO *source(const Instruction &instruction) override {
+    auto selector = _RegisterSelector1();
+    return RegisterIOSelector(_registers, &selector).get(instruction);
+  }
+
+  IO *destination(const Instruction &instruction) override {
+    auto selector = _RegisterSelector1();
+    return RegisterIOSelector(_registers, &selector).get(instruction);
+  }
+};
+
 // Register-Memory move decoder
 struct RM_Decoder final : Decoder {
   struct _RegisterSelector1 : RegisterSelector {
@@ -77,6 +99,27 @@ struct RM_Decoder final : Decoder {
     auto opcode = instruction.opcode_to<d_w_t>();
     return opcode.D == 1 ? register_selector(instruction)
                          : memory_selector(instruction);
+  }
+
+protected:
+  MemoryIOSelector _io_selector;
+};
+
+// Memory-Memory move decoder for increment/decrement
+struct DMM_Decoder final : Decoder {
+  DMM_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers), _io_selector(bus, registers) {}
+
+  IO *memory_selector(const Instruction &instruction) {
+    return _io_selector.get(instruction);
+  }
+
+  IO *source(const Instruction &instruction) override {
+    return memory_selector(instruction);
+  }
+
+  IO *destination(const Instruction &instruction) override {
+    return memory_selector(instruction);
   }
 
 protected:
