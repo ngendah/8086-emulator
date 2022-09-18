@@ -12,7 +12,7 @@ TEST(INPortTests, test_execute) {
   auto address = Address((uint8_t)0x53);
   auto val = Extensions::Bytes((uint8_t)78);
   ram.write(&address, val);
-  auto instruction = Instruction(0xff, 0xE400, 0x0, 0x0, (uint8_t)address);
+  auto instruction = Instruction(0xff, 0xE400, 0x0, (uint8_t)address);
   auto io = INPort(&ram, &registers);
   io.execute(instruction);
   EXPECT_EQ((uint16_t)registers.AX, (uint16_t)val);

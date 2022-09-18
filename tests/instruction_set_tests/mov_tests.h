@@ -47,14 +47,14 @@ TEST_F(MovRegisterRegisterTests, test_execute_2) {
 TEST(MovRegisterImmediateTests, test_execute) {
   auto registers = Registers();
   auto io = MovRegisterImmediate(nullptr, &registers);
-  io.execute(Instruction(0xff, 0xB8, 0x0U, 0x0025));
+  io.execute(Instruction(0xff, 0xB8, 0x0U, (uint16_t)0x0025));
   EXPECT_EQ((uint16_t)registers.AX, 0x25);
 }
 
 TEST(MovRegisterImmediateTests, test_execute_2) {
   auto registers = Registers();
   auto io = MovRegisterImmediate(nullptr, &registers);
-  io.execute(Instruction(0xff, 0xB1, 0x0U, 0xF2));
+  io.execute(Instruction(0xff, 0xB1, 0x0U, make_word(0x0, 0xF2)));
   EXPECT_EQ((uint16_t)registers.AX, 0xF2);
 }
 

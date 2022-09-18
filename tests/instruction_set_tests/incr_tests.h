@@ -10,7 +10,8 @@ TEST(INCRTests, test_execute) {
   auto ram = RAM(128);
   auto registers = Registers();
   auto io = INCRRegister(&ram, &registers);
-  io.execute(Instruction(0xff, 0x4100));
+  auto instruction = Instruction(0xff, 0x4100);
+  io.execute(instruction);
   EXPECT_EQ((uint16_t)registers.CX, 0x2);
 }
 

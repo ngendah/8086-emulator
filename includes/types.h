@@ -26,6 +26,14 @@ static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
   return ((uint16_t)((hi << 8) | (lo & 0x00FF)));
 }
 
+static uint16_t __little_endian(uint16_t x) {
+#if defined(__x86_64__) || defined(__i386__)
+  return x;
+#else
+  return __builtin_bswap16(x)
+#endif
+}
+
 struct IO {
   virtual ~IO() = default;
 
@@ -46,90 +54,142 @@ struct IO {
   virtual uint8_t read_lo() const = 0;
 };
 
-class Instruction final {
-private:
+#pragma GCC diagnostic push
+// Allow anon structs
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+typedef struct _instruction_t {
   uint8_t _sop;
-  uint8_t _opcode;
-  uint8_t _mode;
+  union {
+    uint16_t word;
+    struct {
+      uint8_t mode;
+      uint8_t opcode;
+    };
+  } _opcode_mode;
   uint16_t _offset;
-  uint16_t _data;
-  uint8_t _port;
+  union {
+    uint16_t data;
+    struct {
+      uint8_t hi;
+      uint8_t lo; // also port
+    };
+  } _imm;
+  uint8_t _X;
+} instruction_t;
+
+class Instruction final {
+  instruction_t _instruction;
 
 public:
-  Instruction()
-      : _sop(0xff), _opcode(0), _mode(0), _offset(0), _data(0), _port(0) {}
-
-  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset = 0,
-              uint16_t data = 0, uint8_t port = 0)
-      : _sop(sop), _opcode((uint8_t)(opcode_mode >> 8)),
-        _mode((uint8_t)opcode_mode), _offset(offset), _data(data), _port(port) {
+  Instruction() {
+    _instruction = {};
+    _instruction._sop = 0xff;
   }
 
-  Instruction(const Instruction &rhs)
-      : _sop(rhs._sop), _opcode(rhs._opcode), _mode(rhs._mode),
-        _offset(rhs._offset), _data(rhs._data), _port(rhs._port) {}
+  Instruction(instruction_t instruction) : _instruction(instruction) {}
 
-  Instruction(Instruction &rhs)
-      : _sop(rhs._sop), _opcode(rhs._opcode), _mode(rhs._mode),
-        _offset(rhs._offset), _data(rhs._data), _port(rhs._port) {}
+  Instruction(uint8_t sop, uint16_t opcode_mode) {
+    _instruction = {};
+    _instruction._sop = sop;
+    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+  }
+
+  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset) {
+    _instruction = {};
+    _instruction._sop = sop;
+    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._offset = offset;
+  }
+
+  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
+              uint16_t data) {
+    _instruction = {};
+    _instruction._sop = sop;
+    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._offset = offset;
+    _instruction._imm.data = __little_endian(data);
+  }
+
+  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
+              uint8_t port) {
+    _instruction = {};
+    _instruction._sop = sop;
+    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._offset = offset;
+    _instruction._imm.lo = port;
+  }
+
+  Instruction(const Instruction &rhs) : _instruction(rhs._instruction) {}
+
+  Instruction(Instruction &rhs) : _instruction(rhs._instruction) {}
 
   ~Instruction() = default;
 
   Instruction sop(uint8_t sop) {
-    _sop = sop;
+    _instruction._sop = sop;
     return *this;
   }
 
   Instruction opcode(uint8_t opcode) {
-    _opcode = opcode;
+    _instruction._opcode_mode.opcode = opcode;
     return *this;
   }
 
   Instruction mode(uint8_t mod_reg) {
-    _mode = mod_reg;
+    _instruction._opcode_mode.mode = mod_reg;
     return *this;
   }
 
   Instruction offset(int16_t offset) {
-    _offset = offset;
+    _instruction._offset = offset;
     return *this;
   }
 
   Instruction data(uint16_t data) {
-    _data = data;
+    _instruction._imm.data = data;
     return *this;
   }
 
   Instruction port(uint8_t port) {
-    _port = port;
+    _instruction._imm.lo = port;
     return *this;
   }
 
-  operator sop_t() const { return _sop; }
+  operator sop_t() const { return _instruction._sop; }
 
-  uint16_t sop() const { return _sop; }
+  uint16_t sop() const { return _instruction._sop; }
 
-  template <typename T> T opcode_to() const { return *(T *)&_opcode; }
+  template <typename T> T opcode_to() const {
+    return *(T *)&_instruction._opcode_mode.opcode;
+  }
 
-  template <typename T> T mode_to() const { return *(T *)&_mode; }
+  template <typename T> T mode_to() const {
+    return *(T *)&_instruction._opcode_mode.mode;
+  }
 
-  uint16_t offset() const { return _offset; }
+  uint16_t offset() const { return _instruction._offset; }
 
-  template <typename T> T data() const { return (T)_data; }
+  template <typename T> T data() const { return (T)_instruction._imm.data; }
 
-  uint8_t port() const { return _port; }
+  uint8_t port() const { return _instruction._imm.lo; }
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const Instruction &instruction) {
     os << " "
        << fmt::format("sop=0x{0:x}, opcode=0x{1:x}(0b{1:b}), mode="
                       "0x{2:x}(0b{2:b}), offset=0x{3:x}, data=0x{4:x}",
-                      instruction._sop, instruction._opcode, instruction._mode,
-                      instruction._offset, instruction._data)
+                      instruction._instruction._sop,
+                      instruction._instruction._opcode_mode.opcode,
+                      instruction._instruction._opcode_mode.mode,
+                      instruction._instruction._offset,
+                      instruction._instruction._imm.data)
        << " ";
     return os;
   }
 };
+
+#pragma GCC diagnostic pop
 
 template <typename T, typename P> class InstructionTemplate {
   Instruction _instruction;
