@@ -26,15 +26,44 @@ static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
   return ((uint16_t)((hi << 8) | (lo & 0x00FF)));
 }
 
-static uint16_t __little_endian(uint16_t x) {
-#if defined(__x86_64__) || defined(__i386__)
-  return x;
-#else
-  return __builtin_bswap16(x)
-#endif
-}
+#pragma GCC diagnostic push
+// Allow anon structs
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+typedef union _u16 {
+  uint16_t word;
+  struct {
+    uint8_t lo;
+    uint8_t hi;
+  };
+  _u16(uint16_t val = 0) : word(val) {}
+} u16_t;
+
+typedef struct _instruction {
+  uint8_t _X; // reserved
+  union __imm {
+    uint16_t data;
+    struct {
+      uint8_t lo; // also port
+      uint8_t hi;
+    };
+  } _imm;
+  uint16_t _offset;
+  union __opcode_mode {
+    uint16_t word;
+    struct {
+      uint8_t mode;
+      uint8_t opcode;
+    };
+  } _opcode_mode;
+  uint8_t _sop;
+  _instruction() : _sop(0xff) {}
+} instruction_t;
+
+#pragma GCC diagnostic pop
 
 struct IO {
+
   virtual ~IO() = default;
 
   virtual void write_hi(const uint8_t val) = 0;
@@ -54,68 +83,37 @@ struct IO {
   virtual uint8_t read_lo() const = 0;
 };
 
-#pragma GCC diagnostic push
-// Allow anon structs
-#pragma GCC diagnostic ignored "-Wpedantic"
-
-typedef struct _instruction_t {
-  uint8_t _sop;
-  union {
-    uint16_t word;
-    struct {
-      uint8_t mode;
-      uint8_t opcode;
-    };
-  } _opcode_mode;
-  uint16_t _offset;
-  union {
-    uint16_t data;
-    struct {
-      uint8_t hi;
-      uint8_t lo; // also port
-    };
-  } _imm;
-  uint8_t _X;
-} instruction_t;
-
 class Instruction final {
   instruction_t _instruction;
 
 public:
-  Instruction() {
-    _instruction = {};
-    _instruction._sop = 0xff;
-  }
+  Instruction() = default;
 
   Instruction(instruction_t instruction) : _instruction(instruction) {}
 
   Instruction(uint8_t sop, uint16_t opcode_mode) {
-    _instruction = {};
     _instruction._sop = sop;
-    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._opcode_mode.word = opcode_mode;
   }
 
   Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset) {
-    _instruction = {};
     _instruction._sop = sop;
-    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._opcode_mode.word = opcode_mode;
     _instruction._offset = offset;
   }
 
   Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
               uint16_t data) {
-    _instruction = {};
     _instruction._sop = sop;
-    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._opcode_mode.word = opcode_mode;
     _instruction._offset = offset;
-    _instruction._imm.data = __little_endian(data);
+    _instruction._imm.data = data;
   }
 
   Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
               uint8_t port) {
-    _instruction = {};
     _instruction._sop = sop;
-    _instruction._opcode_mode.word = __little_endian(opcode_mode);
+    _instruction._opcode_mode.word = opcode_mode;
     _instruction._offset = offset;
     _instruction._imm.lo = port;
   }
@@ -189,8 +187,6 @@ public:
   }
 };
 
-#pragma GCC diagnostic pop
-
 template <typename T, typename P> class InstructionTemplate {
   Instruction _instruction;
 
@@ -258,9 +254,9 @@ struct Flags final : IO {
 
   void set(uint16_t flags) { _flags = flags; }
 
-  template <typename T> T bits() const { return *(T *)&_flags; }
+  template <typename T> T bits() const { return *(T *)&_flags.word; }
 
-  operator uint16_t() const { return _flags; }
+  operator uint16_t() const { return _flags.word; }
 
   friend std::ostream &operator<<(std::ostream &os,
                                   UNUSED_PARAM const Flags &) {
@@ -269,37 +265,28 @@ struct Flags final : IO {
     return os;
   }
 
-  void write_hi(const uint8_t val) override {
-    uint8_t lo_flag = (uint8_t)_flags;
-    _flags = make_word(val, lo_flag);
-  }
+  void write_hi(const uint8_t val) override { _flags.hi = val; }
 
-  void write_lo(const uint8_t val) override {
-    uint8_t hi_flag = (uint8_t)_flags >> 8;
-    _flags = make_word(hi_flag, val);
-  }
+  void write_lo(const uint8_t val) override { _flags.lo = val; }
 
-  void write(const uint16_t val) override { _flags = val; }
+  void write(const uint16_t val) override { _flags.word = val; }
 
-  uint16_t read() const override { return _flags; }
+  uint16_t read() const override { return _flags.word; }
 
-  uint8_t read_hi() const override {
-    uint8_t hi_flag = (uint8_t)_flags >> 8;
-    return hi_flag;
-  }
+  uint8_t read_hi() const override { return _flags.hi; }
 
-  uint8_t read_lo() const override { return (uint8_t)_flags; }
+  uint8_t read_lo() const override { return _flags.lo; }
 
 protected:
   void write(UNUSED_PARAM const uint8_t) override { assert(false); }
 
   uint8_t read_byte() const override {
     assert(false);
-    return (uint8_t)_flags;
+    return (uint8_t)_flags.lo;
   }
 
 protected:
-  uint16_t _flags;
+  u16_t _flags;
 };
 
 struct Bytes {
@@ -448,39 +435,8 @@ struct BUS {
 };
 
 class ValueIO final : public IO {
-  enum ValueType {
-    word,
-    byte,
-  };
-
-  struct Value {
-    ValueType _size;
-    uint16_t _value;
-
-    Value() : _size(word), _value(0) {}
-
-    Value(const Value &rhs) : _size(rhs._size), _value(rhs._value) {}
-
-    ~Value() = default;
-
-    Value operator=(const uint8_t &value) {
-      _size = byte;
-      _value = value;
-      return *this;
-    }
-
-    Value operator=(const uint16_t &value) {
-      _size = word;
-      _value = value;
-      return *this;
-    }
-
-    operator uint16_t() const { return _value; }
-
-    operator uint8_t() const { return (uint8_t)_value; }
-  };
-
-  Value _value;
+protected:
+  u16_t _value;
 
 public:
   explicit ValueIO() = default;
@@ -488,32 +444,30 @@ public:
   ValueIO(const ValueIO &rhs) : _value(rhs._value) {}
 
   ValueIO operator=(const uint16_t &val) {
-    _value = val;
+    _value.word = val;
     return *this;
   }
 
   ValueIO operator=(const uint8_t &val) {
-    _value = val;
+    _value.lo = val;
     return *this;
   }
 
-  void write_hi(const uint8_t val) override { _value = make_word(val, 0); }
+  void write_hi(const uint8_t val) override { _value.hi = val; }
 
-  void write_lo(const uint8_t val) override { _value = make_word(0, val); }
+  void write_lo(const uint8_t val) override { _value.lo = val; }
 
-  void write(const uint8_t val) override { _value = val; }
+  void write(const uint8_t val) override { _value.lo = val; }
 
-  void write(const uint16_t val) override { _value = val; }
+  void write(const uint16_t val) override { _value.word = val; }
 
-  uint16_t read() const override { return _value; }
+  uint16_t read() const override { return _value.word; }
 
-  uint8_t read_byte() const override { return (uint8_t)_value; }
+  uint8_t read_byte() const override { return _value.lo; }
 
-  uint8_t read_hi() const override {
-    return (uint8_t)(((uint16_t)_value) >> 8);
-  }
+  uint8_t read_hi() const override { return _value.hi; }
 
-  uint8_t read_lo() const override { return (uint8_t)_value; }
+  uint8_t read_lo() const override { return _value.lo; }
 };
 
 class BUSIO final : public IO {
@@ -595,7 +549,7 @@ public:
 
 class Register : public IO {
 protected:
-  uint16_t _register;
+  u16_t _register;
   std::string _name;
 
 public:
@@ -603,49 +557,47 @@ public:
 
   Register(const std::string &name) : _register(0), _name(name) {}
 
-  Register(const Register &rhs) : _register(rhs._register) {}
+  Register(const Register &rhs) : _register(rhs._register), _name(rhs._name) {}
 
   ~Register() override = default;
 
-  void write_hi(const uint8_t val) override { _register = make_word(val, 0); }
+  void write_hi(const uint8_t val) override { _register.hi = val; }
 
-  void write_lo(const uint8_t val) override { _register = make_word(0, val); }
+  void write_lo(const uint8_t val) override { _register.lo = val; }
 
-  void write(const uint16_t val) override { _register = val; }
+  void write(const uint16_t val) override { _register.word = val; }
 
-  void write(const uint8_t val) override { _register = val; }
+  void write(const uint8_t val) override { _register.lo = val; }
 
-  uint16_t read() const override { return _register; }
+  uint16_t read() const override { return _register.word; }
 
-  uint8_t read_hi() const override {
-    return (uint8_t)((_register >> 8) & 0xff);
-  }
+  uint8_t read_hi() const override { return _register.hi; }
 
-  uint8_t read_lo() const override { return (uint8_t)(_register & 0xff); }
+  uint8_t read_lo() const override { return _register.lo; }
 
-  uint8_t read_byte() const override { return (uint8_t)_register; }
+  uint8_t read_byte() const override { return _register.lo; }
 
-  operator uint16_t() const { return _register; }
+  operator uint16_t() const { return _register.word; }
 
   Register &operator+=(uint16_t offset) {
-    _register += offset;
+    _register.word += offset;
     return *this;
   }
 
   Register &operator-=(uint16_t offset) {
-    _register -= offset;
+    _register.word -= offset;
     return *this;
   }
 
   Register &operator=(uint16_t val) {
-    _register = val;
+    _register.word = val;
     return *this;
   }
 
   std::string name() const { return _name; }
 
   friend std::ostream &operator<<(std::ostream &os, const Register &rhs) {
-    os << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register);
+    os << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register.word);
     return os;
   }
 };
@@ -660,7 +612,7 @@ struct Segment final : public Register {
   ~Segment() override = default;
 
   Segment &operator=(uint16_t val) {
-    _register = val;
+    _register.word = val;
     return *this;
   }
 
