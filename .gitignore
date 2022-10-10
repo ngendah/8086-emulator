@@ -16,3 +16,4 @@ unitTests
 build
 .vscode
 *.d
+.cache/
