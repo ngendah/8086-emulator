@@ -766,35 +766,28 @@ struct MicroOp {
   class Key {
   protected:
     uint8_t _opcode;
-    uint8_t _mask;
     std::string _memonic;
+    std::string _argument_code;
 
   public:
-    explicit Key(uint8_t opcode = 0x0, uint8_t mask = 0xff,
-                 std::string memonic = "")
-        : _opcode(opcode), _mask(mask), _memonic(memonic) {}
+    explicit Key(uint8_t opcode = 0x0, std::string memonic = nullptr,
+                 std::string argument_code = nullptr)
+        : _opcode(opcode), _memonic(memonic), _argument_code(argument_code) {}
 
     Key(const Key &rhs)
-        : _opcode(rhs._opcode), _mask(rhs._mask), _memonic(rhs._memonic) {}
+        : _opcode(rhs._opcode), _memonic(rhs._memonic),
+          _argument_code(rhs._argument_code) {}
 
-    uint8_t opcode() const { return _opcode & _mask; }
+    operator uint8_t() const { return _opcode; }
 
-    operator uint8_t() const { return this->opcode(); }
+    bool operator<(const Key &rhs) const { return _opcode < (uint8_t)rhs; }
 
-    bool operator<(const Key &rhs) const {
-      auto _rhs = rhs.opcode() & _mask;
-      return opcode() < _rhs;
-    }
-
-    bool operator==(const Key &rhs) const {
-      auto _rhs = rhs.opcode() & _mask;
-      return opcode() == _rhs;
-    }
+    bool operator==(const Key &rhs) const { return _opcode == (uint8_t)rhs; }
 
     friend std::ostream &operator<<(std::ostream &os, const Key &key) {
       os << fmt::format(
-          "memonic={0}, opcode=0x{1:x}, mask=0x{2:x}, opcode&mask={3:d}",
-          key._memonic, key._opcode, key._mask, key.opcode());
+          "memonic={0}, opcode=0x{1:x}, opcode={2:d}, argument_code={3}",
+          key._memonic, key._opcode, key._opcode, key._argument_code);
       return os;
     }
   };
