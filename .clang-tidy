@@ -1,0 +1,3 @@
+Checks: "bugprone-*,clang-diagnostic-*,clang-analyzer-*,modernize-*,performance-*,readability-*"
+WarningsAsErrors: ""
+HeaderFilterRegex: ""

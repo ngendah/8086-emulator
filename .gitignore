@@ -13,9 +13,11 @@ _deps
 8086.cbp
 unitTests
 *.a
-build
+build*
 .vscode
 *.d
+.ninja*
 .cache/
 .idea/
 .utils/
+.cmake/
