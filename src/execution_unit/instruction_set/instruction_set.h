@@ -53,6 +53,7 @@ struct InstructionSet {
   }
 
   InstructionSet::create_func_t find(const MicroOp::Key &);
+  InstructionCode* find(uint8_t opcode);
 
   std::shared_ptr<MicroOp> decode(uint8_t opcode,
                                   const MicroOp::Params &params);
