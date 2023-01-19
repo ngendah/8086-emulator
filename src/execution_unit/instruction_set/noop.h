@@ -17,4 +17,6 @@ struct NoOp : MicroOp {
   MICRO_OP_INSTRUCTION(NoOp)
 };
 
+#define NOP NoOp
+
 #endif // _NOOP_H_

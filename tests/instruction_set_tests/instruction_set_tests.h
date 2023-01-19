@@ -52,4 +52,11 @@ TEST(InstructionSetTests, test_decode_push_register) {
   }
 }
 
+TEST(InstructionSetTests, test_find_from_map) {
+    InstructionSet instructions;
+    auto ins_code = instructions.find(0x88);
+    EXPECT_NE(ins_code, nullptr);
+    EXPECT_EQ(ins_code->_memonic, "MOV");
+}
+
 #endif // _INSTRUCTION_SET_TESTS_H_
