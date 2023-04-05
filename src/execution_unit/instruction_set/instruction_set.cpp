@@ -265,8 +265,8 @@ _instruction_code_map.insert({0xCC, InstructionCode(0xCC, "INT", "3")});        
 _instruction_code_map.insert({0xCD, InstructionCode(0xCD, "INT", "Ib")});
 _instruction_code_map.insert({0xCE, InstructionCode(0xCE, "INTO")});                // opcode
 _instruction_code_map.insert({0xCF, InstructionCode(0xCF, "IRET")});                // opcode
-_instruction_code_map.insert({0xD0, InstructionCode(0xD0, "GRP2", "Eb", "1")});     // opcode data
-_instruction_code_map.insert({0xD1, InstructionCode(0xD1, "GRP2", "Ev", "1")});
+_instruction_code_map.insert({0xD0, InstructionCode(0xD0, "GRP2", "E", "1")});     // opcode data
+_instruction_code_map.insert({0xD1, InstructionCode(0xD1, "GRP2", "E", "1")});
 _instruction_code_map.insert({0xD2, InstructionCode(0xD2, "GRP2", "E", "E")});      // opcode mode
 _instruction_code_map.insert({0xD3, InstructionCode(0xD3, "GRP2", "E", "E")});
 _instruction_code_map.insert({0xD4, InstructionCode(0xD4, "AAM", "I0")});           // ?
