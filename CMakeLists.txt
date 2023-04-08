@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(8086)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 include_directories(
   includes

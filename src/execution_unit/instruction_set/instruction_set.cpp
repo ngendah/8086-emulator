@@ -17,7 +17,8 @@
 
 // reference: http://www.mlsite.net/8086
 
-#define _INSTRUCTION(opcode, mask, cls)                               \ register_instruction<cls>(MicroOp::Key(opcode, mask))
+#define _INSTRUCTION(opcode, mask, cls)                                        \
+  register_instruction<cls>(MicroOp::Key(opcode, mask))
 
 InstructionSet::InstructionSet() {
   _INSTRUCTION(0x88, 0xFC, MovRegisterAndMemory);
@@ -346,4 +347,12 @@ std::shared_ptr<MicroOp> InstructionSet::decode(uint8_t opcode,
     //return find(MicroOp::Key(0x90))(params);
   }
   return find(MicroOp::Key(instruction_code->_opcode))(params);
+}
+
+std::shared_ptr<MicroOp> InstructionSet::decode(InstructionCode const *code,
+                                                const MicroOp::Params &params) {
+  if (code == nullptr) {
+    assert(false);
+  }
+  return find(MicroOp::Key(code->_opcode))(params);
 }

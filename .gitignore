@@ -16,7 +16,7 @@ unitTests
 build*
 .vscode
 *.d
-.ninja*
+*.ninja*
 .cache/
 .idea/
 .utils/
