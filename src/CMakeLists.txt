@@ -19,5 +19,6 @@ target_link_libraries(
   fmt 
   peripheral 
   execution_unit
+  ${SDL2_LIBRARIES}
 )
 
