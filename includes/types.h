@@ -156,7 +156,7 @@ public:
 
   operator sop_t() const { return _instruction._sop; }
 
-  uint16_t sop() const { return _instruction._sop; }
+  uint8_t sop() const { return _instruction._sop; }
 
   template <typename T> T opcode_to() const {
     return *(T *)&_instruction._opcode_mode.opcode;

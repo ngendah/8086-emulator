@@ -8,6 +8,7 @@
 
 #include "include/sop.h"
 #include "instruction_templates.h"
+#include "logger.h"
 #include "types.h"
 #include <array>
 #include <istream>
@@ -45,22 +46,25 @@ struct InstructionCode {
   }
 
   std::pair<bool, uint8_t> has_disp(uint8_t const &mode) const {
+    if (!has_mode()) {
+      assert(false);
+    }
     auto mod_reg_rm = *(mod_reg_rm_t*)&mode;
     if(mod_reg_rm.MOD == 0x1 || mod_reg_rm.MOD == 0x2) {
-      return std::pair<bool, uint8_t>(true, mod_reg_rm.MOD==0x1?sizeof(uint8_t) : sizeof(uint16_t));
+      return {true, mod_reg_rm.MOD == 0x1 ? sizeof(uint8_t) : sizeof(uint16_t)};
     }
-    return std::pair<bool, uint8_t>(false, 0);
+    return {false, 0};
   }
 
-  std::pair<bool, uint8_t> has_data() {
+  std::pair<bool, uint8_t> has_data() const {
     if(_arguments.empty())
-      return std::pair<bool, uint8_t>(false, 0);
+      return {false, 0};
     if (_arguments.size() == 1 &&
         (_arguments[0].find("Iw") != std::string::npos ||
          _arguments[0].find("Ib") != std::string::npos)) {
       uint8_t size =
           _arguments[0][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
-      return std::pair<bool, uint8_t>(true, size);
+      return {true, size};
     }
     bool _arg_1 = false, _arg_2 = false;
     if ((_arg_1 = _arguments[0].find("Iw") != std::string::npos ||
@@ -70,17 +74,18 @@ struct InstructionCode {
       if(_arg_1) {
         uint8_t size =
             _arguments[0][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
-        return std::pair<bool, uint8_t>(true, size);
+        return {true, size};
       }
       if(_arg_2) {
         uint8_t size =
             _arguments[1][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
-        return std::pair<bool, uint8_t>(true, size);
+        return {true, size};
       }
     }
-    return std::pair<bool, uint8_t>(false, 0);
+    return {false, 0};
   }
 };
+
 struct Comparator {
   bool operator()(const MicroOp::Key &lhs, const MicroOp::Key &rhs) const {
     return lhs < rhs;
@@ -113,14 +118,14 @@ protected:
 };
 
 struct InstructionsExecutor {
-  InstructionsExecutor(std::streambuf &instruction_buff, bus_ptr_t bus,
+  InstructionsExecutor(std::streambuf *buf, bus_ptr_t bus,
                        registers_ptr_t registers)
-      : _instruction_buff(&instruction_buff), _params(bus, registers) {}
+      : _buf(buf), _params(bus, registers) {}
 
   void fetch_decode_execute() {
-    while (!_instruction_buff.eof()) {
-      _instruction_buff.seekg((uint16_t)_params.registers->IP,
-                              std::ios_base::beg);
+    beg();
+    while (!eof()) {
+      seek(_params.registers->IP);
       auto args = fetch();
       decode(args.first)->execute(args.second);
     }
@@ -130,9 +135,9 @@ struct InstructionsExecutor {
     uint8_t _sop = 0, _opcode = 0;
     uint16_t _offset = 0, _data = 0; // offset == displacement
     auto _data_len = 0;
-    _sop = get<uint8_t>();
+    _sop = getb();
     if (SOP::is_sop(_sop)) {
-      _opcode = get<uint8_t>();
+      _opcode = getb();
     } else {
       _opcode = _sop;
       _sop = 0;
@@ -143,19 +148,18 @@ struct InstructionsExecutor {
     }
     uint8_t _mode = 0;
     if (_code->has_mode()) {
-      _mode = get<uint8_t>();
+      _mode = getb();
       auto _has_offset = _code->has_disp(_mode);
       if (_has_offset.first) {
         auto _offset_len = _has_offset.second;
-        _offset =
-            _offset_len == sizeof(uint8_t) ? get<uint8_t>() : get<uint16_t>();
+        _offset = _offset_len == sizeof(uint8_t) ? getb() : getw();
       }
     }
     uint16_t _opcode_mode = make_word(_opcode, _mode);
     auto _has_data = _code->has_data();
     if (_has_data.first) {
       _data_len = _has_data.second;
-      _data = _data_len == sizeof(uint8_t) ? get<uint8_t>() : get<uint16_t>();
+      _data = _data_len == sizeof(uint8_t) ? getb() : getw();
     }
     return {_code,
             _data_len == sizeof(uint8_t)
@@ -167,16 +171,31 @@ struct InstructionsExecutor {
     return _instruction_set.decode(code, _params);
   }
 
-protected:
-  template <typename T> T get() {
-    T _val = 0;
-    _instruction_buff.get((char *)&_val, sizeof(T));
-    _params.registers->IP += sizeof(T);
+  uint16_t beg() {
+    _params.registers->IP = 0;
+    return _buf->pubseekpos((uint16_t)_params.registers->IP);
+  }
+
+  bool eof() const { return _buf->pubseekoff(0, std::ios_base::cur) == -1; }
+
+  uint16_t seek(uint16_t pos) { return _buf->pubseekpos(pos); }
+
+  uint8_t getb() {
+    uint8_t _val = 0;
+    _buf->sgetn((char *)&_val, sizeof(uint8_t));
+    _params.registers->IP += sizeof(uint8_t);
     return _val;
   }
 
+  uint16_t getw() {
+    auto hi = getb();
+    auto lo = getb();
+    return make_word(hi, lo);
+  }
+
+protected:
   InstructionSet _instruction_set;
-  std::istream _instruction_buff;
+  std::streambuf *_buf;
   MicroOp::Params _params;
 };
 
