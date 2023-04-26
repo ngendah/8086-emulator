@@ -15,27 +15,21 @@
 #include <list>
 
 struct InstructionCode {
-  uint8_t _opcode;
   std::string _memonic;
   std::array<std::string, 2> _arguments;
 
   InstructionCode() = default;
 
   InstructionCode(const InstructionCode &rhs)
-      : _opcode(rhs._opcode), _memonic(rhs._memonic),
-        _arguments(rhs._arguments) {}
+      : _memonic(rhs._memonic), _arguments(rhs._arguments) {}
 
-  InstructionCode(uint16_t opcode) : _opcode(opcode) {}
+  InstructionCode(std::string memonic) : _memonic(memonic) {}
 
-  InstructionCode(uint16_t opcode, std::string memonic)
-      : _opcode(opcode), _memonic(memonic) {}
+  InstructionCode(std::string memonic, std::string larg)
+      : _memonic(memonic), _arguments({larg}) {}
 
-  InstructionCode(uint16_t opcode, std::string memonic, std::string larg)
-      : _opcode(opcode), _memonic(memonic), _arguments({larg}) {}
-
-  InstructionCode(uint16_t opcode, std::string memonic, std::string larg,
-                  std::string rarg)
-      : _opcode(opcode), _memonic(memonic), _arguments({larg, rarg}) {}
+  InstructionCode(std::string memonic, std::string larg, std::string rarg)
+      : _memonic(memonic), _arguments({larg, rarg}) {}
 
   bool has_mode() const {
     if(_arguments.empty())
@@ -107,9 +101,6 @@ struct InstructionSet {
   std::shared_ptr<MicroOp> decode(uint8_t opcode,
                                   const MicroOp::Params &params);
 
-  std::shared_ptr<MicroOp> decode(InstructionCode const *code,
-                                  const MicroOp::Params &params);
-
   InstructionSet();
 
 protected:
@@ -131,7 +122,7 @@ struct InstructionsExecutor {
     }
   }
 
-  std::pair<InstructionCode *, Instruction> fetch() {
+  std::pair<uint8_t, Instruction> fetch() {
     uint8_t _sop = 0, _opcode = 0;
     uint16_t _offset = 0, _data = 0; // offset == displacement
     auto _data_len = 0;
@@ -144,7 +135,7 @@ struct InstructionsExecutor {
     }
     auto _code = _instruction_set.find(_opcode);
     if (_code->_arguments.empty()) {
-      return {_code, Instruction(_sop, _opcode)};
+      return {_opcode, Instruction(_sop, _opcode)};
     }
     uint8_t _mode = 0;
     if (_code->has_mode()) {
@@ -161,14 +152,14 @@ struct InstructionsExecutor {
       _data_len = _has_data.second;
       _data = _data_len == sizeof(uint8_t) ? getb() : getw();
     }
-    return {_code,
+    return {_opcode,
             _data_len == sizeof(uint8_t)
                 ? Instruction(_sop, _opcode_mode, _offset, (uint8_t)_data)
                 : Instruction(_sop, _opcode_mode, _offset, (uint16_t)_data)};
   }
 
-  std::shared_ptr<MicroOp> decode(InstructionCode const *code) {
-    return _instruction_set.decode(code, _params);
+  std::shared_ptr<MicroOp> decode(uint8_t opcode) {
+    return _instruction_set.decode(opcode, _params);
   }
 
   uint16_t beg() {
