@@ -62,78 +62,77 @@ TEST(InstructionSetTests, test_find_from_map) {
 }
 
 TEST(InstructionCodeTests, test_cnstr) {
-  auto code = InstructionCode(0x01, "ADD", "E", "E");
-  EXPECT_EQ(code._opcode, 0x01);
+  auto code = InstructionCode("ADD", "E", "E");
   EXPECT_EQ(code._memonic, "ADD");
   EXPECT_EQ(code._arguments.size(), 2);
 }
 
 TEST(InstructionCodeTests, test_has_mode_1) {
-  auto code = InstructionCode(0x01, "ADD", "E", "E");
+  auto code = InstructionCode("ADD", "E", "E");
   EXPECT_EQ(code.has_mode(), true);
 }
 
 TEST(InstructionCodeTests, test_has_mode_2) {
-  auto code = InstructionCode(0x40, "INC", "E");
+  auto code = InstructionCode("INC", "E");
   EXPECT_EQ(code.has_mode(), true);
 }
 
 TEST(InstructionCodeTests, test_has_mode_3) {
-  auto code = InstructionCode(0x16, "PUSH");
+  auto code = InstructionCode("PUSH");
   EXPECT_EQ(code.has_mode(), false);
 }
 
 TEST(InstructionCodeTests, test_has_data_1) {
-  auto code = InstructionCode(0x16, "ADC", "E", "Iw");
+  auto code = InstructionCode("ADC", "E", "Iw");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
   EXPECT_EQ(data.second, sizeof(uint16_t));
 }
 
 TEST(InstructionCodeTests, test_has_data_2) {
-  auto code = InstructionCode(0xC2, "RET", "Iw");
+  auto code = InstructionCode("RET", "Iw");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
   EXPECT_EQ(data.second, sizeof(uint16_t));
 }
 
 TEST(InstructionCodeTests, test_has_data_3) {
-  auto code = InstructionCode(0xC6, "MOV", "E", "Ib");
+  auto code = InstructionCode("MOV", "E", "Ib");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
   EXPECT_EQ(data.second, sizeof(uint8_t));
 }
 
 TEST(InstructionCodeTests, test_has_data_4) {
-  auto code = InstructionCode(0xCD, "INT", "Ib");
+  auto code = InstructionCode("INT", "Ib");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
   EXPECT_EQ(data.second, sizeof(uint8_t));
 }
 
 TEST(InstructionCodeTests, test_has_data_5) {
-  auto code = InstructionCode(0xC9);
+  auto code = InstructionCode();
   auto data = code.has_data();
   EXPECT_EQ(data.first, false);
   EXPECT_EQ(data.second, 0);
 }
 
 TEST(InstructionCodeTests, test_has_disp_1) {
-  auto code = InstructionCode(0x03, "ADD", "E", "E");
+  auto code = InstructionCode("ADD", "E", "E");
   auto disp = code.has_disp((uint8_t)0x2 << 6);
   EXPECT_EQ(disp.first, true);
   EXPECT_EQ(disp.second, sizeof(uint16_t));
 }
 
 TEST(InstructionCodeTests, test_has_disp_2) {
-  auto code = InstructionCode(0x03, "ADD", "E", "E");
+  auto code = InstructionCode("ADD", "E", "E");
   auto disp = code.has_disp((uint8_t)0x1 << 6);
   EXPECT_EQ(disp.first, true);
   EXPECT_EQ(disp.second, sizeof(uint8_t));
 }
 
 TEST(InstructionCodeTests, test_has_disp_3) {
-  auto code = InstructionCode(0x03, "ADD", "E", "E");
+  auto code = InstructionCode("ADD", "E", "E");
   auto disp = code.has_disp(0x0);
   EXPECT_EQ(disp.first, false);
   EXPECT_EQ(disp.second, 0);
@@ -150,7 +149,7 @@ TEST(InstructionsExecutor, test_fetch_decode) {
   executor.beg();
   auto fetch = executor.fetch();
   auto code = fetch.first;
-  EXPECT_EQ(code->_memonic, "MOV");
+  EXPECT_EQ(code, 0xc7);
   auto instruction = fetch.second;
   EXPECT_EQ(instruction.sop(), 0x3e);
   EXPECT_EQ(instruction.opcode_to<uint8_t>(), 0xc7);
