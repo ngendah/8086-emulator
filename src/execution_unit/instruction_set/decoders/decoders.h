@@ -129,8 +129,13 @@ protected:
 // Register-Immediate move decoder
 struct RI_Decoder final : Decoder {
   struct _RegisterSelector : RegisterSelector {
-    virtual uint8_t REG(const Instruction &instruction) const {
-      return instruction.opcode_to<opcode_w_reg_t>().REG;
+    uint8_t REG(const Instruction &instruction) const override {
+      auto _opcode = instruction.opcode_to<opcode_w_reg_t>();
+      return _opcode.REG;
+    }
+    uint8_t W(const Instruction &instruction) const override {
+      auto _opcode = instruction.opcode_to<opcode_w_reg_t>();
+      return _opcode.W;
     }
   };
 

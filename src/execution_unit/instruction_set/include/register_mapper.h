@@ -17,7 +17,7 @@ class RegisterMapper {
    * Combination of W and REG fields to select registers,
    * "->" is used to indicate the index of the array its mapped to
    *
-   * W|REG|Reg->index
+   * W REG     Windows
    * ---------------
    * 0 000 AL->0
    * 0 001 CL->1
@@ -51,11 +51,35 @@ public:
 
   virtual ~RegisterMapper() = default;
 
-  virtual Register *get(uint8_t idx) {
-    auto _register = _mapper[idx];
-    PLOGD << fmt::format("idx=0x{0:x}, name={1}, ptr=0x{2:x}", idx,
+  virtual Register *get(const uint8_t idx) {
+    // slide the index to its appropriate "window"
+    // as shown on the table above
+    auto _idx = idx <= 7 ? idx % 4 : idx % 8;
+    auto _register = _mapper[_idx];
+    PLOGD << fmt::format("idx=0x{0:x}, name={1}, ptr=0x{2:x}", _idx,
                          _register->name(), (long)_register);
     return _register;
+  }
+
+  /**
+   * 
+   * Register selection will depend on whether the operation
+   * is on a word or byte data.
+   *
+   * In order to select a register for a word operations
+   * the REG bits are prepended with a 1-bit as the MSB,
+   * while for byte operation its prepended with a 0-bit.
+   * 
+   * The selection of which value to prepend depends on the W bit
+   * of the opcode.
+   *
+   * Since this is a 16-byte processor the default action is to prepend
+   * 1-bit as the MSB.
+   *
+   * For futher details, refer to instruction_templates.h
+  */
+  static uint8_t to_idx(uint8_t w, uint8_t reg) {
+    return (uint8_t)((w<<3) | reg);
   }
 
   static const uint8_t AX_INDEX = 0;
