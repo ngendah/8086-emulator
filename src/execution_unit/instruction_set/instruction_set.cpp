@@ -206,7 +206,8 @@ InstructionSet::InstructionSet() {
   _instruction_code_map.insert({0x85, InstructionCode("TEST", "E", "E")});
   _instruction_code_map.insert({0x86, InstructionCode("XCHG", "E", "E")});
   _instruction_code_map.insert({0x87, InstructionCode("XCHG", "E", "E")});
-  _instruction_code_map.insert({0x88, InstructionCode("MOV", "E", "E")});
+  _instruction_code_map.insert(
+      {0x88, InstructionCode("MOV", "E", "E")}); // opcode mode [disp] -- v
   _instruction_code_map.insert({0x89, InstructionCode("MOV", "E", "E")});
   _instruction_code_map.insert({0x8A, InstructionCode("MOV", "E", "E")});
   _instruction_code_map.insert({0x8B, InstructionCode("MOV", "E", "E")});
@@ -214,7 +215,7 @@ InstructionSet::InstructionSet() {
   _instruction_code_map.insert(
       {0x8D, InstructionCode("LEA", "E")}); // opcode mode [disp]
   _instruction_code_map.insert(
-      {0x8E, InstructionCode("MOV", "E", "E")}); // opcode mode [disp]
+      {0x8E, InstructionCode("MOV", "E", "E")}); // opcode mode [disp] -- v
   _instruction_code_map.insert(
       {0x8F, InstructionCode("POP", "E")});                     // opcode mode
   _instruction_code_map.insert({0x90, InstructionCode("NOP")}); // opcode
@@ -235,11 +236,10 @@ InstructionSet::InstructionSet() {
   _instruction_code_map.insert({0x9D, InstructionCode("POPF")});
   _instruction_code_map.insert({0x9E, InstructionCode("SAHF")});
   _instruction_code_map.insert({0x9F, InstructionCode("LAHF")});
-  _instruction_code_map.insert(
-      {0xA0, InstructionCode("MOV", "E", "E")}); // opcode mode
-  _instruction_code_map.insert({0xA1, InstructionCode("MOV", "E", "E")});
-  _instruction_code_map.insert({0xA2, InstructionCode("MOV", "E", "E")});
-  _instruction_code_map.insert({0xA3, InstructionCode("MOV", "E", "E")});
+  _instruction_code_map.insert({0xA0, InstructionCode("MOV")}); // opcode -- v
+  _instruction_code_map.insert({0xA1, InstructionCode("MOV")});
+  _instruction_code_map.insert({0xA2, InstructionCode("MOV")});
+  _instruction_code_map.insert({0xA3, InstructionCode("MOV")});
   _instruction_code_map.insert({0xA4, InstructionCode("MOVSB")}); // opcode
   _instruction_code_map.insert({0xA5, InstructionCode("MOVSW")});
   _instruction_code_map.insert({0xA6, InstructionCode("CMPSB")});
@@ -254,22 +254,22 @@ InstructionSet::InstructionSet() {
   _instruction_code_map.insert({0xAE, InstructionCode("SCASB")});
   _instruction_code_map.insert({0xAF, InstructionCode("SCASW")});
   _instruction_code_map.insert(
-      {0xB0, InstructionCode("MOV", "E", "Ib")}); // opcode mode [disp] data
-  _instruction_code_map.insert({0xB1, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB2, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB3, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB4, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB5, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB6, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB7, InstructionCode("MOV", "E", "Ib")});
-  _instruction_code_map.insert({0xB8, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xB9, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBA, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBB, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBC, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBD, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBE, InstructionCode("MOV", "E", "Iw")});
-  _instruction_code_map.insert({0xBF, InstructionCode("MOV", "E", "Iw")});
+      {0xB0, InstructionCode("MOV", "Ib")}); // opcode data -- v
+  _instruction_code_map.insert({0xB1, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB2, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB3, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB4, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB5, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB6, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB7, InstructionCode("MOV", "Ib")});
+  _instruction_code_map.insert({0xB8, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xB9, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBA, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBB, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBC, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBD, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBE, InstructionCode("MOV", "Iw")});
+  _instruction_code_map.insert({0xBF, InstructionCode("MOV", "Iw")});
   _instruction_code_map.insert({0xC0, InstructionCode()});
   _instruction_code_map.insert({0xC1, InstructionCode()});
   _instruction_code_map.insert(
