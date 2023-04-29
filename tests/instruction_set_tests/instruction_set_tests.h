@@ -141,7 +141,7 @@ TEST(InstructionCodeTests, test_has_disp_3) {
 TEST(InstructionsExecutor, test_fetch_decode) {
   std::stringstream instructions(std::ios_base::trunc | std::ios_base::in |
                                  std::ios_base::out | std::ios_base::binary);
-  uint8_t data[7] = {0x3e, 0xc7, 0x86, 0xf2, 0x46, 0x12, 0x34};
+  uint8_t data[7] = {0x3e, 0xc7, 0x86, 0x46, 0xf2, 0x34, 0x12};
   instructions.write((char *)&data, sizeof(data));
   auto ram = RAM(125);
   auto registers = Registers();
@@ -159,6 +159,39 @@ TEST(InstructionsExecutor, test_fetch_decode) {
   // decode
   auto micro_op = executor.decode(code);
   EXPECT_NE(&micro_op, nullptr);
+}
+
+TEST(InstructionExector, test_fetch_decode_2) {
+  auto file_path = fmt::format("{}", __FILE__);
+  auto idx = file_path.find_last_of("/\\");
+  auto dir = file_path.substr(0, idx);
+  std::fstream executable(fmt::format("{}/{}", dir, "asm/mov1.bin"),
+                          std::ios_base::in | std::ios_base::binary);
+  EXPECT_EQ(executable.is_open(), true);
+  auto ram = RAM(125);
+  auto registers = Registers();
+  auto executor = InstructionsExecutor(executable.rdbuf(), &ram, &registers);
+  executor.beg();
+  {
+    auto fetch = executor.fetch();
+    EXPECT_EQ(fetch.first, 0xb4);
+    auto instruction = fetch.second;
+    EXPECT_EQ(instruction.sop(), 0x0);
+    EXPECT_EQ(instruction.opcode_to<uint8_t>(), 0xb4);
+    EXPECT_EQ(instruction.mode_to<uint8_t>(), 0x0);
+    EXPECT_EQ(instruction.offset(), 0x0);
+    EXPECT_EQ(instruction.data<uint16_t>(), 0x9);
+  }
+  {
+    auto fetch = executor.fetch();
+    EXPECT_EQ(fetch.first, 0xb8);
+    auto instruction = fetch.second;
+    EXPECT_EQ(instruction.sop(), 0x0);
+    EXPECT_EQ(instruction.opcode_to<uint8_t>(), 0xb8);
+    EXPECT_EQ(instruction.mode_to<uint8_t>(), 0x0);
+    EXPECT_EQ(instruction.offset(), 0x0);
+    EXPECT_EQ(instruction.data<uint16_t>(), 0x4c00);
+  }
 }
 
 #endif // _INSTRUCTION_SET_TESTS_H_

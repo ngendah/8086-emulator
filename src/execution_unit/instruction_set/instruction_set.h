@@ -164,24 +164,24 @@ struct InstructionsExecutor {
 
   uint16_t beg() {
     _params.registers->IP = 0;
-    return _buf->pubseekpos((uint16_t)_params.registers->IP);
+    auto res = _buf->pubseekpos((uint16_t)_params.registers->IP);
+    return res;
   }
 
   bool eof() const { return _buf->pubseekoff(0, std::ios_base::cur) == -1; }
 
   uint16_t seek(uint16_t pos) { return _buf->pubseekpos(pos); }
 
-  uint8_t getb() {
-    uint8_t _val = 0;
-    _buf->sgetn((char *)&_val, sizeof(uint8_t));
-    _params.registers->IP += sizeof(uint8_t);
-    return _val;
-  }
+  uint8_t getb() { return _get<uint8_t>(); }
 
-  uint16_t getw() {
-    auto hi = getb();
-    auto lo = getb();
-    return make_word(hi, lo);
+  uint16_t getw() { return _get<uint16_t>(); }
+
+protected:
+  template <typename T> T _get() {
+    T _val = 0;
+    _buf->sgetn((char *)&_val, sizeof(_val));
+    _params.registers->IP += sizeof(_val);
+    return _val;
   }
 
 protected:

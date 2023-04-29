@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-
 add_executable(unitTests tests.cpp)
 
 include_directories(
