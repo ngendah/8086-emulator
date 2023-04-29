@@ -62,22 +62,22 @@ public:
   }
 
   /**
-   * 
+   *
    * Register selection will depend on whether the operation
    * is on a word or byte data.
    *
-   * In order to select a register for a word operations
+   * In order to select a register for a word operation
    * the REG bits are prepended with a 1-bit as the MSB,
    * while for byte operation its prepended with a 0-bit.
-   * 
+   *
    * The selection of which value to prepend depends on the W bit
    * of the opcode.
    *
    * Since this is a 16-byte processor the default action is to prepend
    * 1-bit as the MSB.
    *
-   * For futher details, refer to instruction_templates.h
-  */
+   * For details on REG and W bits, refer to instruction_templates.h
+   */
   static uint8_t to_idx(uint8_t w, uint8_t reg) {
     return (uint8_t)((w<<3) | reg);
   }

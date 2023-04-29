@@ -8,6 +8,20 @@
 
 #include "types.h"
 
+/**
+ *
+ * Instruction templates give meaning to a byte or a word.
+ *
+ * An 8086 instruction is broken into;
+ * 1. a mandatory 8-bit opcode,
+ * 2. an 8-bit mode and
+ * 3. 'data' which includes offsets, immediate values e.tc
+ *
+ * What each bit of an opcode or mode represent depends
+ * on the instruction but there are a common patterns,
+ * and its this common patterns that are captured here as templates.
+ */
+
 typedef struct _flags_t {
   uint8_t _X1 : 4;
   uint8_t O : 1;
