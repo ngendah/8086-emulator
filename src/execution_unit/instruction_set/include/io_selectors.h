@@ -18,10 +18,17 @@ struct IOSelector {
   virtual IO *get(const Instruction &) = 0;
 };
 
+/**
+ *
+ * For how registers are selected refer to register_mapper.h
+ */
 struct RegisterSelector {
   virtual ~RegisterSelector() = default;
   virtual uint8_t REG(const Instruction &instruction) const {
     return instruction.mode_to<opcode_reg_t>().REG;
+  }
+  virtual uint8_t W(const Instruction &) const {
+    return 1;
   }
 };
 
@@ -38,7 +45,12 @@ public:
       : _registerMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {
-    return _registerMapper.get(_selector->REG(instruction));
+    auto _idx = _registerMapper.to_idx(
+_selector->W(instruction),
+      _selector->REG(instruction)
+          );
+    auto _register = _registerMapper.get(_idx);
+    return _register;
   }
 };
 
