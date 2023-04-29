@@ -356,7 +356,7 @@ InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
                      return rhs.first == key;
                    });
   if (it == std::end(instructions)) {
-    assert(false);
+    return (create_func_t) nullptr;
   }
   return it->second;
 }
@@ -370,5 +370,8 @@ InstructionCode *InstructionSet::find(uint8_t opcode) {
 
 std::shared_ptr<MicroOp> InstructionSet::decode(uint8_t opcode,
                                                 const MicroOp::Params &params) {
-  return find(MicroOp::Key(opcode))(params);
+  auto _ctor = find(MicroOp::Key(opcode));
+  if (_ctor == nullptr)
+    return std::shared_ptr<MicroOp>();
+  return _ctor(params);
 }

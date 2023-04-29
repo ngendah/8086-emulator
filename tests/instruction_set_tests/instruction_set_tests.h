@@ -8,6 +8,7 @@
 #include "gtest/gtest.h"
 #include <fstream>
 #include <list>
+#include <typeinfo>
 
 struct Compare {
   template <typename T1, typename T2>
@@ -161,7 +162,7 @@ TEST(InstructionsExecutor, test_fetch_decode) {
   EXPECT_NE(&micro_op, nullptr);
 }
 
-TEST(InstructionExector, test_fetch_decode_2) {
+TEST(InstructionExector, test_fetch_decode_execute) {
   auto file_path = fmt::format("{}", __FILE__);
   auto idx = file_path.find_last_of("/\\");
   auto dir = file_path.substr(0, idx);
@@ -181,6 +182,10 @@ TEST(InstructionExector, test_fetch_decode_2) {
     EXPECT_EQ(instruction.mode_to<uint8_t>(), 0x0);
     EXPECT_EQ(instruction.offset(), 0x0);
     EXPECT_EQ(instruction.data<uint16_t>(), 0x9);
+    auto microop = executor.decode(fetch.first);
+    EXPECT_EQ(typeid(*microop), typeid(MovRegisterImmediate));
+    microop->execute(instruction);
+    EXPECT_EQ((uint8_t)registers.AX, 9);
   }
   {
     auto fetch = executor.fetch();
@@ -191,6 +196,10 @@ TEST(InstructionExector, test_fetch_decode_2) {
     EXPECT_EQ(instruction.mode_to<uint8_t>(), 0x0);
     EXPECT_EQ(instruction.offset(), 0x0);
     EXPECT_EQ(instruction.data<uint16_t>(), 0x4c00);
+    auto microop = executor.decode(fetch.first);
+    EXPECT_EQ(typeid(*microop), typeid(MovRegisterImmediate));
+    microop->execute(instruction);
+    EXPECT_EQ((uint16_t)registers.AX, 0x4c00);
   }
 }
 
