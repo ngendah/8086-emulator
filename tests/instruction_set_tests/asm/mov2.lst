@@ -1,0 +1,9 @@
+     1                                  org 100h
+     2 00000000 8D06[0000]              lea ax, buff
+     3 00000004 8ED8                    mov ds, ax
+     4 00000006 89D8                    mov ax, bx
+     5 00000008 88C3                    mov bl, al
+     6 0000000A 8A04                    mov al, [si]
+     7                                  
+     8                                  section .data
+     9 00000000 00<rep 3h>              buff: times 3 db 0
