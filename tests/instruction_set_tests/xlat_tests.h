@@ -14,7 +14,8 @@ TEST(XLATTests, test_execute) {
   registers.BX.write((uint8_t)0x15);
   auto address =
       registers.DS.address(registers.AX.read() + registers.BX.read());
-  auto val = Extensions::Bytes((uint16_t)0x25);
+  uint16_t _val = 0x25;
+  auto val = Bytes((uint8_t *)&_val, sizeof(uint16_t));
   ram.write(&address, val);
   auto instruction = Instruction(0xff, 0xD7);
   auto io = XLAT(&ram, &registers);
