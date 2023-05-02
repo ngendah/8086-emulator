@@ -10,7 +10,8 @@ TEST(INPortTests, test_execute) {
   auto ram = RAM(128);
   auto registers = Registers();
   auto address = Address((uint8_t)0x53);
-  auto val = Extensions::Bytes((uint8_t)78);
+  uint16_t _val = 78;
+  auto val = Bytes((uint8_t *)&_val, sizeof(uint16_t));
   ram.write(&address, val);
   auto instruction = Instruction(0xff, 0xE400, 0x0, (uint8_t)address);
   auto io = INPort(&ram, &registers);
