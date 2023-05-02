@@ -163,10 +163,12 @@ struct InstructionsExecutor {
       _data_len = _has_data.second;
       _data = _data_len == sizeof(uint8_t) ? getb() : getw();
     }
-    return {_opcode,
-            _data_len == sizeof(uint8_t)
-                ? Instruction(_sop, _opcode_mode, _offset, (uint8_t)_data)
-                : Instruction(_sop, _opcode_mode, _offset, (uint16_t)_data)};
+    auto _instruction =
+        _data_len == sizeof(uint8_t)
+            ? Instruction(_sop, _opcode_mode, _offset, (uint8_t)_data)
+            : Instruction(_sop, _opcode_mode, _offset, (uint16_t)_data);
+    PLOGD << fmt::format("memonic={}", _code->_memonic) << _instruction;
+    return {_opcode, _instruction};
   }
 
   std::shared_ptr<MicroOp> decode(uint8_t opcode) {
