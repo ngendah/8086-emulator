@@ -9,6 +9,8 @@
 #include "include/sop.h"
 #include "instruction_templates.h"
 #include "logger.h"
+#include "physical_addresser.h"
+#include "sop.h"
 #include "types.h"
 #include <array>
 #include <istream>
@@ -43,9 +45,16 @@ struct InstructionCode {
     if (!has_mode()) {
       assert(false);
     }
-    auto mod_reg_rm = *(mod_reg_rm_t*)&mode;
-    if(mod_reg_rm.MOD == 0x1 || mod_reg_rm.MOD == 0x2) {
-      return {true, mod_reg_rm.MOD == 0x1 ? sizeof(uint8_t) : sizeof(uint16_t)};
+    auto _mod_reg_rm = *(_mod_reg_rm_t *)&mode;
+    if (_mod_reg_rm.MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT &&
+        _mod_reg_rm.RM == AddressingModes::RM::DIRECT_ADDRESSING) {
+      return {true, sizeof(uint16_t)};
+    }
+    bool _is_disp_8 = false;
+    if ((_is_disp_8 =
+             (_mod_reg_rm.MOD == AddressingModes::MOD::MEM_DISPLACEMENT_8)) ||
+        _mod_reg_rm.MOD == AddressingModes::MOD::MEM_DISPLACEMENT_16) {
+      return {true, _is_disp_8 ? sizeof(uint8_t) : sizeof(uint16_t)};
     }
     return {false, 0};
   }
@@ -123,7 +132,7 @@ struct InstructionsExecutor {
   }
 
   std::pair<uint8_t, Instruction> fetch() {
-    uint8_t _sop = 0, _opcode = 0;
+    uint8_t _sop = SOP::NONE, _opcode = 0;
     uint16_t _offset = 0, _data = 0; // offset == displacement
     auto _data_len = 0;
     _sop = getb();
@@ -131,10 +140,12 @@ struct InstructionsExecutor {
       _opcode = getb();
     } else {
       _opcode = _sop;
-      _sop = 0;
+      _sop = SOP::NONE;
     }
     auto _code = _instruction_set.find(_opcode);
     if (_code->_arguments.empty()) {
+      PLOGD << fmt::format("memonic={}, sop={:x},opcode={:x}", _code->_memonic,
+                           _sop, _opcode);
       return {_opcode, Instruction(_sop, _opcode)};
     }
     uint8_t _mode = 0;

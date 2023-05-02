@@ -14,9 +14,31 @@
 
 class SegmentMapper {
 protected:
-  struct DefaultSegmentMapper {
-    std::array<Segment *, 4> _segment_mapper = {};
+  struct Mapper {
+    virtual Segment *get(uint8_t idx) = 0;
+  };
+
+  struct DefaultSegmentMapper final : Mapper {
+    std::array<Segment *, 8> _segment_mapper = {};
     DefaultSegmentMapper(Registers *registers) {
+      _segment_mapper = {
+          &registers->DS, // AX => DS
+          &registers->DS, // CX => DS
+          &registers->SS, // DX => SS
+          &registers->SS, // BX => SS
+          &registers->DS, // SP => DS
+          &registers->DS, // BP => DS
+          &registers->SS, // SI => SS
+          &registers->SS, // DI => DS
+      };
+    }
+
+    Segment *get(uint8_t idx) override { return _segment_mapper[idx]; }
+  };
+
+  struct IndexSegmentMapper final : Mapper {
+    std::array<Segment *, 8> _segment_mapper;
+    IndexSegmentMapper(Registers *registers) {
       _segment_mapper = {
           &registers->ES,
           &registers->CS,
@@ -24,26 +46,6 @@ protected:
           &registers->DS,
       };
     }
-
-    virtual Segment *get(uint8_t idx) {
-      std::array<Segment *, 8> _mapping = {
-          _segment_mapper[3], // AX => DS
-          _segment_mapper[3], // CX => DS
-          _segment_mapper[2], // DX => SS
-          _segment_mapper[2], // BX => SS
-          _segment_mapper[3], // SP => DS
-          _segment_mapper[3], // BP => DS
-          _segment_mapper[2], // SI => SS
-          _segment_mapper[2], // DI => DS
-      };
-      return _mapping[idx];
-    }
-  };
-
-  class IndexSegmentMapper : protected DefaultSegmentMapper {
-  public:
-    IndexSegmentMapper(Registers *registers)
-        : DefaultSegmentMapper(registers) {}
 
     Segment *get(uint8_t idx) { return _segment_mapper[idx]; }
   };
