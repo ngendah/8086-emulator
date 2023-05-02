@@ -44,4 +44,4 @@ struct LPA : MicroOp {
   };
 };
 
-#endif // _LEA_H_
+#endif // _LPA_H_

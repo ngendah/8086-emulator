@@ -11,6 +11,7 @@
 #include "physical_addresser.h"
 #include "register_mapper.h"
 #include "segment_mapper.h"
+#include "sop.h"
 #include "types.h"
 
 struct IOSelector {
@@ -45,10 +46,8 @@ public:
       : _registerMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {
-    auto _idx = _registerMapper.to_idx(
-_selector->W(instruction),
-      _selector->REG(instruction)
-          );
+    auto _idx = _registerMapper.to_idx(_selector->W(instruction),
+                                       _selector->REG(instruction));
     auto _register = _registerMapper.get(_idx);
     return _register;
   }
@@ -60,14 +59,14 @@ struct MemorySelector {
   virtual SegmentMappingTypes segment_mapping_type() const = 0;
 };
 
-struct DefaultMemorySelector final : MemorySelector {
-  uint8_t MOD(const Instruction &instruction) const override {
+struct DefaultMemorySelector : MemorySelector {
+  virtual uint8_t MOD(const Instruction &instruction) const {
     mod_reg_rm_t mode = instruction.mode_to<mod_reg_rm_t>();
     PLOGD << mode;
     return mode.MOD;
   }
 
-  uint8_t RM(const Instruction &instruction) const override {
+  virtual uint8_t RM(const Instruction &instruction) const {
     mod_reg_rm_t mode = instruction.mode_to<mod_reg_rm_t>();
     return mode.RM;
   }
@@ -84,29 +83,41 @@ struct IOAddresser {
   template <class T = PhysicalAddresser>
   Address address(const Instruction &instruction) {
     auto _addresser = T(_registers);
-    Segment *_segment = segment(instruction, _selector);
     auto MOD = _selector->MOD(instruction);
     auto RM = _selector->RM(instruction);
+    auto offset = instruction.offset();
     if (MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT) {
-      assert(RM != AddressingModes::RM::_X); // Not yet implemented
+      if (RM == AddressingModes::RM::DIRECT_ADDRESSING) {
+        auto _segment = direct_addressing_segment(instruction);
+        return _addresser.address(_segment, (uint16_t)offset);
+      }
+      auto _segment = segment(instruction, _selector);
       return _addresser.address(_segment, RM);
     } else if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_8) {
-      auto offset = instruction.offset();
+      auto _segment = segment(instruction, _selector);
       return _addresser.address(_segment, RM, (uint8_t)offset);
     } else if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_16) {
-      auto offset = instruction.offset();
+      auto _segment = segment(instruction, _selector);
       return _addresser.address(_segment, RM, (uint16_t)offset);
-    } else {
-      PLOGD << "mod=0x3(0b11) is register selector mode";
-      assert(false);
     }
+    PLOGD << "mod=0x3(0b11) is register selector mode";
+    assert(false);
   }
 
   Segment *segment(const Instruction &instruction,
                    MemorySelector const *selector) {
-    if (instruction.sop() == 0xff) {
+    if (instruction.sop() == SOP::NONE) {
       return SegmentMapper(_registers)
           .get(selector->RM(instruction), selector->segment_mapping_type());
+    }
+    uint8_t idx = ((instruction.sop() >> 3) & 0x03);
+    PLOGD << fmt::format("idx: 0x{:x}", idx);
+    return SegmentMapper(_registers).get(idx, indexed);
+  }
+
+  Segment *direct_addressing_segment(const Instruction &instruction) {
+    if (instruction.sop() == SOP::NONE) {
+      return SegmentMapper(_registers).get(SegmentMapper::DS_INDEX, indexed);
     }
     uint8_t idx = ((instruction.sop() >> 3) & 0x03);
     PLOGD << fmt::format("idx: 0x{:x}", idx);

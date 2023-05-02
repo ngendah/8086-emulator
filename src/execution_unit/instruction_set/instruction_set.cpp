@@ -24,7 +24,7 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0x88, 0xFC, MovRegisterAndMemory);
   _INSTRUCTION(0xB0, 0xF0, MovRegisterImmediate);
   _INSTRUCTION(0xA0, 0xF0, MovAccumulator);
-  _INSTRUCTION(0x8E, 0xFC, MovSegmentAndRegisterMemory);
+  _INSTRUCTION(0x8E, 0xFE, MovSegmentAndRegisterMemory);
   _INSTRUCTION(0xC6, 0xFE, MovMemoryImmediate);
   _INSTRUCTION(0x50, 0xF0, PushRegister);
   _INSTRUCTION(0xFF, 0xFF, PushMemory);
@@ -371,7 +371,9 @@ InstructionCode *InstructionSet::find(uint8_t opcode) {
 std::shared_ptr<MicroOp> InstructionSet::decode(uint8_t opcode,
                                                 const MicroOp::Params &params) {
   auto _ctor = find(MicroOp::Key(opcode));
-  if (_ctor == nullptr)
+  if (_ctor == nullptr) {
+    assert(false);
     return std::shared_ptr<MicroOp>();
+  }
   return _ctor(params);
 }

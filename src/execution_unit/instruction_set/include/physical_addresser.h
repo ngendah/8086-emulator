@@ -111,10 +111,11 @@ public:
     return (this->*_map_fn)(offset);
   };
 
-  virtual Address address(UNUSED_PARAM Segment *,
-                          UNUSED_PARAM uint16_t) override {
-    assert(false);
-    return Address();
+  virtual Address address(Segment *segment, uint16_t offset) override {
+    PLOGD << "mapping: "
+          << fmt::format("addressing_mode=DIRECT, effective_address=0x{:x}",
+                         offset);
+    return segment->address(offset);
   };
 
   static const uint8_t BX_SI_INDEX = 0;
@@ -237,7 +238,7 @@ struct AddressingModes final {
     static const uint8_t BP_SI = EffectiveAddresser::BP_SI_INDEX;
     static const uint8_t SI = EffectiveAddresser::SI_INDEX;
     static const uint8_t DI = EffectiveAddresser::DI_INDEX;
-    static const uint8_t _X = 6; // TODO implement
+    static const uint8_t DIRECT_ADDRESSING = 0x6;
     static const uint8_t BX = EffectiveAddresser::BX_INDEX;
   };
   struct MOD {

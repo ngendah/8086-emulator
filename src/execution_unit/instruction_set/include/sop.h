@@ -17,6 +17,7 @@ struct SOP{
   static const uint8_t SOP_CS = 0x2E;
   static const uint8_t SOP_SS = 0x36;
   static const uint8_t SOP_DS = 0x3E;
+  static const uint8_t NONE = 0xff; // no segment override, default value
 };
 
 #endif // SOP_CHECKER_H
