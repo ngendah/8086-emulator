@@ -305,7 +305,7 @@ struct Bytes {
   Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
 
   ~Bytes() {
-    //delete _bytes;
+    // delete _bytes;
     _bytes = nullptr;
   }
 
@@ -392,8 +392,7 @@ public:
   void write_hi(const uint8_t val) override {
     uint16_t _word = make_word(val, 0);
     // NOLINTNEXTLINE
-    Bytes bytes(reinterpret_cast<uint8_t *>(&_word),
-                sizeof(uint16_t));
+    Bytes bytes(reinterpret_cast<uint8_t *>(&_word), sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
@@ -404,8 +403,7 @@ public:
 
   void write(const uint16_t val) override {
     // NOLINTNEXTLINE
-    Bytes bytes(reinterpret_cast<const uint8_t *>(&val),
-                sizeof(uint16_t));
+    Bytes bytes(reinterpret_cast<const uint8_t *>(&val), sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
@@ -713,8 +711,8 @@ struct MicroOp {
 
 protected:
   template <class OpTypeSelectorT, class OperatorT>
-  struct _ExecuteStrategy2 final : ExecuteStrategy {
-    _ExecuteStrategy2(Decoder *const decoder, MicroOp *const micro_op)
+  struct ExecuteStrategy2 final : ExecuteStrategy {
+    ExecuteStrategy2(Decoder *const decoder, MicroOp *const micro_op)
         : ExecuteStrategy(decoder, micro_op) {}
 
     void execute(const Instruction &instruction) const override {
@@ -730,9 +728,9 @@ protected:
   };
 
   template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
-  struct _ExecuteStrategy21 final : ExecuteStrategy {
-    _ExecuteStrategy21(Decoder *const decoder, MicroOp *const op)
-        : ExecuteStrategy(decoder, op) {}
+  struct ExecuteStrategy21 final : ExecuteStrategy {
+    ExecuteStrategy21(Decoder *const decoder, MicroOp *const micro_op)
+        : ExecuteStrategy(decoder, micro_op) {}
 
     void execute(const Instruction &instruction) const override {
       auto op_selector = OpTypeSelectorT();
@@ -749,11 +747,11 @@ protected:
   };
 
   template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
-  struct _ExecuteStrategy3 final: ExecuteStrategy {
-    _ExecuteStrategy3(Decoder *const decoder, MicroOp *const op)
-        : ExecuteStrategy(decoder, op) {}
+  struct ExecuteStrategy3 final : ExecuteStrategy {
+    ExecuteStrategy3(Decoder *const decoder, MicroOp *const micro_op)
+        : ExecuteStrategy(decoder, micro_op) {}
 
-    void execute(const Instruction &instruction) const {
+    void execute(const Instruction &instruction) const override {
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
       auto _instruction = _micro_op->before_decode(instruction);
@@ -767,7 +765,7 @@ protected:
     }
   };
 
-  struct Executor final{
+  struct Executor final {
     Executor(ExecuteStrategy *const execute_strategy)
         : _execute_strategy(execute_strategy) {}
 
@@ -805,7 +803,7 @@ protected:
   void execute(const Instruction &instruction) override {                      \
     auto decoder = decoder_cls(_bus, _registers);                              \
     auto _strategy =                                                           \
-        _ExecuteStrategy2<op_type_selector_cls, operator_type_cls>(            \
+        ExecuteStrategy2<op_type_selector_cls, operator_type_cls>(             \
             &decoder, (MicroOp *)this);                                        \
     Executor(&_strategy).execute(instruction);                                 \
   }
@@ -818,9 +816,8 @@ protected:
   }                                                                            \
   void execute(const Instruction &instruction) override {                      \
     auto decoder = decoder_cls(_bus, _registers);                              \
-    auto _strategy =                                                           \
-        _ExecuteStrategy3<op_type_selector_cls, operator_type_cls,             \
-                          op_type_cls>(&decoder, (MicroOp *)this);             \
+    auto _strategy = ExecuteStrategy3<op_type_selector_cls, operator_type_cls, \
+                                      op_type_cls>(&decoder, (MicroOp *)this); \
     Executor(&_strategy).execute(instruction);                                 \
   }
 

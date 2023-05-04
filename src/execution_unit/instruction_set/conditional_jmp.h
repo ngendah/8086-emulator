@@ -45,10 +45,10 @@
       }                                                                        \
     };                                                                         \
                                                                                \
-    typedef _ExecuteStrategy21<JmpSelector, CJmpOperator, CJmpOpType>          \
-        ExecuteStrategy21;                                                     \
+    typedef ExecuteStrategy21<JmpSelector, CJmpOperator, CJmpOpType>          \
+        ExecuteStrategy4;                                                     \
                                                                                \
-    MICRO_OP_INSTRUCTION_D(cls_name, ExecuteStrategy21, JMP_Decoder)           \
+    MICRO_OP_INSTRUCTION_D(cls_name, ExecuteStrategy4, JMP_Decoder)           \
   };
 
 CONDITIONAL_JMP_MICRO_OP(JE, je)
