@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 add_executable(unitTests tests.cpp)
 
 include_directories(
-  "${PROJECT_SOURCE_DIR}/includes"
+  "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_SOURCE_DIR}/src/peripheral"
   "${PROJECT_SOURCE_DIR}/src/execution_unit"
   "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set"

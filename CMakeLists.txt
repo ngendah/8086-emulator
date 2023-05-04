@@ -7,10 +7,10 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(SDL2 REQUIRED)
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 include_directories(
-  includes
-  libraries/plog/include
-  libraries/fmt/include
-  ${SDL2_INCLUDE_DIRS}
+        include
+        libraries/plog/include
+        libraries/fmt/include
+        ${SDL2_INCLUDE_DIRS}
 )
 add_subdirectory(src)
 add_subdirectory(libraries)
