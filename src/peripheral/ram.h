@@ -18,7 +18,7 @@ class Buffer {
 public:
   Buffer(uint32_t size = 128) : _memory(size & 0x000FFFFF) {}
 
-  uint16_t write(Address *address, Bytes bytes) {
+  uint16_t write(Address const *address, Bytes bytes) {
     auto begin = _memory.data();
     auto end = begin + _memory.size();
     if (begin + ((uint32_t)*address) + bytes._size >= end) {
@@ -29,7 +29,7 @@ public:
     return bytes._size;
   }
 
-  Bytes read(Address *address, uint16_t len) {
+  Bytes read(Address const *address, uint16_t len) {
     auto begin = _memory.data();
     auto end = begin + _memory.size();
     if (begin + ((uint32_t)*address) >= end) {
@@ -48,11 +48,11 @@ public:
 
   ~RAM() override {}
 
-  uint16_t write(Address *address, const Bytes &bytes) override {
+  uint16_t write(Address const *address, const Bytes &bytes) override {
     return _buffer.write(address, bytes);
   }
 
-  Bytes read(Address *address, uint16_t len) override {
+  Bytes read(Address const *address, uint16_t len) override {
     return _buffer.read(address, len);
   }
 };

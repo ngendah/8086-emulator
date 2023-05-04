@@ -14,16 +14,16 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <utility>
 
 #define len(x) sizeof(x) * CHAR_BIT
-#define UNUSED(expr) (void)(expr)
 #define UNUSED_PARAM __attribute__((unused))
 
-typedef void *const void_ptr_t;
+__attribute__((unused)) typedef void *const void_ptr_t;
 typedef uint8_t sop_t; // segment override prefix
 
-static uint16_t make_word(const uint8_t hi, const uint8_t lo) {
-  return ((uint16_t)((hi << 8) | (lo & 0x00FF)));
+static uint16_t make_word(const uint8_t high, const uint8_t low) {
+  return ((uint16_t)((high << 8) | (low & 0x00FF)));
 }
 
 #pragma GCC diagnostic push
@@ -40,7 +40,7 @@ typedef union _u16 {
 } u16_t;
 
 typedef struct _instruction {
-  uint8_t _X; // reserved
+  uint8_t X; // reserved
   union __imm {
     uint16_t data;
     struct {
@@ -63,16 +63,17 @@ typedef struct _instruction {
 #pragma GCC diagnostic pop
 
 struct IO {
+  IO() = default;
 
   virtual ~IO() = default;
 
-  virtual void write_hi(const uint8_t val) = 0;
+  virtual void write_hi(uint8_t val) = 0;
 
-  virtual void write_lo(const uint8_t val) = 0;
+  virtual void write_lo(uint8_t val) = 0;
 
-  virtual void write(const uint8_t val) = 0;
+  virtual void write(uint8_t val) = 0;
 
-  virtual void write(const uint16_t val) = 0;
+  virtual void write(uint16_t val) = 0;
 
   virtual uint16_t read() const = 0;
 
@@ -172,18 +173,18 @@ public:
 
   uint8_t port() const { return _instruction._imm.lo; }
 
-  friend std::ostream &operator<<(std::ostream &os,
+  friend std::ostream &operator<<(std::ostream &ostream,
                                   const Instruction &instruction) {
-    os << " "
-       << fmt::format("sop=0x{0:x}, opcode=0x{1:x}(0b{1:b}), mode="
-                      "0x{2:x}(0b{2:b}), offset=0x{3:x}, data=0x{4:x}",
-                      instruction._instruction._sop,
-                      instruction._instruction._opcode_mode.opcode,
-                      instruction._instruction._opcode_mode.mode,
-                      instruction._instruction._offset,
-                      instruction._instruction._imm.data)
-       << " ";
-    return os;
+    ostream << " "
+            << fmt::format("sop=0x{0:x}, opcode=0x{1:x}(0b{1:b}), mode="
+                           "0x{2:x}(0b{2:b}), offset=0x{3:x}, data=0x{4:x}",
+                           instruction._instruction._sop,
+                           instruction._instruction._opcode_mode.opcode,
+                           instruction._instruction._opcode_mode.mode,
+                           instruction._instruction._offset,
+                           instruction._instruction._imm.data)
+            << " ";
+    return ostream;
   }
 };
 
@@ -195,18 +196,25 @@ public:
 
   InstructionTemplate(const Instruction &val) : _instruction(val) {}
 
-  InstructionTemplate(const InstructionTemplate<T, P> &rhs)
+  InstructionTemplate(const InstructionTemplate &rhs)
       : _instruction(rhs._instruction) {}
+
+  ~InstructionTemplate() = default;
+
+  InstructionTemplate &operator=(const InstructionTemplate &rhs) {
+    _instruction = rhs._instruction;
+    return *this;
+  };
 
   T opcode() const { return _instruction.opcode_to<T>(); }
 
   P mode() const { return _instruction.mode_to<P>(); }
 
   friend std::ostream &
-  operator<<(std::ostream &os,
+  operator<<(std::ostream &ostream,
              const InstructionTemplate<T, P> &instruction_template) {
-    os << instruction_template._instruction;
-    return os;
+    ostream << instruction_template._instruction;
+    return ostream;
   }
 };
 
@@ -220,7 +228,7 @@ public:
   Address(const uint8_t address) : _address(address) {}
   Address(const uint16_t address) : _address(address) {}
   Address(const uint32_t address) : _address(address) {}
-  Address operator=(const Address &rhs) {
+  Address &operator=(const Address &rhs) {
     _address = rhs._address;
     return *this;
   }
@@ -233,22 +241,17 @@ public:
     return *this;
   }
 
-  Address &operator+=(const Address &address) {
-    *this += address._address;
-    return *this;
+  Address operator+(uint16_t offset) const {
+    return Address(_address + offset);
   }
 
-  Address operator+(uint16_t offset) { return Address(_address + offset); }
-
-  Address operator+(const Address &rhs) {
+  Address operator+(const Address &rhs) const {
     return Address(_address + rhs._address);
   }
 };
 
 struct Flags final : IO {
   Flags() : _flags(0) {}
-
-  Flags(const uint16_t &flags) : _flags(flags) {}
 
   Flags(const Flags &rhs) : _flags(rhs._flags) {}
 
@@ -258,11 +261,11 @@ struct Flags final : IO {
 
   operator uint16_t() const { return _flags.word; }
 
-  friend std::ostream &operator<<(std::ostream &os,
+  friend std::ostream &operator<<(UNUSED_PARAM std::ostream &ostream,
                                   UNUSED_PARAM const Flags &) {
     // instead do: os << flags.bits<flags_t>();
     assert(false);
-    return os;
+    // return ostream;
   }
 
   void write_hi(const uint8_t val) override { _flags.hi = val; }
@@ -282,51 +285,51 @@ protected:
 
   uint8_t read_byte() const override {
     assert(false);
-    return (uint8_t)_flags.lo;
+    // return (uint8_t)_flags.lo;
   }
 
-protected:
   u16_t _flags;
 };
 
+// TODO fix pointer copy and assignments
 struct Bytes {
   uint8_t *_bytes;
   uint16_t _size;
   Bytes() : _bytes(nullptr), _size(0) {}
 
-  explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(nullptr), _size(size) {
-    _bytes = bytes;
-    _size = size;
+  explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(bytes), _size(size) {}
+
+  Bytes(uint8_t const *bytes, uint16_t size)
+      : _bytes(const_cast<uint8_t *>(bytes)), _size(size) {} // NOLINT
+
+  Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
+
+  ~Bytes() {
+    //delete _bytes;
+    _bytes = nullptr;
   }
 
-  Bytes(const Bytes &bytes) : _bytes(nullptr), _size(0) {
-    _bytes = bytes._bytes;
-    _size = bytes._size;
-  }
-
-  ~Bytes() { _bytes = nullptr; }
-
-  Bytes operator=(const Bytes &rhs) {
-    _bytes = rhs._bytes;
-    _size = rhs._size;
+  Bytes &operator=(Bytes &&rhs) noexcept {
+    std::swap(_size, rhs._size);
+    std::swap(_bytes, rhs._bytes);
     return *this;
   }
 
   operator uint16_t() const {
     assert(_size == 2);
-    return (uint16_t)((_bytes[1] << 8) | _bytes[0]);
+    return (uint16_t)((_bytes[1] << 8) | _bytes[0]); // NOLINT
   }
 
   operator uint8_t() const {
     assert(_size == 1);
-    return _bytes[0];
+    return _bytes[0]; // NOLINT
   }
 };
 
 struct BUS {
   virtual ~BUS() = default;
-  virtual uint16_t write(Address *, const Bytes &) = 0;
-  virtual Bytes read(Address *, uint16_t size) = 0;
+  virtual uint16_t write(Address const *, const Bytes &) = 0;
+  virtual Bytes read(Address const *, uint16_t size) = 0;
 };
 
 class ValueIO final : public IO {
@@ -338,12 +341,12 @@ public:
 
   ValueIO(const ValueIO &rhs) : _value(rhs._value) {}
 
-  ValueIO operator=(const uint16_t &val) {
+  ValueIO &operator=(const uint16_t &val) {
     _value.word = val;
     return *this;
   }
 
-  ValueIO operator=(const uint8_t &val) {
+  ValueIO &operator=(const uint8_t &val) {
     _value.lo = val;
     return *this;
   }
@@ -388,57 +391,61 @@ public:
 
   void write_hi(const uint8_t val) override {
     uint16_t _word = make_word(val, 0);
-    Bytes bytes((uint8_t *)&_word, sizeof(uint16_t));
+    // NOLINTNEXTLINE
+    Bytes bytes(reinterpret_cast<uint8_t *>(&_word),
+                sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
   void write_lo(const uint8_t val) override {
-    Bytes bytes((uint8_t *)&val, sizeof(uint8_t));
+    Bytes bytes(const_cast<uint8_t *>(&val), sizeof(uint8_t)); // NOLINT
     _bus->write(&_address, bytes);
   }
 
   void write(const uint16_t val) override {
-    Bytes bytes((uint8_t *)&val, sizeof(uint16_t));
+    // NOLINTNEXTLINE
+    Bytes bytes(reinterpret_cast<const uint8_t *>(&val),
+                sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
   void write(const uint8_t val) override {
-    Bytes bytes((uint8_t *)&val, sizeof(uint8_t));
+    Bytes bytes(&val, sizeof(uint8_t));
     _bus->write(&_address, bytes);
   }
 
   uint16_t read() const override {
-    Bytes bytes = _bus->read((Address *)&_address, sizeof(uint16_t));
+    Bytes bytes = _bus->read(&_address, sizeof(uint16_t));
     uint16_t word = 0;
     std::memcpy(&word, bytes._bytes, bytes._size);
     return word;
   }
 
   uint8_t read_byte() const override {
-    Bytes bytes = _bus->read((Address *)&_address, sizeof(uint8_t));
+    Bytes bytes = _bus->read(&_address, sizeof(uint8_t));
     uint8_t byte = 0;
     std::memcpy(&byte, bytes._bytes, bytes._size);
     return byte;
   }
 
   uint8_t read_hi() const override {
-    Bytes bytes = _bus->read((Address *)&_address, sizeof(uint16_t));
+    Bytes bytes = _bus->read(&_address, sizeof(uint16_t));
     uint16_t word = 0;
     std::memcpy(&word, bytes._bytes, sizeof(uint16_t));
     return ((word >> 8) & 0x107);
   }
 
   uint8_t read_lo() const override {
-    Bytes bytes = _bus->read((Address *)&_address, sizeof(uint8_t));
+    Bytes bytes = _bus->read(&_address, sizeof(uint8_t));
     uint16_t byte = 0;
     std::memcpy(&byte, bytes._bytes, sizeof(uint8_t));
     return byte;
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const BUSIO &t) {
-    os << fmt::format("BUSIO_ptr=0x{:x}", (long)&t) << ", "
-       << fmt::format("physical_address=0x{:x}", (uint32_t)t._address);
-    return os;
+  friend std::ostream &operator<<(std::ostream &ostream, const BUSIO &t) {
+    ostream << fmt::format("BUSIO_ptr=0x{:x}", (long)&t) << ", "
+            << fmt::format("physical_address=0x{:x}", (uint32_t)t._address);
+    return ostream;
   }
 };
 
@@ -484,16 +491,16 @@ public:
     return *this;
   }
 
-  Register &operator=(uint16_t val) {
+  virtual Register &operator=(uint16_t val) {
     _register.word = val;
     return *this;
   }
 
   std::string name() const { return _name; }
 
-  friend std::ostream &operator<<(std::ostream &os, const Register &rhs) {
-    os << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register.word);
-    return os;
+  friend std::ostream &operator<<(std::ostream &ostream, const Register &rhs) {
+    ostream << fmt::format("{0:}=0x{1:x}", rhs._name, rhs._register.word);
+    return ostream;
   }
 };
 
@@ -502,11 +509,11 @@ struct Segment final : public Register {
 
   Segment(const Segment &rhs) : Register(rhs) {}
 
-  Segment(std::string name) : Register(name) {}
+  Segment(const std::string& name) : Register(name) {}
 
   ~Segment() override = default;
 
-  Segment &operator=(uint16_t val) {
+  Segment &operator=(uint16_t val) override {
     _register.word = val;
     return *this;
   }
@@ -560,6 +567,7 @@ enum OpTypes {
   nop,
 };
 
+// NOLINTNEXTLINE
 static const std::string _OpTypes[] = {
     "word",          "byte",          "high_byte", "low_byte",
     "high_low_byte", "low_high_byte", "nop"};
@@ -596,6 +604,7 @@ enum CJmpOpTypes {
   jge,
 };
 
+// NOLINTNEXTLINE
 static const std::string _CJmpOpTypes[] = {
     "noj", "je",  "jne", "js",   "jns", "jo",  "jno",  "jc",  "jb",  "jnae",
     "jnc", "jae", "jnb", "jp",   "jpe", "jnp", "jpo",  "jbe", "jna", "jnbe",
@@ -603,6 +612,7 @@ static const std::string _CJmpOpTypes[] = {
 };
 
 struct OpType {
+  virtual ~OpType() = default;
   struct Params {
     OpTypes _op_type;
     CJmpOpTypes _jmp_type;
@@ -636,19 +646,21 @@ struct OpType {
 };
 
 struct OpTypeSelector {
+  virtual ~OpTypeSelector() = default;
   virtual OpTypes op_type(const Instruction &instruction) const = 0;
 };
 
 struct MicroOp {
 
   struct ExecuteStrategy {
-    ExecuteStrategy(Decoder *const decoder, MicroOp *const op)
-        : _decoder(decoder), _op(op) {}
+    virtual ~ExecuteStrategy() = default;
+    ExecuteStrategy(Decoder *const decoder, MicroOp *const micro_op)
+        : _decoder(decoder), _micro_op(micro_op) {}
 
     virtual void execute(const Instruction &instruction) const = 0;
 
-    Decoder *const _decoder;
-    MicroOp *const _op;
+    Decoder *_decoder;
+    MicroOp *_micro_op;
   };
 
   struct Params {
@@ -673,9 +685,9 @@ struct MicroOp {
 
     bool operator==(const Key &rhs) const { return _opcode == (rhs & _mask); }
 
-    friend std::ostream &operator<<(std::ostream &os, const Key &key) {
-      os << fmt::format("opcode=0x{:x}", key._opcode);
-      return os;
+    friend std::ostream &operator<<(std::ostream &ostream, const Key &key) {
+      ostream << fmt::format("opcode=0x{:x}", key._opcode);
+      return ostream;
     }
   };
 
@@ -701,19 +713,19 @@ struct MicroOp {
 
 protected:
   template <class OpTypeSelectorT, class OperatorT>
-  struct _ExecuteStrategy2 : ExecuteStrategy {
-    _ExecuteStrategy2(Decoder *const decoder, MicroOp *const op)
-        : ExecuteStrategy(decoder, op) {}
+  struct _ExecuteStrategy2 final : ExecuteStrategy {
+    _ExecuteStrategy2(Decoder *const decoder, MicroOp *const micro_op)
+        : ExecuteStrategy(decoder, micro_op) {}
 
     void execute(const Instruction &instruction) const override {
       auto op_selector = OpTypeSelectorT();
-      auto _instruction = _op->before_decode(instruction);
+      auto _instruction = _micro_op->before_decode(instruction);
       auto src_dest = _decoder->decode(_instruction);
-      _op->before_execute(_instruction);
+      _micro_op->before_execute(_instruction);
       auto uop_operator =
           OperatorT(src_dest.first, src_dest.second, &op_selector);
       uop_operator.execute(_instruction);
-      _op->after_execute(_instruction);
+      _micro_op->after_execute(_instruction);
     }
   };
 
@@ -725,37 +737,37 @@ protected:
     void execute(const Instruction &instruction) const override {
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
-      auto _instruction = _op->before_decode(instruction);
+      auto _instruction = _micro_op->before_decode(instruction);
       auto src_dest = _decoder->decode(_instruction);
-      auto registers = _op->_registers;
-      _op->before_execute(_instruction);
+      auto *registers = _micro_op->_registers;
+      _micro_op->before_execute(_instruction);
       auto uop_operator = OperatorT(src_dest.first, src_dest.second,
                                     &op_selector, &op_type, &registers->FLAGS);
       uop_operator.execute(_instruction);
-      _op->after_execute(_instruction);
+      _micro_op->after_execute(_instruction);
     }
   };
 
   template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
-  struct _ExecuteStrategy3 : ExecuteStrategy {
+  struct _ExecuteStrategy3 final: ExecuteStrategy {
     _ExecuteStrategy3(Decoder *const decoder, MicroOp *const op)
         : ExecuteStrategy(decoder, op) {}
 
     void execute(const Instruction &instruction) const {
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
-      auto _instruction = _op->before_decode(instruction);
+      auto _instruction = _micro_op->before_decode(instruction);
       auto src_dest = _decoder->decode(_instruction);
-      auto registers = _op->_registers;
-      _op->before_execute(_instruction);
+      auto *registers = _micro_op->_registers;
+      _micro_op->before_execute(_instruction);
       auto uop_operator = OperatorT(src_dest.first, src_dest.second,
                                     &op_selector, &op_type, &registers->FLAGS);
       uop_operator.execute(_instruction);
-      _op->after_execute(_instruction);
+      _micro_op->after_execute(_instruction);
     }
   };
 
-  struct Executor {
+  struct Executor final{
     Executor(ExecuteStrategy *const execute_strategy)
         : _execute_strategy(execute_strategy) {}
 
@@ -763,8 +775,7 @@ protected:
       _execute_strategy->execute(instruction);
     }
 
-  protected:
-    ExecuteStrategy *const _execute_strategy;
+    ExecuteStrategy *_execute_strategy;
   };
 };
 

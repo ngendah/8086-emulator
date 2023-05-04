@@ -1,3 +1,11 @@
-Checks: "bugprone-*,clang-diagnostic-*,clang-analyzer-*,modernize-*,performance-*,readability-*"
+Checks: "-*,cppcoreguidelines-*,
+bugprone-*,
+clang-diagnostic-*,
+clang-analyzer-*,
+performance-*,
+readability-*,
+-readability-magic-numbers,
+-cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-special-member-functions"
 WarningsAsErrors: ""
 HeaderFilterRegex: ""
