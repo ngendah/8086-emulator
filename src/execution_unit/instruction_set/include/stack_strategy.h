@@ -9,6 +9,7 @@
 #include "types.h"
 
 struct StackStrategy {
+virtual ~StackStrategy() = default;
   virtual void next(Register &, uint16_t) const = 0;
   virtual void prev(Register &, uint16_t) const = 0;
 };

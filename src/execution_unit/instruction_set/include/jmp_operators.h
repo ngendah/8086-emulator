@@ -15,6 +15,7 @@ struct CJmpOpTypeSelector : OpTypeSelector {
 };
 
 struct CJmpOperator : Operator {
+  virtual ~CJmpOperator() = default;
   CJmpOperator(IO *source, IO *destination, OpTypeSelector *selector,
                OpType *const optype, Flags *flags)
       : Operator(source, destination, selector, optype), _flags(flags) {}
@@ -22,10 +23,13 @@ struct CJmpOperator : Operator {
   void execute(const Instruction &instruction) override {
     auto _op_type = _selector->op_type(instruction);
     auto _jmp_op_type =
-        ((CJmpOpTypeSelector *)_selector)->jmp_type(instruction);
+        dynamic_cast<CJmpOpTypeSelector *>(_selector)->jmp_type(instruction);
+    // NOLINTNEXTLINE
     PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
-                         (long)_source, (long)_destination);
+                         (long)_source, (long)_destination); // NOLINT
+    // NOLINTNEXTLINE
     PLOGD << fmt::format("operation type={}", _OpTypes[_op_type]);
+    // NOLINTNEXTLINE
     PLOGD << fmt::format("jump type={}", _CJmpOpTypes[_jmp_op_type]);
     _op_type_operator->execute(
         OpType::Params(_op_type, _source, _destination, _flags, _jmp_op_type));
@@ -37,7 +41,7 @@ protected:
 
 struct CJmpOpType : OpType {
   void execute(const OpType::Params &params) const override {
-    Register *IP = (Register *)params._source;
+    Register *IP = dynamic_cast<Register *>(params._source);
     IO *value = params._destination;
     switch (params._jmp_type) {
     case je:

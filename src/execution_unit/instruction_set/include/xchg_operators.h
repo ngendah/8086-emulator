@@ -39,7 +39,8 @@ static const auto xchg_op_type_operator = XCHGOpType();
 
 struct XCHGOperator : public Operator {
   XCHGOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : Operator(source, destination, selector, &xchg_op_type_operator) {}
+      : Operator(source, destination, selector,
+                 (OpType *)&xchg_op_type_operator) {}
 };
 
 #endif // _XCHG_OPERATORS_H_
