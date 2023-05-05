@@ -9,18 +9,17 @@
 #include "types.h"
 
 #include <cstdint>
-#include <vector>
 #include <string>
-
+#include <vector>
 
 class CPU {
-    BUS *_ram;
-    Decoder* _decoder;
+  BUS *_ram;
+
 public:
-    CPU(BUS*, Decoder*);
-    virtual ~CPU();
-    void start();
-    void reset();
+  CPU(BUS *);
+  virtual ~CPU();
+  void start();
+  void reset();
 };
 
 #endif /* CPU_H_ */

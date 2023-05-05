@@ -3,10 +3,10 @@
 #include <plog/Init.h>
 #include <plog/Log.h>
 
+#include "execution_unit_tests/execution_unit_tests.h"
 #include "instruction_set_tests/cmp_tests.h"
 #include "instruction_set_tests/in_tests.h"
 #include "instruction_set_tests/incr_tests.h"
-#include "instruction_set_tests/instruction_executor_tests.h"
 #include "instruction_set_tests/instruction_set_tests.h"
 #include "instruction_set_tests/io_selectors_tests.h"
 #include "instruction_set_tests/lahf_tests.h"

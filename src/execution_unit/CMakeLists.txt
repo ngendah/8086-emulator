@@ -1,4 +1,4 @@
-add_library(execution_unit cpu.cpp decoder_impl.cpp)
+add_library(execution_unit execution_unit.cpp)
 
 add_subdirectory(instruction_set)
 

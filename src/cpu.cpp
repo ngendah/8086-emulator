@@ -5,7 +5,7 @@
 
 #include "cpu.h"
 
-CPU::CPU(BUS *ram, Decoder *decoder) : _ram(ram), _decoder(decoder) {}
+CPU::CPU(BUS *ram) : _ram(ram) {}
 
 CPU::~CPU() {}
 
