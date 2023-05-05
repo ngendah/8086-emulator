@@ -15,7 +15,7 @@ struct CJmpOpTypeSelector : OpTypeSelector {
 };
 
 struct CJmpOperator : Operator {
-  virtual ~CJmpOperator() = default;
+  ~CJmpOperator() override = default;
   CJmpOperator(IO *source, IO *destination, OpTypeSelector *selector,
                OpType *const optype, Flags *flags)
       : Operator(source, destination, selector, optype), _flags(flags) {}

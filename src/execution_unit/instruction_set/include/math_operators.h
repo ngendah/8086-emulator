@@ -18,7 +18,7 @@ struct WordOrByteWithSignOpTypeSelector : OpTypeSelector {
 };
 
 struct MathOperator : Operator {
-virtual ~MathOperator() = default;
+~MathOperator() override = default;
   MathOperator(IO *source, IO *destination, OpTypeSelector *selector,
                OpType *const optype, Flags *flags)
       : Operator(source, destination, selector, optype), _flags(flags) {}

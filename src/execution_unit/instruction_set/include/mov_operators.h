@@ -39,9 +39,10 @@ struct MovOpType : OpType {
 static const auto mov_op_type_operator = MovOpType();
 
 struct MovOperator : public Operator {
-  virtual ~MovOperator() = default;
+  ~MovOperator() override = default;
   MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : Operator(source, destination, selector, &mov_op_type_operator) {}
+      : Operator(source, destination, selector,
+                 (OpType *)&mov_op_type_operator) {}
 };
 
 struct RegisterMovOpTypeSelector : OpTypeSelector {
