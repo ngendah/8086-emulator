@@ -18,14 +18,17 @@ struct WordOrByteWithSignOpTypeSelector : OpTypeSelector {
 };
 
 struct MathOperator : Operator {
+virtual ~MathOperator() = default;
   MathOperator(IO *source, IO *destination, OpTypeSelector *selector,
                OpType *const optype, Flags *flags)
       : Operator(source, destination, selector, optype), _flags(flags) {}
 
   void execute(const Instruction &instruction) override {
     auto _op_type = _selector->op_type(instruction);
+    // NOLINTNEXTLINE
     PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
-                         (long)_source, (long)_destination);
+                         (long)_source, (long)_destination); // NOLINT
+    // NOLINTNEXTLINE
     PLOGD << fmt::format("math operation type={}", _OpTypes[_op_type]);
     _op_type_operator->execute(
         OpType::Params(_op_type, _source, _destination, _flags));
@@ -74,7 +77,7 @@ struct CompareOpType : OpType {
   }
 
 protected:
-  void byte_cmp(const OpType::Params &params) const {
+  static void byte_cmp(const OpType::Params &params) {
     // TODO revisit and verify it's correct
     auto flags = params._flags->bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
@@ -89,7 +92,7 @@ protected:
     params._flags->set((uint16_t)flags);
   }
 
-  void word_cmp(const OpType::Params &params) const {
+  static void word_cmp(const OpType::Params &params) {
     // TODO revisit and verify it's correct
     auto flags = params._flags->bits<flags_t>();
     memset(&flags, 0, sizeof(flags));

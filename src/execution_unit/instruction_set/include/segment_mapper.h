@@ -15,6 +15,7 @@
 class SegmentMapper {
 protected:
   struct Mapper {
+    virtual ~Mapper() = default;
     virtual Segment *get(uint8_t idx) = 0;
   };
 
@@ -33,21 +34,20 @@ protected:
       };
     }
 
-    Segment *get(uint8_t idx) override { return _segment_mapper[idx]; }
+    Segment *get(uint8_t idx) override { return _segment_mapper.at(idx); }
   };
 
   struct IndexSegmentMapper final : Mapper {
     std::array<Segment *, 8> _segment_mapper;
-    IndexSegmentMapper(Registers *registers) {
-      _segment_mapper = {
-          &registers->ES,
-          &registers->CS,
-          &registers->SS,
-          &registers->DS,
-      };
-    }
+    IndexSegmentMapper(Registers *registers)
+        : _segment_mapper({
+              &registers->ES,
+              &registers->CS,
+              &registers->SS,
+              &registers->DS,
+          }) {}
 
-    Segment *get(uint8_t idx) { return _segment_mapper[idx]; }
+    Segment *get(uint8_t idx) { return _segment_mapper.at(idx); }
   };
 
   Registers *_registers;

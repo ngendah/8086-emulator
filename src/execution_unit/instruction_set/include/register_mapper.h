@@ -55,9 +55,9 @@ public:
     // slide the index to its appropriate "window"
     // as shown on the table above
     auto _idx = idx <= 7 ? idx % 4 : idx % 8;
-    auto _register = _mapper[_idx];
+    auto _register = _mapper.at(_idx);
     PLOGD << fmt::format("idx=0x{0:x}, name={1}, ptr=0x{2:x}", _idx,
-                         _register->name(), (long)_register);
+                         _register->name(), (long)_register); // NOLINT
     return _register;
   }
 
@@ -79,7 +79,7 @@ public:
    * For details on REG and W bits, refer to instruction_templates.h
    */
   static uint8_t to_idx(uint8_t w, uint8_t reg) {
-    return (uint8_t)((w<<3) | reg);
+    return (uint8_t)((w << 3) | reg);
   }
 
   static const uint8_t AX_INDEX = 0;

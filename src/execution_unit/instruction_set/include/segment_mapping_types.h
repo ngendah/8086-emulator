@@ -13,6 +13,6 @@ enum SegmentMappingTypes {
   indexed,
 };
 
-static const std::string _SegmentMappingTypes[] = {"defaults", "indexed"};
+static const std::string _SegmentMappingTypes[] = {"defaults", "indexed"}; // NOLINT
 
 #endif // SEGMENT_MAPPING_TYPES_H_
