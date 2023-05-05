@@ -1,7 +1,7 @@
 #ifndef _INSTRUCTION_EXECUTOR_TESTS_H_
 #define _INSTRUCTION_EXECUTOR_TESTS_H_
 
-#include "instruction_set.h"
+#include "execution_unit.h"
 #include "lea.h"
 #include "mov.h"
 #include "ram.h"
@@ -16,14 +16,14 @@ const std::string _file_path(std::string const &file) {
   return fmt::format("{}/{}", dir, file);
 }
 
-TEST(InstructionsExecutor, test_fetch_decode) {
+TEST(ExecutionUnit, test_fetch_decode) {
   std::stringstream instructions(std::ios_base::trunc | std::ios_base::in |
                                  std::ios_base::out | std::ios_base::binary);
   uint8_t data[7] = {0x3e, 0xc7, 0x86, 0x46, 0xf2, 0x34, 0x12};
   instructions.write((char *)&data, sizeof(data));
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = InstructionsExecutor(instructions.rdbuf(), &ram, &registers);
+  auto executor = ExecutionUnit(instructions.rdbuf(), &ram, &registers);
   executor.beg();
   auto fetch = executor.fetch();
   auto code = fetch.first;
@@ -39,13 +39,13 @@ TEST(InstructionsExecutor, test_fetch_decode) {
   EXPECT_NE(&micro_op, nullptr);
 }
 
-TEST(InstructionExector, test_fetch_decode_execute_1) {
+TEST(ExecutionUnit, test_fetch_decode_execute_1) {
   std::fstream executable(_file_path("asm/mov1.bin"),
                           std::ios_base::in | std::ios_base::binary);
   EXPECT_EQ(executable.is_open(), true);
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = InstructionsExecutor(executable.rdbuf(), &ram, &registers);
+  auto executor = ExecutionUnit(executable.rdbuf(), &ram, &registers);
   executor.beg();
   {
     auto fetch = executor.fetch();
@@ -77,13 +77,13 @@ TEST(InstructionExector, test_fetch_decode_execute_1) {
   }
 }
 
-TEST(InstructionExector, test_fetch_decode_execute_2) {
+TEST(ExecutionUnit, test_fetch_decode_execute_2) {
   std::fstream executable(_file_path("asm/mov2.bin"),
                           std::ios_base::in | std::ios_base::binary);
   EXPECT_EQ(executable.is_open(), true);
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = InstructionsExecutor(executable.rdbuf(), &ram, &registers);
+  auto executor = ExecutionUnit(executable.rdbuf(), &ram, &registers);
   executor.beg();
   {
     auto fetch = executor.fetch();

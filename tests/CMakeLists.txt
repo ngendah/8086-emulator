@@ -16,6 +16,7 @@ include_directories(
 
 add_subdirectory(peripheral_tests)
 add_subdirectory(instruction_set_tests)
+add_subdirectory(execution_unit_tests)
 
 target_link_libraries(
   unitTests

@@ -13,7 +13,6 @@
 #include "sop.h"
 #include "types.h"
 #include <array>
-#include <istream>
 #include <list>
 
 struct InstructionCode {
@@ -115,92 +114,6 @@ struct InstructionSet {
 protected:
   std::list<std::pair<MicroOp::Key, create_func_t>> instructions;
   std::map<uint8_t, InstructionCode> _instruction_code_map;
-};
-
-struct InstructionsExecutor {
-  InstructionsExecutor(std::streambuf *buf, bus_ptr_t bus,
-                       registers_ptr_t registers)
-      : _buf(buf), _params(bus, registers) {}
-
-  void fetch_decode_execute() {
-    beg();
-    while (!eof()) {
-      seek(_params.registers->IP);
-      auto args = fetch();
-      decode(args.first)->execute(args.second);
-    }
-  }
-
-  std::pair<uint8_t, Instruction> fetch() {
-    uint8_t _sop = SOP::NONE, _opcode = 0;
-    uint16_t _offset = 0, _data = 0; // offset == displacement
-    auto _data_len = 0;
-    _sop = getb();
-    if (SOP::is_sop(_sop)) {
-      _opcode = getb();
-    } else {
-      _opcode = _sop;
-      _sop = SOP::NONE;
-    }
-    auto _code = _instruction_set.find(_opcode);
-    if (_code->_arguments.empty()) {
-      PLOGD << fmt::format("memonic={}, sop={:x},opcode={:x}", _code->_memonic,
-                           _sop, _opcode);
-      return {_opcode, Instruction(_sop, _opcode)};
-    }
-    uint8_t _mode = 0;
-    if (_code->has_mode()) {
-      _mode = getb();
-      auto _has_offset = _code->has_disp(_mode);
-      if (_has_offset.first) {
-        auto _offset_len = _has_offset.second;
-        _offset = _offset_len == sizeof(uint8_t) ? getb() : getw();
-      }
-    }
-    uint16_t _opcode_mode = make_word(_opcode, _mode);
-    auto _has_data = _code->has_data();
-    if (_has_data.first) {
-      _data_len = _has_data.second;
-      _data = _data_len == sizeof(uint8_t) ? getb() : getw();
-    }
-    auto _instruction =
-        _data_len == sizeof(uint8_t)
-            ? Instruction(_sop, _opcode_mode, _offset, (uint8_t)_data)
-            : Instruction(_sop, _opcode_mode, _offset, (uint16_t)_data);
-    PLOGD << fmt::format("memonic={}", _code->_memonic) << _instruction;
-    return {_opcode, _instruction};
-  }
-
-  std::shared_ptr<MicroOp> decode(uint8_t opcode) {
-    return _instruction_set.decode(opcode, _params);
-  }
-
-  uint16_t beg() {
-    _params.registers->IP = 0;
-    auto res = _buf->pubseekpos((uint16_t)_params.registers->IP);
-    return res;
-  }
-
-  bool eof() const { return _buf->pubseekoff(0, std::ios_base::cur) == -1; }
-
-  uint16_t seek(uint16_t pos) { return _buf->pubseekpos(pos); }
-
-  uint8_t getb() { return _get<uint8_t>(); }
-
-  uint16_t getw() { return _get<uint16_t>(); }
-
-protected:
-  template <typename T> T _get() {
-    T _val = 0;
-    _buf->sgetn((char *)&_val, sizeof(_val));
-    _params.registers->IP += sizeof(_val);
-    return _val;
-  }
-
-protected:
-  InstructionSet _instruction_set;
-  std::streambuf *_buf;
-  MicroOp::Params _params;
 };
 
 #endif // _INSTRUCTION_SET_H_
