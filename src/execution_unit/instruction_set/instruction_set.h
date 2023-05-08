@@ -32,9 +32,9 @@ struct InstructionCode {
       : _memonic(memonic), _arguments({larg, rarg}) {}
 
   bool has_mode() const {
-    if(_arguments.empty())
+    if (_arguments.empty())
       return false;
-    if(_arguments.size() == 1 && _arguments[0] == "E")
+    if (_arguments.size() == 1 && _arguments[0] == "E")
       return true;
     return _arguments[0] == "E" || _arguments[1] == "E";
   }
@@ -58,7 +58,7 @@ struct InstructionCode {
   }
 
   std::pair<bool, uint8_t> has_data() const {
-    if(_arguments.empty())
+    if (_arguments.empty())
       return {false, 0};
     if (_arguments.size() == 1 &&
         (_arguments[0].find("Iw") != std::string::npos ||
@@ -72,12 +72,12 @@ struct InstructionCode {
                   _arguments[0].find("Ib") != std::string::npos) ||
         (_arg_2 = _arguments[1].find("Iw") != std::string::npos ||
                   _arguments[1].find("Ib") != std::string::npos)) {
-      if(_arg_1) {
+      if (_arg_1) {
         uint8_t size =
             _arguments[0][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
         return {true, size};
       }
-      if(_arg_2) {
+      if (_arg_2) {
         uint8_t size =
             _arguments[1][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
         return {true, size};

@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-struct SOP{
+struct SOP {
   static bool is_sop(const uint8_t &code) {
     return code == SOP_ES || code == SOP_CS || code == SOP_SS || code == SOP_DS;
   }

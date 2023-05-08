@@ -48,7 +48,7 @@ InstructionSet::InstructionSet() {
 
   /**
    * Code defination
-   * E - Argument(s) encoded in Mode 
+   * E - Argument(s) encoded in Mode
    * I - Immediate value
    *
    * Argument Size

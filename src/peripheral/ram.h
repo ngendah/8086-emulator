@@ -6,8 +6,8 @@
 #ifndef RAM_H_
 #define RAM_H_
 
-#include "types.h"
 #include "logger.h"
+#include "types.h"
 #include <sstream>
 
 struct stream_buffer : std::basic_streambuf<uint8_t> {
@@ -83,7 +83,8 @@ struct stream_buffer : std::basic_streambuf<uint8_t> {
   }
 
   std::streamsize sgetn(char_type **dest, std::streamsize n) {
-    if (reinterpret_cast<std::streamsize>(gpos()) + n > reinterpret_cast<std::streamsize>(egptr())) {
+    if (reinterpret_cast<std::streamsize>(gpos()) + n >
+        reinterpret_cast<std::streamsize>(egptr())) {
       return pos_type(off_type(-1));
     }
     *dest = gptr();
@@ -94,36 +95,39 @@ struct stream_buffer : std::basic_streambuf<uint8_t> {
   pos_type seekpos(pos_type pos,
                    std::ios_base::openmode mode = std::ios_base::in |
                                                   std::ios_base::out) override {
-    if((mode & std::ios_base::in) == std::ios_base::in){
+    if ((mode & std::ios_base::in) == std::ios_base::in) {
       pbump(offset(pos, mode));
     }
-    if((mode & std::ios_base::out) == std::ios_base::out){
+    if ((mode & std::ios_base::out) == std::ios_base::out) {
       gbump(offset(pos, mode));
     }
     return pos;
   }
 
-  off_type offset(pos_type pos, std::ios_base::openmode mode = std::ios_base::in |
+  off_type offset(pos_type pos,
+                  std::ios_base::openmode mode = std::ios_base::in |
                                                  std::ios_base::out) const {
-    if((mode & std::ios_base::in) == std::ios_base::in){
+    if ((mode & std::ios_base::in) == std::ios_base::in) {
       return pos - ppos();
     }
     return pos - gpos();
   }
 
   bool pbounded(pos_type pos) const {
-   return pos + reinterpret_cast<std::streamsize >(pbase()) < reinterpret_cast<std::streamsize>(epptr());
+    return pos + reinterpret_cast<std::streamsize>(pbase()) <
+           reinterpret_cast<std::streamsize>(epptr());
   }
 
   bool gbounded(pos_type pos) const {
-   return pos + reinterpret_cast<std::streamsize>(eback()) < reinterpret_cast<std::streamsize>(egptr());
+    return pos + reinterpret_cast<std::streamsize>(eback()) <
+           reinterpret_cast<std::streamsize>(egptr());
   }
 };
 
 struct RAM final : BUS {
   RAM(uint32_t size = 1024) : _buffer(size){};
 
-  RAM(uint8_t *buffer, uint16_t size) : _buffer(buffer, size){}
+  RAM(uint8_t *buffer, uint16_t size) : _buffer(buffer, size) {}
 
   ~RAM() override {}
 
@@ -162,9 +166,7 @@ protected:
     }
 
     // TODO make it visible only to tests
-    Buffer(uint8_t *buffer, uint16_t size) {
-      this->setbuf(buffer, size);
-    }
+    Buffer(uint8_t *buffer, uint16_t size) { this->setbuf(buffer, size); }
   };
 
   Buffer _buffer;

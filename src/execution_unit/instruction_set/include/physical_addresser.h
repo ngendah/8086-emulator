@@ -29,7 +29,7 @@ protected:
   std::array<std::string, 8> _eff_memonics;
 
   static Address _address(const Register &r1, const Register &r2,
-                   const uint16_t &offset) {
+                          const uint16_t &offset) {
     PLOGD << r1 << ", " << r2 << ", " << fmt::format("offset=0x{:x}", offset);
     return Address((uint16_t)(r1.read() + r2.read() + offset));
   }
@@ -72,18 +72,27 @@ protected:
   }
 
 public:
-  EffectiveAddresser(Registers *registers) : _registers(registers),
-    _eff_mapper({
-        &EffectiveAddresser::_e0, &EffectiveAddresser::_e1,
-        &EffectiveAddresser::_e2, &EffectiveAddresser::_e3,
-        &EffectiveAddresser::_e4, &EffectiveAddresser::_e5,
-        &EffectiveAddresser::_e6, &EffectiveAddresser::_e7,
-    }),
-    _eff_memonics({
-        "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]",
-        "[SI]",      "[DI]",      "[BP]",      "[BX]",
-    }){
-  }
+  EffectiveAddresser(Registers *registers)
+      : _registers(registers), _eff_mapper({
+                                   &EffectiveAddresser::_e0,
+                                   &EffectiveAddresser::_e1,
+                                   &EffectiveAddresser::_e2,
+                                   &EffectiveAddresser::_e3,
+                                   &EffectiveAddresser::_e4,
+                                   &EffectiveAddresser::_e5,
+                                   &EffectiveAddresser::_e6,
+                                   &EffectiveAddresser::_e7,
+                               }),
+        _eff_memonics({
+            "[BX]+[SI]",
+            "[BX]+[DI]",
+            "[BP]+[SI]",
+            "[BP]+[DI]",
+            "[SI]",
+            "[DI]",
+            "[BP]",
+            "[BX]",
+        }) {}
 
   Address address(UNUSED_PARAM Segment *, uint8_t idx) override {
     PLOGD << "mapping: "
@@ -94,7 +103,7 @@ public:
   }
 
   Address address(UNUSED_PARAM Segment *, uint8_t idx,
-                          uint16_t offset) override {
+                  uint16_t offset) override {
     PLOGD << "mapping: "
           << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
                          _eff_memonics.at(idx));
@@ -103,7 +112,7 @@ public:
   };
 
   Address address(UNUSED_PARAM Segment *, uint8_t idx,
-                          uint8_t offset) override {
+                  uint8_t offset) override {
     PLOGD << "mapping: "
           << fmt::format("addressing_mode=0x{0:x}, memonic={1}", idx,
                          _eff_memonics.at(idx));
@@ -142,7 +151,7 @@ protected:
   }
 
   static Address _f_2(Segment *segment, const Register &register1,
-               const Register &register2) {
+                      const Register &register2) {
     return segment->address(register1, register2.read());
   }
 
@@ -183,19 +192,29 @@ protected:
   }
 
 public:
-  PhysicalAddresser(Registers *registers) : EffectiveAddresser(registers),
-    _phy_mapper({
-        &PhysicalAddresser::_f0, &PhysicalAddresser::_f1,
-        &PhysicalAddresser::_f2, &PhysicalAddresser::_f3,
-        &PhysicalAddresser::_f4, &PhysicalAddresser::_f5,
-        &PhysicalAddresser::_f6, &PhysicalAddresser::_f7,
-        &PhysicalAddresser::_f8,
-    }),
-    _phy_memonics({
-        "[BX]+[SI]", "[BX]+[DI]", "[BP]+[SI]", "[BP]+[DI]", "[SI]",
-        "[DI]",      "[BP]",      "[BX]",      "[AX][BX]",
-    }) {
-  }
+  PhysicalAddresser(Registers *registers)
+      : EffectiveAddresser(registers), _phy_mapper({
+                                           &PhysicalAddresser::_f0,
+                                           &PhysicalAddresser::_f1,
+                                           &PhysicalAddresser::_f2,
+                                           &PhysicalAddresser::_f3,
+                                           &PhysicalAddresser::_f4,
+                                           &PhysicalAddresser::_f5,
+                                           &PhysicalAddresser::_f6,
+                                           &PhysicalAddresser::_f7,
+                                           &PhysicalAddresser::_f8,
+                                       }),
+        _phy_memonics({
+            "[BX]+[SI]",
+            "[BX]+[DI]",
+            "[BP]+[SI]",
+            "[BP]+[DI]",
+            "[SI]",
+            "[DI]",
+            "[BP]",
+            "[BX]",
+            "[AX][BX]",
+        }) {}
 
   Address address(Segment *segment, uint8_t idx, uint16_t offset) override {
     PLOGD << "mapping: "
