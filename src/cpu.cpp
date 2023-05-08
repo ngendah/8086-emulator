@@ -8,10 +8,8 @@ void CPU::bootstrap(const std::string &os,
                     std::vector<Peripheral *> peripherals) {
   _halt = false;
   (void)os; // load program
-  auto idx = 0;
   for (auto peripheral : peripherals) {
     peripheral->bootstrap(nullptr, dynamic_cast<InterruptHandler *>(this));
-    idx++;
   }
 }
 

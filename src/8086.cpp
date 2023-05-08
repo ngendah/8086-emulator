@@ -93,7 +93,7 @@ int main(int, char **) {
         break;
       }
     }
-    cpu.execute();
+    // cpu.execute();
   }
 
   SDL_DestroyWindow(window);
