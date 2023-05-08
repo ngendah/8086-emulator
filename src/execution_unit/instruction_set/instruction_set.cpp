@@ -15,8 +15,6 @@
 
 #include <algorithm>
 
-// reference: http://www.mlsite.net/8086
-
 #define _INSTRUCTION(opcode, mask, cls)                                        \
   register_instruction<cls>(MicroOp::Key(opcode, mask))
 

@@ -250,8 +250,9 @@ struct SegmentIOSelector : public IOSelector {
       : _segmentMapper(registers), _selector(selector) {}
 
   IO *get(const Instruction &instruction) override {
-    return _segmentMapper.get(_selector->SR(instruction),
+    auto _segment = _segmentMapper.get(_selector->SR(instruction),
                               _selector->map_type());
+    return _segment;
   }
 
 protected:

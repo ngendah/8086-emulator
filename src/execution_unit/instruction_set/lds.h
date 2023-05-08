@@ -43,36 +43,20 @@ protected:
   void _execute(const Instruction &instruction) {
     MovRegisterMemory(_bus, _registers).execute(instruction);
     _test_point(this, 0);
-    auto reg = instruction.mode_to<mod_reg_rm_t>().REG;
-    {
-      opcode_reg_t opcode = {};
-      opcode.REG = reg;
-      opcode.OPCODE = 0x5;
-      auto instruction = Instruction(0xff, make_word(opcode, 0));
-      INCRRegister(_bus, _registers).execute(instruction);
-      _test_point(this, 1);
-    }
+    auto rm = instruction.mode_to<mod_reg_rm_t>().RM;
     {
       d_w_t opcode = {};
       opcode.D = 1;
-      opcode.W = 1;
-      mod_reg_rm_t mode;
-      mode.MOD = AddressingModes::MOD::REG;
-      mode.REG = RegisterMapper::SI_INDEX;
-      mode.RM = reg;
-      auto instruction = Instruction(0xff, make_word(opcode, mode));
-      MovRegisterRegister(_bus, _registers).execute(instruction);
-      _test_point(this, 2);
-    }
-    {
-      d_w_t opcode = {};
-      opcode.D = 1;
-      mod_sr_rm_t mode = {};
-      mode.SR = SegmentMapper::DS_INDEX;
-      mode.RM = AddressingModes::RM::SI;
-      auto instruction =
-          Instruction(SegmentMapper::SOP_DS_INDEX, make_word(opcode, mode));
-      MovMemorySegment(_bus, _registers).execute(instruction);
+      mod_reg_rm_t mode = {};
+      mode.MOD = AddressingModes::MOD::MEM_DISPLACEMENT_16;
+      mode.REG = SegmentMapper::DS_INDEX;
+      mode.RM = rm;
+      auto _instruction = Instruction(instruction);
+      _instruction.sop(SegmentMapper::SOP_DS_INDEX);
+      _instruction.opcode(opcode);
+      _instruction.mode(mode);
+      _instruction.offset(_instruction.offset() + sizeof(uint16_t));
+      MovMemorySegment(_bus, _registers).execute(_instruction);
     }
   }
   std::function<void(LDS *const, uint8_t)> _test_point;

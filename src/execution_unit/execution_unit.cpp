@@ -1,20 +1,32 @@
 #include "execution_unit.h"
 
-ExecutionUnit::ExecutionUnit(std::streambuf *buf, bus_ptr_t bus,
-                             registers_ptr_t registers)
-    : _buf(buf), _params(bus, registers) {}
+ExecutionUnit::ExecutionUnit(bus_ptr_t bus, registers_ptr_t registers)
+    : _buf(bus->rdbuf()), _params(bus, registers) {}
 
 void ExecutionUnit::fetch_decode_execute() {
-  beg();
-  while (!eof()) {
-    process_interrupt();
-    seek(_params.registers->IP);
-    auto args = fetch();
-    decode(args.first)->execute(args.second);
-  }
+  seek(_params.registers->IP);
+  auto args = fetch();
+  decode(args.first)->execute(args.second);
 }
 
-void ExecutionUnit::process_interrupt() {}
+void ExecutionUnit::bootstrap(std::streambuf *program, bool replace) {
+  if (replace) {
+    _buf = program;
+  } else {
+    const auto _size = 512;
+    uint8_t _chr[_size] = {};
+    uint16_t _len = 0;
+    while (program->pubseekoff(_len, std::ios_base::cur, std::ios_base::out) !=
+           -1) {
+      _len = program->sgetn(reinterpret_cast<char *>(_chr), _size); // NOLINT
+      _buf->sputn(reinterpret_cast<const char *>(_chr), _len);      // NOLINT
+    }
+  }
+  // TODO set up registers
+  beg();
+}
+
+void ExecutionUnit::interrupt(uint8_t type) { _interrupts.push(type); }
 
 std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
   uint8_t _sop = SOP::NONE, _opcode = 0;
@@ -61,7 +73,6 @@ std::shared_ptr<MicroOp> ExecutionUnit::decode(uint8_t opcode) {
 }
 
 uint16_t ExecutionUnit::beg() {
-  _params.registers->IP = 0;
   auto res = _buf->pubseekpos((uint16_t)_params.registers->IP);
   return res;
 }

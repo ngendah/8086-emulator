@@ -37,7 +37,7 @@
                                                                                \
     struct JmpSelector final : CJmpOpTypeSelector {                            \
       CJmpOpTypes jmp_type(UNUSED_PARAM const Instruction &) const override {  \
-        return jmp;                                                            \
+        return CJmpOpTypes::jmp;                                               \
       }                                                                        \
                                                                                \
       OpTypes op_type(UNUSED_PARAM const Instruction &) const override {       \
@@ -45,10 +45,10 @@
       }                                                                        \
     };                                                                         \
                                                                                \
-    typedef ExecuteStrategy21<JmpSelector, CJmpOperator, CJmpOpType>          \
-        ExecuteStrategy4;                                                     \
+    typedef ExecuteStrategy21<JmpSelector, CJmpOperator, CJmpOpType>           \
+        ExecuteStrategy4;                                                      \
                                                                                \
-    MICRO_OP_INSTRUCTION_D(cls_name, ExecuteStrategy4, JMP_Decoder)           \
+    MICRO_OP_INSTRUCTION_D(cls_name, ExecuteStrategy4, JMP_Decoder)            \
   };
 
 CONDITIONAL_JMP_MICRO_OP(JE, je)

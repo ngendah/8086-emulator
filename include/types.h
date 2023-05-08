@@ -117,6 +117,7 @@ public:
     _instruction._opcode_mode.word = opcode_mode;
     _instruction._offset = offset;
     _instruction._imm.lo = port;
+    _instruction._imm.hi = 0;
   }
 
   Instruction(const Instruction &rhs) : _instruction(rhs._instruction) {}
@@ -299,19 +300,18 @@ struct Bytes {
 
   explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(bytes), _size(size) {}
 
-  Bytes(uint8_t const *bytes, uint16_t size)
-      : _bytes(const_cast<uint8_t *>(bytes)), _size(size) {} // NOLINT
-
   Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
+
+  Bytes(const Bytes &&other)  noexcept : _bytes(other._bytes), _size(other._size) {}
 
   ~Bytes() {
     // delete _bytes;
     _bytes = nullptr;
   }
 
-  Bytes &operator=(Bytes &&rhs) noexcept {
-    std::swap(_size, rhs._size);
-    std::swap(_bytes, rhs._bytes);
+  Bytes& operator=(const Bytes &&other) {
+    _bytes = other._bytes;
+    _size = other._size;
     return *this;
   }
 
@@ -330,6 +330,7 @@ struct BUS {
   virtual ~BUS() = default;
   virtual uint16_t write(Address const *, const Bytes &) = 0;
   virtual Bytes read(Address const *, uint16_t size) = 0;
+  virtual std::streambuf *rdbuf() { return nullptr; }
 };
 
 class ValueIO final : public IO {
@@ -403,12 +404,12 @@ public:
 
   void write(const uint16_t val) override {
     // NOLINTNEXTLINE
-    Bytes bytes(reinterpret_cast<const uint8_t *>(&val), sizeof(uint16_t));
+    Bytes bytes((uint8_t *)&val, sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
   void write(const uint8_t val) override {
-    Bytes bytes(&val, sizeof(uint8_t));
+    Bytes bytes((uint8_t *)&val, sizeof(uint8_t));
     _bus->write(&_address, bytes);
   }
 
@@ -570,36 +571,36 @@ static const std::string _OpTypes[] = {
     "word",          "byte",          "high_byte", "low_byte",
     "high_low_byte", "low_high_byte", "nop"};
 
-enum CJmpOpTypes {
-  noj,
-  je,
-  jne,
-  js,
-  jns,
-  jo,
-  jno,
-  jc,
-  jb,
-  jnae,
-  jnc,
-  jae,
-  jnb,
-  jp,
-  jpe,
-  jnp,
-  jpo,
-  jbe,
-  jna,
-  jnbe,
-  ja,
-  jle,
-  jng,
-  jnle,
-  jg,
-  jl,
-  jnge,
-  jnl,
-  jge,
+enum class CJmpOpTypes {
+  noj = 0,
+  je = 1,
+  jne = 2,
+  js = 3,
+  jns = 4,
+  jo = 5,
+  jno = 6,
+  jc = 7,
+  jb = 8,
+  jnae = 9,
+  jnc = 10,
+  jae = 11,
+  jnb = 12,
+  jp = 13,
+  jpe = 14,
+  jnp = 15,
+  jpo = 16,
+  jbe = 17,
+  jna = 18,
+  jnbe = 19,
+  ja = 20,
+  jle = 21,
+  jng = 22,
+  jnle = 23,
+  jg = 24,
+  jl = 25,
+  jnge = 26,
+  jnl = 27,
+  jge = 28,
 };
 
 // NOLINTNEXTLINE
@@ -618,11 +619,11 @@ struct OpType {
     Flags *_flags;
 
     Params(OpTypes op_type, IO *source, IO *destination)
-        : _op_type(op_type), _jmp_type(noj), _source(source),
+        : _op_type(op_type), _jmp_type(CJmpOpTypes::noj), _source(source),
           _destination(destination), _flags(nullptr) {}
 
     Params(OpTypes op_type, IO *source, IO *destination, Flags *flags)
-        : _op_type(op_type), _jmp_type(noj), _source(source),
+        : _op_type(op_type), _jmp_type(CJmpOpTypes::noj), _source(source),
           _destination(destination), _flags(flags) {}
 
     Params(OpTypes op_type, IO *source, IO *destination, Flags *flags,
