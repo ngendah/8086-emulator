@@ -330,6 +330,7 @@ struct BUS {
   virtual ~BUS() = default;
   virtual uint16_t write(Address const *, const Bytes &) = 0;
   virtual Bytes read(Address const *, uint16_t size) = 0;
+  virtual std::streambuf *rdbuf() { return nullptr; }
 };
 
 class ValueIO final : public IO {
