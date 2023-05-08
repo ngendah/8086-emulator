@@ -25,5 +25,5 @@ add_library(
   noop.cpp
 )
 
-target_link_libraries(instruction_set PUBLIC decoders)
+target_link_libraries(instruction_set PUBLIC decoders fmt)
 target_include_directories(instruction_set PUBLIC decoders)

@@ -6,11 +6,10 @@
 #ifndef _INSTRUCTION_SET_H_
 #define _INSTRUCTION_SET_H_
 
+#include "include/physical_addresser.h"
 #include "include/sop.h"
 #include "instruction_templates.h"
 #include "logger.h"
-#include "physical_addresser.h"
-#include "sop.h"
 #include "types.h"
 #include <array>
 #include <list>
