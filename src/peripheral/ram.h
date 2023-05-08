@@ -7,6 +7,7 @@
 #define RAM_H_
 
 #include "types.h"
+#include "logger.h"
 #include <sstream>
 
 struct stream_buffer : std::basic_streambuf<uint8_t> {
@@ -41,23 +42,23 @@ struct stream_buffer : std::basic_streambuf<uint8_t> {
    * @brief current position of read sequence
    *
    */
-  pos_type ppos() const { return pptr() - pbase(); }
+  std::streamsize ppos() const { return pptr() - pbase(); }
 
   /**
    * @brief current position of write sequence
    *
    */
-  pos_type gpos() const { return gptr() - eback(); }
+  std::streamsize gpos() const { return gptr() - eback(); }
 
   /**
    * @brief seek from beginning of the read sequence
    *
    */
   pos_type pseekpos(pos_type pos) {
-    if (pos > psize() - ppos()) {
+    if (!pbounded(pos)) {
       return pos_type(off_type(-1));
     }
-    _M_in_cur = pbase() + pos;
+    pbump(pos - ppos());
     return pos;
   }
 
@@ -66,94 +67,68 @@ struct stream_buffer : std::basic_streambuf<uint8_t> {
    *
    */
   pos_type gseekpos(pos_type pos) {
-    if (pos > gsize() - gpos()) {
+    if (!gbounded(pos)) {
       return pos_type(off_type(-1));
     }
-    _M_out_cur = eback() + pos;
+    gbump(pos - gpos());
     return pos;
-  }
-
-  /**
-   * @brief write to the output sequence
-   *
-   */
-  std::streamsize xsputn(const char_type *src, std::streamsize n) override {
-    if (gpos() < gsize() - n) {
-      return pos_type(off_type(-1));
-    }
-    std::memmove(static_cast<void *>(gptr()), src, n);
-    gbump(n);
-    return n;
   }
 
   /**
    * @brief read from the read sequence
    *
    */
-  std::streamsize xsgetn(char_type *dest, std::streamsize n) override {
-    if (ppos() < psize() - n) {
-      return pos_type(off_type(-1));
-    }
-    std::memcpy(static_cast<void *>(dest), pptr(), n);
-    pbump(n);
-    return n;
+  std::streampos sgetn(char_type *dest, std::streamsize n) {
+    return std::basic_streambuf<uint8_t>::sgetn(dest, n);
   }
 
   std::streamsize sgetn(char_type **dest, std::streamsize n) {
-    if (ppos() < psize() - n) {
+    if (reinterpret_cast<std::streamsize>(gpos()) + n > reinterpret_cast<std::streamsize>(egptr())) {
       return pos_type(off_type(-1));
     }
-    *dest = pptr();
-    pbump(n);
+    *dest = gptr();
+    gbump(n);
     return n;
-  }
-
-  pos_type seekoff(off_type off, std::ios_base::seekdir dir,
-                   std::ios_base::openmode mode = std::ios_base::in |
-                                                  std::ios_base::out) override {
-    char_type **_start = {};
-    char_type **_cur = {};
-    uint8_t _dir = 1;
-    if ((dir & std::ios_base::beg) == std::ios_base::beg) {
-      _start = mode == std::ios_base::in ? &_M_out_beg : &_M_in_beg;
-      _cur = mode == std::ios_base::in ? &_M_out_cur : &_M_in_cur;
-      if (off > psize() - (long)_cur || off > gsize() - (long)_cur) {
-        return pos_type(off_type(-1));
-      }
-      *_cur = _dir * off + *_start; // NOLINT
-      return mode == std::ios_base::in ? ppos() : gpos();
-    }
-    if ((dir & std::ios_base::end) == std::ios_base::end) {
-      _dir = -1;
-      _start = mode == std::ios_base::in ? &_M_out_end : &_M_in_end;
-      *_start = _dir * off + *_start; // NOLINT
-      return mode == std::ios_base::in ? ppos() : gpos();
-    }
-    return pos_type(off_type(-1));
   }
 
   pos_type seekpos(pos_type pos,
                    std::ios_base::openmode mode = std::ios_base::in |
                                                   std::ios_base::out) override {
-    char_type **_start = mode == std::ios_base::in ? &_M_out_beg : &_M_in_beg;
-    char_type **_cur = mode == std::ios_base::in ? &_M_out_cur : &_M_in_cur;
-    char_type **_end = mode == std::ios_base::in ? &_M_out_end : &_M_in_end;
-    if ((long)(pos) < (long)(*_start) &&
-        (long)(pos) > (long)(*_end)) { // NOLINT
-      return pos_type(off_type(-1));
+    if((mode & std::ios_base::in) == std::ios_base::in){
+      pbump(offset(pos, mode));
     }
-    *_cur = pos + *_start;
-    return pos_type(pos);
+    if((mode & std::ios_base::out) == std::ios_base::out){
+      gbump(offset(pos, mode));
+    }
+    return pos;
+  }
+
+  off_type offset(pos_type pos, std::ios_base::openmode mode = std::ios_base::in |
+                                                 std::ios_base::out) const {
+    if((mode & std::ios_base::in) == std::ios_base::in){
+      return pos - ppos();
+    }
+    return pos - gpos();
+  }
+
+  bool pbounded(pos_type pos) const {
+   return pos + reinterpret_cast<std::streamsize >(pbase()) < reinterpret_cast<std::streamsize>(epptr());
+  }
+
+  bool gbounded(pos_type pos) const {
+   return pos + reinterpret_cast<std::streamsize>(eback()) < reinterpret_cast<std::streamsize>(egptr());
   }
 };
 
 struct RAM final : BUS {
   RAM(uint32_t size = 1024) : _buffer(size){};
 
+  RAM(uint8_t *buffer, uint16_t size) : _buffer(buffer, size){}
+
   ~RAM() override {}
 
   uint16_t write(Address const *address, const Bytes &bytes) override {
-    if (_buffer.gseekpos((uint32_t)(*address)) == -1) {
+    if (_buffer.pseekpos((uint32_t)(*address)) == -1) {
       assert(false);
       return -1;
     }
@@ -162,7 +137,7 @@ struct RAM final : BUS {
 
   Bytes read(Address const *address, uint16_t len) override {
     uint8_t *_p = nullptr;
-    if (_buffer.pseekpos((uint32_t)*address) == -1) {
+    if (_buffer.gseekpos((uint32_t)*address) == -1) {
       assert(false);
       return Bytes();
     }
@@ -179,11 +154,16 @@ struct RAM final : BUS {
 
 protected:
   struct Buffer final : stream_buffer {
-    std::shared_ptr<uint8_t[]> _memory; // NOLINT
+    std::shared_ptr<uint8_t> _memory{};
 
     Buffer(uint16_t size = 1024)
         : _memory(std::allocator<uint8_t>().allocate(size)) {
       this->setbuf(_memory.get(), size);
+    }
+
+    // TODO make it visible only to tests
+    Buffer(uint8_t *buffer, uint16_t size) {
+      this->setbuf(buffer, size);
     }
   };
 
