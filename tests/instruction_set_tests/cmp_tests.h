@@ -21,10 +21,14 @@ TEST(CMPRegistersTests, test_execute) {
 
 TEST(CMPRegisterMemoryTests, test_execute) {
   auto ram = RAM(128);
+  auto address = Address((uint8_t)0x24);
+  uint8_t val = 5;
+  auto bytes = Bytes(&val, 1);
+  ram.write(&address, bytes);
   auto registers = Registers();
   registers.DX = 5;
   auto io = CMPRegisterMemory(&ram, &registers);
-  auto instruction = Instruction(0x3E, 0x3996, 0x24);
+  auto instruction = Instruction(0x3E, 0x3996, (uint16_t)address);
   io.execute(instruction);
   EXPECT_NE((uint16_t)registers.FLAGS, 0);
 }

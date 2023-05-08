@@ -117,6 +117,7 @@ public:
     _instruction._opcode_mode.word = opcode_mode;
     _instruction._offset = offset;
     _instruction._imm.lo = port;
+    _instruction._imm.hi = 0;
   }
 
   Instruction(const Instruction &rhs) : _instruction(rhs._instruction) {}
@@ -299,19 +300,18 @@ struct Bytes {
 
   explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(bytes), _size(size) {}
 
-  Bytes(uint8_t const *bytes, uint16_t size)
-      : _bytes(const_cast<uint8_t *>(bytes)), _size(size) {} // NOLINT
-
   Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
+
+  Bytes(const Bytes &&other)  noexcept : _bytes(other._bytes), _size(other._size) {}
 
   ~Bytes() {
     // delete _bytes;
     _bytes = nullptr;
   }
 
-  Bytes &operator=(Bytes &&rhs) noexcept {
-    std::swap(_size, rhs._size);
-    std::swap(_bytes, rhs._bytes);
+  Bytes& operator=(const Bytes &&other) {
+    _bytes = other._bytes;
+    _size = other._size;
     return *this;
   }
 
@@ -404,12 +404,12 @@ public:
 
   void write(const uint16_t val) override {
     // NOLINTNEXTLINE
-    Bytes bytes(reinterpret_cast<const uint8_t *>(&val), sizeof(uint16_t));
+    Bytes bytes((uint8_t *)&val, sizeof(uint16_t));
     _bus->write(&_address, bytes);
   }
 
   void write(const uint8_t val) override {
-    Bytes bytes(&val, sizeof(uint8_t));
+    Bytes bytes((uint8_t *)&val, sizeof(uint8_t));
     _bus->write(&_address, bytes);
   }
 

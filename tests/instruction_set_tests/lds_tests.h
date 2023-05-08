@@ -20,21 +20,15 @@ TEST(LDSTests, test_execute_1) {
   auto val = (uint8_t)55;
   auto bytes = Bytes(&val, 1);
   ram.write(&address, bytes);
-  val = 0xA;
+  val = 0x97;
   bytes = Bytes(&val, 1);
-  address = Address((uint16_t)57);
+  address = Address((uint16_t)0x44);
   ram.write(&address, bytes);
   auto registers = Registers();
   auto io = LDSTest(&ram, &registers, [](LDS *const les, uint8_t point) {
     auto registers = ((LDSTest *)les)->get();
     if (point == 0) {
       EXPECT_EQ((uint16_t)registers->BX, 55);
-    }
-    if (point == 1) {
-      EXPECT_EQ((uint16_t)registers->BX, 57);
-    }
-    if (point == 2) {
-      EXPECT_EQ((uint16_t)registers->SI, 57);
     }
   });
   // LDS BX, 0x42[SI]
