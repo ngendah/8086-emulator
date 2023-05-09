@@ -1,25 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_executable(8086 8086.cpp cpu.cpp)
+add_executable(8086 8086.cpp)
 
+add_subdirectory(common)
+add_subdirectory(cpu)
 add_subdirectory(peripheral)
-add_subdirectory(execution_unit)
 
 include_directories(
+  common
+  cpu
   peripheral
-  execution_unit
   )
 
-target_include_directories(8086 PUBLIC peripheral)
-target_include_directories(8086 PUBLIC execution_unit)
+target_include_directories(8086 PUBLIC common cpu peripheral)
 
 
 target_link_libraries(
   8086
+  common
+  cpu
+  peripheral
+  fmt
   plog 
-  fmt 
-  peripheral 
-  execution_unit
   ${SDL2_LIBRARIES}
-)
+  )
 

@@ -1,4 +1,5 @@
 #include "SDL.h"
+#include "address.h"
 #include "cpu.h"
 #include "peripheral.h"
 #include "ram.h"
