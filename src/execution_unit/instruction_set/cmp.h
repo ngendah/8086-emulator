@@ -8,6 +8,7 @@
 
 #include "decoders.h"
 #include "math_operators.h"
+#include "micro_op.h"
 #include "mov_operators.h"
 #include "types.h"
 

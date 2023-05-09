@@ -11,6 +11,7 @@
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "math_operators.h"
+#include "micro_op.h"
 #include "mov.h"
 #include "mov_operators.h"
 #include "segment_mapper.h"

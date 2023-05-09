@@ -6,6 +6,7 @@
 #ifndef _DECODERS_H_
 #define _DECODERS_H_
 
+#include "decoder.h"
 #include "instruction_templates.h"
 #include "io_selectors.h"
 #include "mov_operators.h"

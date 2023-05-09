@@ -9,6 +9,7 @@
 #include "decoders.h"
 #include "instruction_templates.h"
 #include "io_selectors.h"
+#include "micro_op.h"
 #include "mov_operators.h"
 #include "stack_strategy.h"
 #include "types.h"

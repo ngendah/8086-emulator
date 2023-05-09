@@ -10,7 +10,9 @@
 #include "include/sop.h"
 #include "instruction_templates.h"
 #include "logger.h"
+#include "micro_op.h"
 #include "types.h"
+
 #include <array>
 #include <list>
 

@@ -10,6 +10,7 @@
 #include "instruction_templates.h"
 #include "jmp_operators.h"
 #include "logger.h"
+#include "micro_op.h"
 #include "operators.h"
 #include "types.h"
 

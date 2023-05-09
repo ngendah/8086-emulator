@@ -7,6 +7,7 @@
 #define _NOOP_H_
 
 #include "logger.h"
+#include "micro_op.h"
 #include "types.h"
 
 struct NoOp : MicroOp {

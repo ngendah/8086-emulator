@@ -7,6 +7,7 @@
 #define _EXECUTION_UNIT_H_
 
 #include "instruction_set.h"
+#include "micro_op.h"
 #include <queue>
 #include <streambuf>
 

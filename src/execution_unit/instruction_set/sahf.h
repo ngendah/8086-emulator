@@ -8,6 +8,7 @@
 
 #include "decoders.h"
 #include "io_selectors.h"
+#include "micro_op.h"
 #include "mov_operators.h"
 #include "register_mapper.h"
 #include "types.h"
