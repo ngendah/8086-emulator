@@ -1,6 +1,5 @@
 add_library(
   instruction_set
-  OBJECT
   mov.cpp
   push.cpp
   pop.cpp
