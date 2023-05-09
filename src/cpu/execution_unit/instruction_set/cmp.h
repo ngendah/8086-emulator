@@ -6,6 +6,7 @@
 #ifndef _CMP_H_
 #define _CMP_H_
 
+#include "address.h"
 #include "decoders.h"
 #include "math_operators.h"
 #include "micro_op.h"

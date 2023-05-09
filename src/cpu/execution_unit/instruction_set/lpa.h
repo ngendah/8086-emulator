@@ -6,6 +6,7 @@
 #ifndef _LPA_H_
 #define _LPA_H_
 
+#include "address.h"
 #include "decoders.h"
 #include "io_selectors.h"
 #include "micro_op.h"

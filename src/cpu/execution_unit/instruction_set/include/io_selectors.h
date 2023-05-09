@@ -6,6 +6,7 @@
 #ifndef _IO_SELECTORS_H_
 #define _IO_SELECTORS_H_
 
+#include "address.h"
 #include "bus_io.h"
 #include "instruction_templates.h"
 #include "logger.h"

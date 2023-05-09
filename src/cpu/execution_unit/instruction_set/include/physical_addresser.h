@@ -9,6 +9,7 @@
 #include <array>
 #include <functional>
 
+#include "address.h"
 #include "logger.h"
 #include "types.h"
 

@@ -6,6 +6,7 @@
 #ifndef _LDS_H_
 #define _LDS_H_
 
+#include "address.h"
 #include "decoders.h"
 #include "incr.h"
 #include "instruction_templates.h"

@@ -6,6 +6,7 @@
 #ifndef _INSTRUCTION_SET_H_
 #define _INSTRUCTION_SET_H_
 
+#include "address.h"
 #include "include/physical_addresser.h"
 #include "include/sop.h"
 #include "instruction_templates.h"

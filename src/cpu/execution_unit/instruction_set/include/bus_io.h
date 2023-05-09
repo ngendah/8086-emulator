@@ -2,6 +2,7 @@
 #ifndef _BUS_IO_H_
 #define _BUS_IO_H_
 
+#include "address.h"
 #include "bytes.h"
 #include "types.h"
 

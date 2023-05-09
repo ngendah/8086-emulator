@@ -6,6 +6,7 @@
 #ifndef _LES_H_
 #define _LES_H_
 
+#include "address.h"
 #include "decoders.h"
 #include "incr.h"
 #include "instruction_templates.h"

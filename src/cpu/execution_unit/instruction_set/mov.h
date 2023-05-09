@@ -6,6 +6,7 @@
 #ifndef _MOV_H_
 #define _MOV_H_
 
+#include "address.h"
 #include "decoders.h"
 #include "instruction_templates.h"
 #include "io_selectors.h"

@@ -1,9 +1,6 @@
-add_subdirectory(decoders)
-
-include_directories(include decoders)
-
 add_library(
   instruction_set
+  OBJECT
   mov.cpp
   push.cpp
   pop.cpp
@@ -25,5 +22,10 @@ add_library(
   noop.cpp
 )
 
-target_link_libraries(instruction_set PUBLIC decoders fmt)
-target_include_directories(instruction_set PUBLIC decoders)
+add_subdirectory(decoders)
+add_subdirectory(include)
+
+include_directories(include decoders)
+
+target_link_libraries(instruction_set PUBLIC core decoders)
+target_include_directories(instruction_set PUBLIC decoders include)

@@ -6,10 +6,11 @@
 #ifndef _DECODERS_H_
 #define _DECODERS_H_
 
+#include "../include/io_selectors.h" // TODO fix relative path
+#include "../include/mov_operators.h"
+#include "address.h"
 #include "decoder.h"
 #include "instruction_templates.h"
-#include "io_selectors.h"
-#include "mov_operators.h"
 #include "types.h"
 #include "value_io.h"
 
