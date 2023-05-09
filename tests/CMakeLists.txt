@@ -4,10 +4,10 @@ add_executable(unitTests tests.cpp)
 include_directories(
   "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_SOURCE_DIR}/src/peripheral"
-  "${PROJECT_SOURCE_DIR}/src/execution_unit"
-  "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set"
-  "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set/include"
-  "${PROJECT_SOURCE_DIR}/src/execution_unit/instruction_set/decoders"
+  "execution_unit"
+  "execution_unit/instruction_set"
+  "execution_unit/instruction_set/include"
+  "execution_unit/instruction_set/decoders"
 )
 
 include_directories(
@@ -25,7 +25,8 @@ target_link_libraries(
   plog
   fmt
   peripheral
-  execution_unit
+ cpu 
+  common
 )
 
 add_test(runUnitTests unitTests)
