@@ -30,34 +30,25 @@ static uint16_t make_word(const uint8_t high, const uint8_t low) {
 // Allow anon structs
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-typedef union _u16 {
+typedef union _u16 final {
   uint16_t word;
   struct {
     uint8_t lo;
     uint8_t hi;
   };
   _u16(uint16_t val = 0) : word(val) {}
+  _u16 operator=(uint16_t val){
+    this->word = val;
+    return *this;
+  }
 } u16_t;
 
-typedef struct _instruction {
-  uint8_t X; // reserved
-  union __imm {
-    uint16_t data;
-    struct {
-      uint8_t lo; // also port
-      uint8_t hi;
-    };
-  } _imm;
-  uint16_t _offset;
-  union __opcode_mode {
-    uint16_t word;
-    struct {
-      uint8_t mode;
-      uint8_t opcode;
-    };
-  } _opcode_mode;
-  uint8_t _sop;
-  _instruction() : _sop(0xff) {}
+typedef struct _instruction final {
+  uint8_t X; // unused
+  u16_t imm;
+  uint16_t offset;
+  u16_t opcode_mod;
+  uint8_t sop;
 } instruction_t;
 
 #pragma GCC diagnostic pop
@@ -84,40 +75,37 @@ struct IO {
   virtual uint8_t read_lo() const = 0;
 };
 
-class Instruction final {
-  instruction_t _instruction;
-
-public:
+struct Instruction final {
   Instruction() = default;
 
   Instruction(instruction_t instruction) : _instruction(instruction) {}
 
-  Instruction(uint8_t sop, uint16_t opcode_mode) {
-    _instruction._sop = sop;
-    _instruction._opcode_mode.word = opcode_mode;
+  Instruction(uint8_t sop, uint16_t opcode_mod) {
+    _instruction.sop = sop;
+    _instruction.opcode_mod = opcode_mod;
   }
 
-  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset) {
-    _instruction._sop = sop;
-    _instruction._opcode_mode.word = opcode_mode;
-    _instruction._offset = offset;
+  Instruction(uint8_t sop, uint16_t opcode_mod, uint16_t offset) {
+    _instruction.sop = sop;
+    _instruction.opcode_mod = opcode_mod;
+    _instruction.offset = offset;
   }
 
-  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
+  Instruction(uint8_t sop, uint16_t opcode_mod, uint16_t offset,
               uint16_t data) {
-    _instruction._sop = sop;
-    _instruction._opcode_mode.word = opcode_mode;
-    _instruction._offset = offset;
-    _instruction._imm.data = data;
+    _instruction.sop = sop;
+    _instruction.opcode_mod = opcode_mod;
+    _instruction.offset = offset;
+    _instruction.imm = data;
   }
 
-  Instruction(uint8_t sop, uint16_t opcode_mode, uint16_t offset,
+  Instruction(uint8_t sop, uint16_t opcode_mod, uint16_t offset,
               uint8_t port) {
-    _instruction._sop = sop;
-    _instruction._opcode_mode.word = opcode_mode;
-    _instruction._offset = offset;
-    _instruction._imm.lo = port;
-    _instruction._imm.hi = 0;
+    _instruction.sop = sop;
+    _instruction.opcode_mod = opcode_mod;
+    _instruction.offset = offset;
+    _instruction.imm.lo = port;
+    _instruction.imm.hi = 0;
   }
 
   Instruction(const Instruction &rhs) : _instruction(rhs._instruction) {}
@@ -127,72 +115,71 @@ public:
   ~Instruction() = default;
 
   Instruction sop(uint8_t sop) {
-    _instruction._sop = sop;
+    _instruction.sop = sop;
     return *this;
   }
 
   Instruction opcode(uint8_t opcode) {
-    _instruction._opcode_mode.opcode = opcode;
+    _instruction.opcode_mod.hi = opcode;
     return *this;
   }
 
   Instruction mode(uint8_t mod_reg) {
-    _instruction._opcode_mode.mode = mod_reg;
+    _instruction.opcode_mod.lo = mod_reg;
     return *this;
   }
 
   Instruction offset(int16_t offset) {
-    _instruction._offset = offset;
+    _instruction.offset = offset;
     return *this;
   }
 
   Instruction data(uint16_t data) {
-    _instruction._imm.data = data;
+    _instruction.imm = data;
     return *this;
   }
 
   Instruction port(uint8_t port) {
-    _instruction._imm.lo = port;
+    _instruction.imm.lo = port;
     return *this;
   }
 
-  operator sop_t() const { return _instruction._sop; }
+  operator sop_t() const { return _instruction.sop; }
 
-  uint8_t sop() const { return _instruction._sop; }
+  uint8_t sop() const { return _instruction.sop; }
 
   template <typename T> T opcode_to() const {
-    return *(T *)&_instruction._opcode_mode.opcode;
+    return *(T *)&_instruction.opcode_mod.hi;
   }
 
   template <typename T> T mode_to() const {
-    return *(T *)&_instruction._opcode_mode.mode;
+    return *(T *)&_instruction.opcode_mod.lo;
   }
 
-  uint16_t offset() const { return _instruction._offset; }
+  uint16_t offset() const { return _instruction.offset; }
 
-  template <typename T> T data() const { return (T)_instruction._imm.data; }
+  template <typename T> T data() const { return (T)_instruction.imm.word; }
 
-  uint8_t port() const { return _instruction._imm.lo; }
+  uint8_t port() const { return _instruction.imm.lo; }
 
   friend std::ostream &operator<<(std::ostream &ostream,
                                   const Instruction &instruction) {
     ostream << " "
             << fmt::format("sop=0x{0:x}, opcode=0x{1:x}(0b{1:b}), mode="
                            "0x{2:x}(0b{2:b}), offset=0x{3:x}, data=0x{4:x}",
-                           instruction._instruction._sop,
-                           instruction._instruction._opcode_mode.opcode,
-                           instruction._instruction._opcode_mode.mode,
-                           instruction._instruction._offset,
-                           instruction._instruction._imm.data)
+                           instruction._instruction.sop,
+                           instruction._instruction.opcode_mod.hi,
+                           instruction._instruction.opcode_mod.lo,
+                           instruction._instruction.offset,
+                           instruction._instruction.imm.word)
             << " ";
     return ostream;
   }
+private:
+  instruction_t _instruction;
 };
 
-template <typename T, typename P> class InstructionTemplate {
-  Instruction _instruction;
-
-public:
+template <typename T, typename P> struct InstructionTemplate final {
   InstructionTemplate() = default;
 
   InstructionTemplate(const Instruction &val) : _instruction(val) {}
@@ -217,6 +204,9 @@ public:
     ostream << instruction_template._instruction;
     return ostream;
   }
+
+private:
+  Instruction _instruction;
 };
 
 class Address final {
