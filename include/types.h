@@ -22,7 +22,7 @@
 __attribute__((unused)) typedef void *const void_ptr_t;
 typedef uint8_t sop_t; // segment override prefix
 
-static uint16_t make_word(const uint8_t high, const uint8_t low) {
+__attribute__((unused)) static uint16_t make_word(const uint8_t high, const uint8_t low) {
   return ((uint16_t)((high << 8) | (low & 0x00FF)));
 }
 
@@ -52,6 +52,8 @@ typedef struct _instruction final {
 } instruction_t;
 
 #pragma GCC diagnostic pop
+
+struct Bytes;
 
 struct IO {
   IO() = default;
@@ -282,40 +284,6 @@ protected:
   u16_t _flags;
 };
 
-// TODO fix pointer copy and assignments
-struct Bytes {
-  uint8_t *_bytes;
-  uint16_t _size;
-  Bytes() : _bytes(nullptr), _size(0) {}
-
-  explicit Bytes(uint8_t *bytes, uint16_t size) : _bytes(bytes), _size(size) {}
-
-  Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
-
-  Bytes(const Bytes &&other)  noexcept : _bytes(other._bytes), _size(other._size) {}
-
-  ~Bytes() {
-    // delete _bytes;
-    _bytes = nullptr;
-  }
-
-  Bytes& operator=(const Bytes &&other) {
-    _bytes = other._bytes;
-    _size = other._size;
-    return *this;
-  }
-
-  operator uint16_t() const {
-    assert(_size == 2);
-    return (uint16_t)((_bytes[1] << 8) | _bytes[0]); // NOLINT
-  }
-
-  operator uint8_t() const {
-    assert(_size == 1);
-    return _bytes[0]; // NOLINT
-  }
-};
-
 struct BUS {
   virtual ~BUS() = default;
   virtual uint16_t write(Address const *, const Bytes &) = 0;
@@ -357,85 +325,6 @@ public:
   uint8_t read_hi() const override { return _value.hi; }
 
   uint8_t read_lo() const override { return _value.lo; }
-};
-
-class BUSIO final : public IO {
-private:
-  BUS *_bus;
-  Address _address;
-
-public:
-  explicit BUSIO(BUS *bus) : _bus(bus) {}
-
-  BUSIO(const BUSIO &rhs) : _bus(rhs._bus), _address(rhs._address) {}
-
-  ~BUSIO() override = default;
-
-  BUS *bus() const { return _bus; }
-
-  Address address() const { return _address; }
-
-  BUSIO set_address(const Address &address) {
-    _address = address;
-    return *this;
-  }
-
-  void write_hi(const uint8_t val) override {
-    uint16_t _word = make_word(val, 0);
-    // NOLINTNEXTLINE
-    Bytes bytes(reinterpret_cast<uint8_t *>(&_word), sizeof(uint16_t));
-    _bus->write(&_address, bytes);
-  }
-
-  void write_lo(const uint8_t val) override {
-    Bytes bytes(const_cast<uint8_t *>(&val), sizeof(uint8_t)); // NOLINT
-    _bus->write(&_address, bytes);
-  }
-
-  void write(const uint16_t val) override {
-    // NOLINTNEXTLINE
-    Bytes bytes((uint8_t *)&val, sizeof(uint16_t));
-    _bus->write(&_address, bytes);
-  }
-
-  void write(const uint8_t val) override {
-    Bytes bytes((uint8_t *)&val, sizeof(uint8_t));
-    _bus->write(&_address, bytes);
-  }
-
-  uint16_t read() const override {
-    Bytes bytes = _bus->read(&_address, sizeof(uint16_t));
-    uint16_t word = 0;
-    std::memcpy(&word, bytes._bytes, bytes._size);
-    return word;
-  }
-
-  uint8_t read_byte() const override {
-    Bytes bytes = _bus->read(&_address, sizeof(uint8_t));
-    uint8_t byte = 0;
-    std::memcpy(&byte, bytes._bytes, bytes._size);
-    return byte;
-  }
-
-  uint8_t read_hi() const override {
-    Bytes bytes = _bus->read(&_address, sizeof(uint16_t));
-    uint16_t word = 0;
-    std::memcpy(&word, bytes._bytes, sizeof(uint16_t));
-    return ((word >> 8) & 0x107);
-  }
-
-  uint8_t read_lo() const override {
-    Bytes bytes = _bus->read(&_address, sizeof(uint8_t));
-    uint16_t byte = 0;
-    std::memcpy(&byte, bytes._bytes, sizeof(uint8_t));
-    return byte;
-  }
-
-  friend std::ostream &operator<<(std::ostream &ostream, const BUSIO &t) {
-    ostream << fmt::format("BUSIO_ptr=0x{:x}", (long)&t) << ", "
-            << fmt::format("physical_address=0x{:x}", (uint32_t)t._address);
-    return ostream;
-  }
 };
 
 class Register : public IO {
