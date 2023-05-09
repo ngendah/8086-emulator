@@ -57,6 +57,7 @@ struct Bytes;
 struct IO;
 struct BUS;
 struct Instruction;
+struct Address;
 
 struct IO {
   IO() = default;
@@ -214,38 +215,6 @@ private:
   Instruction _instruction;
 };
 
-class Address final {
-protected:
-  uint32_t _address;
-
-public:
-  Address() : _address(0) {}
-  Address(const Address &rhs) : _address(rhs._address) {}
-  Address(const uint8_t address) : _address(address) {}
-  Address(const uint16_t address) : _address(address) {}
-  Address(const uint32_t address) : _address(address) {}
-  Address &operator=(const Address &rhs) {
-    _address = rhs._address;
-    return *this;
-  }
-  operator uint8_t() const { return (uint8_t)_address & 0x000000ff; }
-  operator uint16_t() const { return (uint16_t)_address & 0x0000ffff; }
-  operator uint32_t() const { return (uint32_t)_address & 0x000fffff; }
-
-  Address &operator+=(uint16_t offset) {
-    _address += offset;
-    return *this;
-  }
-
-  Address operator+(uint16_t offset) const {
-    return Address(_address + offset);
-  }
-
-  Address operator+(const Address &rhs) const {
-    return Address(_address + rhs._address);
-  }
-};
-
 struct Flags final : IO {
   Flags() : _flags(0) {}
 
@@ -349,7 +318,7 @@ public:
   }
 };
 
-struct Segment final : public Register {
+struct Segment final : Register {
   explicit Segment(uint16_t val = 0) : Register(val){};
 
   Segment(const Segment &rhs) : Register(rhs) {}
@@ -363,14 +332,9 @@ struct Segment final : public Register {
     return *this;
   }
 
-  Address address(const Register &reg, uint16_t offset = 0x0) {
-    uint16_t eff_addr = offset + (uint16_t)reg;
-    return Address((uint32_t)(((uint32_t) * this) * 0x10 + eff_addr));
-  }
+  Address address(const Register &reg, uint16_t offset = 0x0);
 
-  Address address(uint16_t eff_addr) {
-    return Address((uint32_t)(((uint32_t) * this) * 0x10 + eff_addr));
-  }
+  Address address(uint16_t eff_addr);
 };
 
 struct Registers final {
