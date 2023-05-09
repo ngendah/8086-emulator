@@ -11,6 +11,7 @@
 #include "io_selectors.h"
 #include "mov_operators.h"
 #include "types.h"
+#include "value_io.h"
 
 // Register-Register move decoder
 struct RR_Decoder final : Decoder {

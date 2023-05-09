@@ -54,6 +54,9 @@ typedef struct _instruction final {
 #pragma GCC diagnostic pop
 
 struct Bytes;
+struct IO;
+struct BUS;
+struct Instruction;
 
 struct IO {
   IO() = default;
@@ -289,42 +292,6 @@ struct BUS {
   virtual uint16_t write(Address const *, const Bytes &) = 0;
   virtual Bytes read(Address const *, uint16_t size) = 0;
   virtual std::streambuf *rdbuf() { return nullptr; }
-};
-
-class ValueIO final : public IO {
-protected:
-  u16_t _value;
-
-public:
-  explicit ValueIO() = default;
-
-  ValueIO(const ValueIO &rhs) : _value(rhs._value) {}
-
-  ValueIO &operator=(const uint16_t &val) {
-    _value.word = val;
-    return *this;
-  }
-
-  ValueIO &operator=(const uint8_t &val) {
-    _value.lo = val;
-    return *this;
-  }
-
-  void write_hi(const uint8_t val) override { _value.hi = val; }
-
-  void write_lo(const uint8_t val) override { _value.lo = val; }
-
-  void write(const uint8_t val) override { _value.lo = val; }
-
-  void write(const uint16_t val) override { _value.word = val; }
-
-  uint16_t read() const override { return _value.word; }
-
-  uint8_t read_byte() const override { return _value.lo; }
-
-  uint8_t read_hi() const override { return _value.hi; }
-
-  uint8_t read_lo() const override { return _value.lo; }
 };
 
 class Register : public IO {
