@@ -8,6 +8,7 @@ find_package(SDL2 REQUIRED)
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 include_directories(
         include
+        src/common
         libraries/plog/include
         libraries/fmt/include
         ${SDL2_INCLUDE_DIRS}

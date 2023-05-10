@@ -1,1 +1,1 @@
-add_library(common address.cpp)
+add_library(common src/address.cpp src/bytes.cpp)
