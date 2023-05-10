@@ -5,15 +5,16 @@
 ======================
 
 ### Dependencies:
+1. clang or gcc, cmake, clang-tools, clang-tidy, ninja
 
-1. SDL2
+2. SDL2
 
-2. git submodules fmt, plog and googletest
+3. git submodules: fmt, plog and googletest
 
 ### Build
 
 ```
  cmake . -G Ninja
- cmake --build . --verbose
- gdb tests/unitTests
+ cmake --build . # --verbose
+ ctest # gdb tests/unitTests
 ```
