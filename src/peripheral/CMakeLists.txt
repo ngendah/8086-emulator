@@ -1,1 +1,1 @@
-add_library(peripheral ram.cpp)
+add_library(peripheral STATIC ram.cpp)

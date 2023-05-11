@@ -5,6 +5,7 @@
 #include "lea.h"
 #include "mov.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 #include <fstream>
 #include <typeinfo>

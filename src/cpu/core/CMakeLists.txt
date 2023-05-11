@@ -1,1 +1,1 @@
-add_library(core OBJECT segment.cpp)
+add_library(core STATIC src/flags.cpp src/registers.cpp src/segment.cpp)

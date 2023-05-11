@@ -4,6 +4,7 @@
 #include "incr.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 TEST(INCRTests, test_execute) {

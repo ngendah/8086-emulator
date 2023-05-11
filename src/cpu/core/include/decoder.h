@@ -6,6 +6,8 @@
 #ifndef _DECODER_H_
 #define _DECODER_H_
 
+#include "instruction.h"
+#include "io.h"
 #include "types.h"
 
 struct Decoder {

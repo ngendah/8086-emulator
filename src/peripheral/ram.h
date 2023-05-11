@@ -7,9 +7,12 @@
 #define RAM_H_
 
 #include "address.h"
+#include "bus.h"
 #include "bytes.h"
 #include "logger.h"
 #include "types.h"
+
+#include <memory>
 #include <sstream>
 
 struct stream_buffer : std::basic_streambuf<uint8_t> {

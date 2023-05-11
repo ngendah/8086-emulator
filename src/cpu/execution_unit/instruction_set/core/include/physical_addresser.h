@@ -6,12 +6,15 @@
 #ifndef INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_
 #define INSTRUCTION_SET_PHYSICAL_ADDRESSER_H_
 
-#include <array>
-#include <functional>
-
 #include "address.h"
+#include "bus.h"
 #include "logger.h"
+#include "registers.h"
 #include "types.h"
+
+#include <array>
+#include <fmt/core.h>
+#include <functional>
 
 struct Addresser {
   virtual ~Addresser() {}

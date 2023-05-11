@@ -4,6 +4,7 @@
 #include "lahf.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 TEST(LAHFTests, test_execute) {

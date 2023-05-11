@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "ram.h"
 #include "xlat.h"
+
 #include "gtest/gtest.h"
 
 TEST(XLATTests, test_execute) {

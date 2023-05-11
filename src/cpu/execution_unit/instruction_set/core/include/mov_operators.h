@@ -6,6 +6,7 @@
 #ifndef _MOV_OPERATORS_H_
 #define _MOV_OPERATORS_H_
 
+#include "instruction.h"
 #include "instruction_templates.h"
 #include "operators.h"
 

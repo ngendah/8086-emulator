@@ -8,6 +8,7 @@
 
 #include "instruction_set.h"
 #include "micro_op.h"
+
 #include <queue>
 #include <streambuf>
 

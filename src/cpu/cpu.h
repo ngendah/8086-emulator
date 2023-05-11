@@ -8,6 +8,7 @@
 
 #include "execution_unit.h"
 #include "peripheral.h"
+
 #include <vector>
 
 class CPU final : InterruptHandler {

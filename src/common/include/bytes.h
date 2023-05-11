@@ -23,7 +23,7 @@ struct Bytes {
 
   ~Bytes();
 
-  Bytes& operator=(const Bytes &&other);
+  Bytes &operator=(const Bytes &&other);
 
   operator uint16_t() const;
 

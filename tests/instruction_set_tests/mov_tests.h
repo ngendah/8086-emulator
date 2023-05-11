@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "mov.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 struct MovRegisterRegisterTests : ::testing::Test {

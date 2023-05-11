@@ -4,6 +4,7 @@
 #include "les.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 struct LESTest final : LES {
@@ -15,7 +16,7 @@ struct LESTest final : LES {
 };
 
 TEST(LESTests, test_execute_1) {
-  uint8_t _buffer[125]={};
+  uint8_t _buffer[125] = {};
   auto ram = RAM(_buffer, 125);
   auto address = Address((uint16_t)0x42);
   auto val = (uint8_t)55;

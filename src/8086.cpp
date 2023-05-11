@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "peripheral.h"
 #include "ram.h"
+
 #include <streambuf>
 
 int main(int, char **) {

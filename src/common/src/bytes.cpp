@@ -6,13 +6,12 @@ Bytes::Bytes(uint8_t *bytes, uint16_t size) : _bytes(bytes), _size(size) {}
 
 Bytes::Bytes(const Bytes &bytes) : _bytes(bytes._bytes), _size(bytes._size) {}
 
-Bytes::Bytes(const Bytes &&other) noexcept : _bytes(other._bytes), _size(other._size) {}
+Bytes::Bytes(const Bytes &&other) noexcept
+    : _bytes(other._bytes), _size(other._size) {}
 
-Bytes::~Bytes() {
-  _bytes = nullptr;
-}
+Bytes::~Bytes() { _bytes = nullptr; }
 
-Bytes& Bytes::operator=(const Bytes &&other) {
+Bytes &Bytes::operator=(const Bytes &&other) {
   _bytes = other._bytes;
   _size = other._size;
   return *this;

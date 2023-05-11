@@ -6,8 +6,6 @@
 #ifndef _OPERATION_TYPE_SELECTOR_H_
 #define _OPERATION_TYPE_SELECTOR_H_
 
-#include "types.h"
-
 struct OpTypeSelector {
   virtual ~OpTypeSelector() = default;
   virtual OpTypes op_type(const Instruction &instruction) const = 0;
