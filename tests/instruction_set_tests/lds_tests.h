@@ -4,6 +4,7 @@
 #include "lds.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 struct LDSTest final : LDS {

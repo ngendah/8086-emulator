@@ -4,6 +4,7 @@
 #include "lea.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 TEST(LEATests, test_execute_1) {

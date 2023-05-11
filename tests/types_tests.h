@@ -3,6 +3,7 @@
 
 #include "instruction_templates.h"
 #include "types.h"
+
 #include "gtest/gtest.h"
 
 TEST(InstructionOpcodeTest, test_sop_t_cast) {

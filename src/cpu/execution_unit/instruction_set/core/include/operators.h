@@ -6,9 +6,10 @@
 #ifndef _OPERATORS_H_
 #define _OPERATORS_H_
 
-#include "operation_type.h"
-#include "operation_type_selector.h"
+#include "op_type.h"
+#include "op_type_selector.h"
 #include "types.h"
+
 #include <string>
 
 struct WordOrByteOpcodeOpTypeSelector : OpTypeSelector {

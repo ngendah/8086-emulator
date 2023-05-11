@@ -6,11 +6,11 @@
 #ifndef INSTRUCTION_SET_SEGMENT_MAPPER_H_
 #define INSTRUCTION_SET_SEGMENT_MAPPER_H_
 
-#include <array>
-
 #include "./segment_mapping_types.h"
 #include "logger.h"
 #include "types.h"
+
+#include <array>
 
 class SegmentMapper {
 protected:

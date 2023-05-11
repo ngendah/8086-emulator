@@ -6,7 +6,8 @@
 #ifndef INSTRUCTION_TEMPLATES_H_
 #define INSTRUCTION_TEMPLATES_H_
 
-#include "types.h"
+#include <fmt/core.h>
+#include <iostream>
 
 /**
  *

@@ -6,6 +6,7 @@
 #ifndef _VALUE_IO_H_
 #define _VALUE_IO_H_
 
+#include "io.h"
 #include "types.h"
 
 struct ValueIO final : IO {

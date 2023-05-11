@@ -1,4 +1,4 @@
-add_library(execution_unit execution_unit.cpp)
+add_library(execution_unit STATIC execution_unit.cpp)
 
 add_subdirectory(instruction_set)
 

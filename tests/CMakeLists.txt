@@ -3,16 +3,16 @@ add_executable(unitTests tests.cpp)
 
 include_directories(
   "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/peripheral"
-  "execution_unit"
-  "execution_unit/instruction_set"
-  "execution_unit/instruction_set/include"
-  "execution_unit/instruction_set/decoders"
+  "${PROJECT_SOURCE_DIR}/src/common"
+        "${PROJECT_SOURCE_DIR}/src/cpu"
+        "${PROJECT_SOURCE_DIR}/src/peripheral"
+        ${PROJECT_SOURCE_DIR}/libraries/googletest/googletest/include
 )
 
-include_directories(
-  ${PROJECT_SOURCE_DIR}/libraries/googletest/googletest/include
-)
+target_include_directories(unitTests PUBLIC "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/src/common"
+        "${PROJECT_SOURCE_DIR}/src/cpu"
+        "${PROJECT_SOURCE_DIR}/src/peripheral")
 
 add_subdirectory(peripheral_tests)
 add_subdirectory(instruction_set_tests)

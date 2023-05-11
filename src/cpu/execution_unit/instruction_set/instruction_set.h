@@ -7,15 +7,17 @@
 #define _INSTRUCTION_SET_H_
 
 #include "address.h"
-#include "include/physical_addresser.h"
-#include "include/sop.h"
 #include "instruction_templates.h"
 #include "logger.h"
 #include "micro_op.h"
+#include "physical_addresser.h"
+#include "sop.h"
 #include "types.h"
 
 #include <array>
 #include <list>
+#include <map>
+#include <memory>
 
 struct InstructionCode {
   std::string _memonic;

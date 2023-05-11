@@ -3,6 +3,7 @@
 
 #include "io_selectors.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 struct RegisterIOSelectorTests : ::testing::Test {

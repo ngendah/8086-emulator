@@ -7,10 +7,10 @@
 #ifndef INSTRUCTION_SET_REGISTER_MAPPER_H_
 #define INSTRUCTION_SET_REGISTER_MAPPER_H_
 
+#include "types.h"
+
 #include <array>
 #include <functional>
-
-#include "types.h"
 
 class RegisterMapper {
   /**

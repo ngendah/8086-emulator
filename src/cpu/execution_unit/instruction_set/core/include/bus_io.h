@@ -3,8 +3,14 @@
 #define _BUS_IO_H_
 
 #include "address.h"
+#include "bus.h"
 #include "bytes.h"
+#include "io.h"
 #include "types.h"
+
+#include <cstring>
+#include <fmt/core.h>
+#include <iostream>
 
 struct BUSIO final : IO {
   explicit BUSIO(BUS *bus) : _bus(bus) {}

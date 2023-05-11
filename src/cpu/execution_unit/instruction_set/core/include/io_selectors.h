@@ -7,7 +7,9 @@
 #define _IO_SELECTORS_H_
 
 #include "address.h"
+#include "bus.h"
 #include "bus_io.h"
+#include "instruction.h"
 #include "instruction_templates.h"
 #include "logger.h"
 #include "physical_addresser.h"

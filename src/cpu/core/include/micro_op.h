@@ -7,7 +7,13 @@
 #define _MICRO_OP_H_
 
 #include "decoder.h"
+#include "instruction.h"
+#include "registers.h"
 #include "types.h"
+
+#include <fmt/core.h>
+#include <iostream>
+#include <memory>
 
 struct MicroOp {
 

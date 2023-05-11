@@ -4,6 +4,7 @@
 #include "cmp.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 // TODO fix to correctly test the results

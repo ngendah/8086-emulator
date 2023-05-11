@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "push.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 TEST(PushRegisterTests, test_execute) {

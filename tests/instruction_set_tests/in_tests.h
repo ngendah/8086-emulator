@@ -4,6 +4,7 @@
 #include "in.h"
 #include "logger.h"
 #include "ram.h"
+
 #include "gtest/gtest.h"
 
 TEST(INPortTests, test_execute) {

@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "ram.h"
 #include "sahf.h"
+
 #include "gtest/gtest.h"
 
 TEST(SAHFTests, test_execute) {
