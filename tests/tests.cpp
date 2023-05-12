@@ -1,9 +1,5 @@
-#include <plog/Appenders/ColorConsoleAppender.h>
-#include <plog/Formatters/TxtFormatter.h>
-#include <plog/Init.h>
-#include <plog/Log.h>
-
 #include "execution_unit_tests/execution_unit_tests.h"
+#include "instruction_set_tests/bus_address_latch_tests.h"
 #include "instruction_set_tests/cmp_tests.h"
 #include "instruction_set_tests/in_tests.h"
 #include "instruction_set_tests/incr_tests.h"
@@ -23,6 +19,11 @@
 #include "instruction_set_tests/xlat_tests.h"
 #include "peripheral_tests/ram_tests.h"
 #include "types_tests.h"
+
+#include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
+#include <plog/Init.h>
+#include <plog/Log.h>
 
 int main(int argc, char **argv) {
   static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
