@@ -10,7 +10,7 @@
 
 #include <map>
 
-struct Port final : IO {
+struct Port : IO {
   Port() = default;
 
   ~Port() override = default;

@@ -14,9 +14,9 @@ struct InterruptHandler {
   virtual void interrupt(uint8_t type) = 0;
 };
 
-struct Peripheral {
+struct Peripheral { // TODO rename to Device
   virtual ~Peripheral() = default;
-  virtual void bootstrap(std::streambuf *, InterruptHandler *) = 0;
+  virtual void bootstrap(Ports *, InterruptHandler *) = 0;
 };
 
 #endif // _PERIPHERAL_H_
