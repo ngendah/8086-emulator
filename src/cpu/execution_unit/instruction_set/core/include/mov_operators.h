@@ -8,10 +8,15 @@
 
 #include "instruction.h"
 #include "instruction_templates.h"
+#include "logger.h"
 #include "operators.h"
 
 struct MovOpType : OpType {
   void execute(const OpType::Params &params) const override {
+    if (params._destination == nullptr || params._source == nullptr) {
+      PLOGD << "source or destination is not available, is null";
+      return;
+    }
     switch (params._op_type) {
     case byte:
       params._destination->write(params._source->read_byte());

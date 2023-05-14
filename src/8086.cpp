@@ -19,9 +19,29 @@ int main(int, char **) {
   SDL_RenderClear(renderer);
   SDL_RenderPresent(renderer);
 
-  struct KeyBoard final : BUS, Peripheral {
-    std::streambuf *_buf{};
+  struct KeyBoard final : Peripheral {
+    struct _Port : Port {
+      void write_hi(uint8_t val) override { Port::write_hi(val); }
+      void write_lo(uint8_t val) override { Port::write_lo(val); }
+      void write(uint8_t val) override { Port::write(val); }
+      void write(uint16_t val) override { Port::write(val); }
+      uint16_t read() const override { return Port::read(); }
+      uint8_t read_byte() const override { return Port::read_byte(); }
+      uint8_t read_hi() const override { return Port::read_hi(); }
+      uint8_t read_lo() const override { return Port::read_lo(); }
+      friend struct KeyBoard;
+
+    private:
+      _Port(KeyBoard *keyboard) : _keyboard(keyboard) {}
+      uint8_t _control_register{};
+      KeyBoard *_keyboard;
+    };
+
+    uint16_t _port_number = 0x61;
+    _Port _port;
     InterruptHandler *_interrupt_handler{};
+
+    KeyBoard() : _port(this) {}
 
     void process_input(uint8_t *key_state) {
       (void)key_state; // process the input, write ...
@@ -29,51 +49,23 @@ int main(int, char **) {
     }
 
   protected:
-    uint16_t write(UNUSED_PARAM Address const *,
-                   UNUSED_PARAM const Bytes &) override {
-      return 0;
-    };
-    Bytes read(UNUSED_PARAM Address const *,
-               UNUSED_PARAM uint16_t size) override {
-      return Bytes();
-    };
-    void bootstrap(std::streambuf *buf, InterruptHandler *handler) override {
-      _buf = buf; // receive a region in memory
+    void bootstrap(Ports *port, InterruptHandler *handler) override {
+      port->add(_port_number, &_port);
       _interrupt_handler = handler;
     };
   };
 
-  struct Display final : BUS, Peripheral {
-    std::streambuf *_buf{};
-
-    uint16_t write(UNUSED_PARAM Address const *,
-                   UNUSED_PARAM const Bytes &) override {
-      return 0;
-    };
-    Bytes read(UNUSED_PARAM Address const *,
-               UNUSED_PARAM uint16_t size) override {
-      return Bytes();
-    };
-    void bootstrap(std::streambuf *buf,
-                   UNUSED_PARAM InterruptHandler *) override {
-      _buf = buf; // receive a region in memory
+  struct Display final : Peripheral {
+    void bootstrap(Ports *ports, UNUSED_PARAM InterruptHandler *) override {
+      (void)ports;
     };
   };
 
-  struct Pointer final : BUS, Peripheral {
-    std::streambuf *_buf{};
+  struct Pointer final : Peripheral {
     InterruptHandler *_interrupt_handler{};
 
-    uint16_t write(UNUSED_PARAM Address const *,
-                   UNUSED_PARAM const Bytes &) override {
-      return 0;
-    };
-    Bytes read(UNUSED_PARAM Address const *,
-               UNUSED_PARAM uint16_t size) override {
-      return Bytes();
-    };
-    void bootstrap(std::streambuf *buf, InterruptHandler *handler) override {
-      _buf = buf; // receive a region in memory
+    void bootstrap(Ports *ports, InterruptHandler *handler) override {
+      (void)ports;
       _interrupt_handler = handler;
     };
   };

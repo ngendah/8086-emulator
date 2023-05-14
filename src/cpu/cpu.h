@@ -19,7 +19,8 @@ class CPU final : InterruptHandler {
 public:
   CPU(BUS *ram);
   ~CPU() override;
-  void bootstrap(const std::string &, std::vector<Peripheral *> peripherals);
+  void bootstrap(const std::string &,
+                 const std::vector<Peripheral *> &peripherals);
   bool halt() const;
   void power_off();
   void execute();

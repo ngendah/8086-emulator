@@ -5,11 +5,12 @@ CPU::CPU(BUS *ram) : _execution_unit(ram, &_registers), _halt(true) {}
 CPU::~CPU() {}
 
 void CPU::bootstrap(const std::string &os,
-                    std::vector<Peripheral *> peripherals) {
+                    const std::vector<Peripheral *> &peripherals) {
   _halt = false;
   (void)os; // load program
   for (auto peripheral : peripherals) {
-    peripheral->bootstrap(nullptr, dynamic_cast<InterruptHandler *>(this));
+    peripheral->bootstrap(&_registers.PORTS,
+                          dynamic_cast<InterruptHandler *>(this));
   }
 }
 
