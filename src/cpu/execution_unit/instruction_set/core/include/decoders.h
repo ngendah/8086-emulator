@@ -599,7 +599,7 @@ struct AXO_Decoder final : Decoder {
   };
 
   AXO_Decoder(bus_ptr_t bus, registers_ptr_t registers)
-      : Decoder(bus, registers), _io(bus) {}
+      : Decoder(bus, registers) {}
 
   IO *source(const Instruction &instruction) override {
     auto register_selector = RegisterSelector1();
@@ -607,12 +607,8 @@ struct AXO_Decoder final : Decoder {
   }
 
   IO *destination(const Instruction &instruction) override {
-    _io.set_address(Address((uint8_t)instruction.port()));
-    return &_io;
+    return _registers->PORTS.port(instruction.port());
   }
-
-protected:
-  BUSIO _io;
 };
 
 // AX-DX out decoder
@@ -620,12 +616,6 @@ struct AXDX_Decoder final : Decoder {
   struct RegisterSelector1 : RegisterSelector {
     uint8_t REG(UNUSED_PARAM const Instruction &) const override {
       return RegisterMapper::AX_INDEX;
-    }
-  };
-
-  struct RegisterSelector2 final : RegisterSelector {
-    uint8_t REG(UNUSED_PARAM const Instruction &) const override {
-      return RegisterMapper::DX_INDEX;
     }
   };
 
@@ -637,9 +627,8 @@ struct AXDX_Decoder final : Decoder {
     return RegisterIOSelector(_registers, &register_selector).get(instruction);
   }
 
-  IO *destination(const Instruction &instruction) override {
-    auto register_selector = RegisterSelector2();
-    return RegisterIOSelector(_registers, &register_selector).get(instruction);
+  IO *destination(UNUSED_PARAM const Instruction &) override {
+    return _registers->PORTS.port(_registers->DX);
   }
 };
 
@@ -652,20 +641,16 @@ struct IAX_Decoder final : Decoder {
   };
 
   IAX_Decoder(bus_ptr_t bus, registers_ptr_t registers)
-      : Decoder(bus, registers), _io(bus) {}
+      : Decoder(bus, registers) {}
 
   IO *source(const Instruction &instruction) override {
-    _io.set_address(Address((uint8_t)instruction.port()));
-    return &_io;
+    return _registers->PORTS.port(instruction.port());
   }
 
   IO *destination(const Instruction &instruction) override {
     auto register_selector = RegisterSelector1();
     return RegisterIOSelector(_registers, &register_selector).get(instruction);
   }
-
-protected:
-  BUSIO _io;
 };
 
 // DX-AX in decoder
@@ -676,18 +661,11 @@ struct IAXDX_Decoder final : Decoder {
     }
   };
 
-  struct RegisterSelector2 : RegisterSelector {
-    uint8_t REG(UNUSED_PARAM const Instruction &) const override {
-      return RegisterMapper::DX_INDEX;
-    }
-  };
-
   IAXDX_Decoder(bus_ptr_t bus, registers_ptr_t registers)
       : Decoder(bus, registers) {}
 
-  IO *source(const Instruction &instruction) override {
-    auto register_selector = RegisterSelector2();
-    return RegisterIOSelector(_registers, &register_selector).get(instruction);
+  IO *source(UNUSED_PARAM const Instruction &) override {
+    return _registers->PORTS.port(_registers->DX);
   }
 
   IO *destination(const Instruction &instruction) override {

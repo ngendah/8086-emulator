@@ -9,6 +9,7 @@
 #include "address.h"
 #include "flags.h"
 #include "io.h"
+#include "port.h"
 
 #include <cstdint>
 #include <string>
@@ -75,6 +76,7 @@ struct Registers final {
   Register AX, BX, CX, DX, SP, BP, SI, DI, IP;
   Segment CS, DS, SS, ES;
   Flags FLAGS;
+  Ports PORTS; // TODO move or rename cls
 
   Registers();
 };
