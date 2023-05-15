@@ -8,7 +8,7 @@ void CPU::bootstrap(const std::string &os,
                     const std::vector<Device *> &devices) {
   _halt = false;
   (void)os; // load program
-  for (auto device : devices) {
+  for (auto *device : devices) {
     device->bootstrap(&_registers.PORTS,
                       dynamic_cast<InterruptHandler *>(this));
   }
