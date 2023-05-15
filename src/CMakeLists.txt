@@ -4,16 +4,16 @@ add_executable(8086 8086.cpp)
 
 add_subdirectory(common)
 add_subdirectory(cpu)
-add_subdirectory(peripheral)
+add_subdirectory(devices)
 
-target_include_directories(8086 PRIVATE cpu peripheral)
+target_include_directories(8086 PRIVATE cpu devices)
 
 target_link_libraries(
   8086
         PUBLIC
   common
   cpu
-  peripheral
+  devices
   fmt
   plog
   )

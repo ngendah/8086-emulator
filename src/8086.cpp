@@ -1,7 +1,7 @@
 #include "SDL.h"
 #include "address.h"
 #include "cpu.h"
-#include "peripheral.h"
+#include "device.h"
 #include "ram.h"
 
 #include <streambuf>
@@ -19,7 +19,7 @@ int main(int, char **) {
   SDL_RenderClear(renderer);
   SDL_RenderPresent(renderer);
 
-  struct KeyBoard final : Peripheral {
+  struct KeyBoard final : Device {
     struct _Port : Port {
       void write_hi(uint8_t val) override { Port::write_hi(val); }
       void write_lo(uint8_t val) override { Port::write_lo(val); }
@@ -55,13 +55,13 @@ int main(int, char **) {
     };
   };
 
-  struct Display final : Peripheral {
+  struct Display final : Device {
     void bootstrap(Ports *ports, UNUSED_PARAM InterruptHandler *) override {
       (void)ports;
     };
   };
 
-  struct Pointer final : Peripheral {
+  struct Pointer final : Device {
     InterruptHandler *_interrupt_handler{};
 
     void bootstrap(Ports *ports, InterruptHandler *handler) override {
@@ -78,7 +78,7 @@ int main(int, char **) {
   KeyBoard keyboard;
   Pointer pointer;
   cpu.bootstrap("./dos.com",
-                std::vector<Peripheral *>{&keyboard, &display, &pointer});
+                std::vector<Device *>{&keyboard, &display, &pointer});
   while (!cpu.halt()) {
     while (SDL_PollEvent(&evt)) {
       switch (evt.type) {
