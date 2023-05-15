@@ -50,17 +50,17 @@ InstructionSet::InstructionSet() {
   //_INSTRUCTION(0xff, 0xFF, OR);
   //_INSTRUCTION(0xff, 0xFF, ADC);
   //_INSTRUCTION(0xff, 0xFF, SBB);
-  //_INSTRUCTION(0xff, 0xFF, ADD);
+  //_INSTRUCTION(0xff, 0xFF, ADD); // TODO
   //_INSTRUCTION(0xff, 0xFF, DAA);
-  //_INSTRUCTION(0xff, 0xFF, SUB);
+  //_INSTRUCTION(0xff, 0xFF, SUB); // TODO
   //_INSTRUCTION(0xff, 0xFF, DAS);
-  //_INSTRUCTION(0xff, 0xFF, XOR);
+  //_INSTRUCTION(0xff, 0xFF, XOR); // TODO
   //_INSTRUCTION(0xff, 0xFF, AAA);
   //_INSTRUCTION(0xff, 0xFF, AAS);
   //_INSTRUCTION(0xff, 0xFF, TEST);
   //_INSTRUCTION(0xff, 0xFF, CBW);
   //_INSTRUCTION(0xff, 0xFF, CWD);
-  //_INSTRUCTION(0xff, 0xFF, WAIT);
+  //_INSTRUCTION(0xff, 0xFF, WAIT);  // TODO
   //_INSTRUCTION(0xff, 0xFF, MOVS);
   //_INSTRUCTION(0xff, 0xFF, CMPS);
   //_INSTRUCTION(0xff, 0xFF, STOS);
@@ -73,14 +73,16 @@ InstructionSet::InstructionSet() {
   //_INSTRUCTION(0xff, 0xFF, AAM);
   //_INSTRUCTION(0xff, 0xFF, AAD);
   //_INSTRUCTION(0xff, 0xFF, LOCK);
-  //_INSTRUCTION(0xff, 0xFF, HALT);
+  //_INSTRUCTION(0xff, 0xFF, HALT); // TODO
   //_INSTRUCTION(0xff, 0xFF, CMC);
   //_INSTRUCTION(0xff, 0xFF, CLC);
   //_INSTRUCTION(0xff, 0xFF, STC);
-  //_INSTRUCTION(0xff, 0xFF, CLI);
+  //_INSTRUCTION(0xff, 0xFF, CLI); // TODO
   //_INSTRUCTION(0xff, 0xFF, STI);
   //_INSTRUCTION(0xff, 0xFF, CLD);
   //_INSTRUCTION(0xff, 0xFF, STD);
+  //_INSTRUCTION(0xff, 0xFF, SHL); // TODO
+  //_INSTRUCTION(0xff, 0xFF, SHR);
 
   /**
    * Code defination

@@ -1,0 +1,24 @@
+CLI
+XOR     AX,AX
+JB      HALT
+JO      HALT
+JS      HALT
+JNZ     HALT
+JPO     HALT
+ADD     AX,1
+JZ      HALT
+JPE     HALT
+SUB     AX,8002h
+JS      HALT
+INC     AX
+JNO     HALT
+SHL     AX,1
+JNB     HALT
+JNZ     HALT
+SHL     AX,1
+JB      HALT
+
+MOV     BX,0101010101010101b
+
+HALT:
+    HLT

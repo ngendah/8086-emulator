@@ -55,6 +55,8 @@ add_library(
   src/sti.cpp
   src/cld.cpp
   src/std.cpp
+  src/shr.cpp
+  src/shl.cpp
   )
 
 target_include_directories(instructions PUBLIC ../core/include include)
