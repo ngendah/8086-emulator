@@ -44,7 +44,9 @@ struct Ports final {
 
   void add(uint8_t number, Port *port);
 
+#ifndef _TESTS_H_
 private:
+#endif
   std::map<uint8_t, Port *> _ports;
 };
 

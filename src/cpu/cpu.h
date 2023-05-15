@@ -6,8 +6,8 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+#include "device.h"
 #include "execution_unit.h"
-#include "peripheral.h"
 
 #include <vector>
 
@@ -19,8 +19,7 @@ class CPU final : InterruptHandler {
 public:
   CPU(BUS *ram);
   ~CPU() override;
-  void bootstrap(const std::string &,
-                 const std::vector<Peripheral *> &peripherals);
+  void bootstrap(const std::string &, const std::vector<Device *> &devices);
   bool halt() const;
   void power_off();
   void execute();
