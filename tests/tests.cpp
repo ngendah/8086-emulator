@@ -2,6 +2,7 @@
 #define _TESTS_H_
 
 #include "execution_unit_tests/execution_unit_tests.h"
+#include "execution_unit_tests/execution_unit_tests_1.h"
 #include "instruction_set_tests/bus_address_latch_tests.h"
 #include "instruction_set_tests/cmp_tests.h"
 #include "instruction_set_tests/in_tests.h"
