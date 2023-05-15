@@ -1,0 +1,24 @@
+     1 00000000 FA                      CLI
+     2 00000001 31C0                    XOR     AX,AX
+     3 00000003 7224                    JB      HALT
+     4 00000005 7022                    JO      HALT
+     5 00000007 7820                    JS      HALT
+     6 00000009 751E                    JNZ     HALT
+     7 0000000B 7B1C                    JPO     HALT
+     8 0000000D 83C001                  ADD     AX,1
+     9 00000010 7417                    JZ      HALT
+    10 00000012 7A15                    JPE     HALT
+    11 00000014 2D0280                  SUB     AX,8002h
+    12 00000017 7810                    JS      HALT
+    13 00000019 40                      INC     AX
+    14 0000001A 710D                    JNO     HALT
+    15 0000001C D1E0                    SHL     AX,1
+    16 0000001E 7309                    JNB     HALT
+    17 00000020 7507                    JNZ     HALT
+    18 00000022 D1E0                    SHL     AX,1
+    19 00000024 7203                    JB      HALT
+    20                                  
+    21 00000026 BB5555                  MOV     BX,0101010101010101b
+    22                                  
+    23                                  HALT:
+    24 00000029 F4                          HLT
