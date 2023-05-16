@@ -8,11 +8,14 @@
 
 #include "logger.h"
 #include "micro_op.h"
+#include "instruction_templates.h"
 
 struct HALT : MicroOp {
   HALT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 
-  void execute(UNUSED_PARAM const Instruction &) override { assert(false); }
+  void execute(UNUSED_PARAM const Instruction &) override {
+    _registers->FLAGS.to_bits<flags_t>()->H = 1;
+  }
 
   MICRO_OP_INSTRUCTION(HALT)
 };
