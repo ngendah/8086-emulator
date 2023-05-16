@@ -11,21 +11,19 @@
 
 #include <vector>
 
-class CPU final : InterruptHandler {
-  Registers _registers;
-  ExecutionUnit _execution_unit;
-  bool _halt;
-
-public:
+struct CPU final : InterruptHandler {
   CPU(BUS *ram);
   ~CPU() override;
   void bootstrap(const std::string &, const std::vector<Device *> &devices);
-  bool halt() const;
-  void power_off();
+  bool power_off() const;
   void execute();
 
 protected:
   void interrupt(uint8_t type) override;
+
+  Registers _registers;
+  ExecutionUnit _execution_unit;
+  bool _power_off;
 };
 
 #endif /* CPU_H_ */

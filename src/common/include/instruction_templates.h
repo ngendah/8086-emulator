@@ -24,7 +24,8 @@
  */
 
 typedef struct _flags_t {
-  uint8_t X1 : 4;
+  uint8_t X1 : 3;
+  uint8_t H : 1; // custom:- machine halt
   uint8_t O : 1;
   uint8_t D : 1;
   uint8_t I : 1;
