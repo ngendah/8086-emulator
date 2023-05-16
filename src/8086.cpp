@@ -27,11 +27,11 @@ int main(int, char **) {
   Pointer pointer;
   cpu.bootstrap("./dos.com",
                 std::vector<Device *>{&keyboard, &display, &pointer});
-  while (!cpu.halt()) {
+  while (!cpu.power_off()) {
     while (SDL_PollEvent(&evt)) {
       switch (evt.type) {
       case SDL_QUIT:
-        cpu.power_off();
+        keyboard.process_input(nullptr);
         break;
       }
     }

@@ -10,7 +10,7 @@
 #include "pointer.h"
 
 struct KeyBoard final : Device {
-  struct _Port : Port {
+  struct _Port final : Port {
     void write_hi(uint8_t val) override { Port::write_hi(val); }
     void write_lo(uint8_t val) override { Port::write_lo(val); }
     void write(uint8_t val) override { Port::write(val); }
@@ -35,7 +35,9 @@ struct KeyBoard final : Device {
   KeyBoard() : _port(this) {}
 
   void process_input(uint8_t *key_state) {
-    (void)key_state; // process the input, write ...
+    if (key_state == nullptr) {
+      return _interrupt_handler->interrupt(0x19);
+    }
     _interrupt_handler->interrupt(0x21);
   }
 

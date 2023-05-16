@@ -1,12 +1,12 @@
 #include "cpu.h"
 
-CPU::CPU(BUS *ram) : _execution_unit(ram, &_registers), _halt(true) {}
+CPU::CPU(BUS *ram) : _execution_unit(ram, &_registers), _power_off(false) {}
 
 CPU::~CPU() {}
 
 void CPU::bootstrap(const std::string &os,
                     const std::vector<Device *> &devices) {
-  _halt = false;
+  _power_off = false;
   (void)os; // load program
   for (auto *device : devices) {
     device->bootstrap(&_registers.PORTS,
@@ -14,10 +14,14 @@ void CPU::bootstrap(const std::string &os,
   }
 }
 
-bool CPU::halt() const { return _halt; }
-
-void CPU::power_off() { _halt = true; }
+bool CPU::power_off() const { return _power_off; }
 
 void CPU::execute() { _execution_unit.fetch_decode_execute(); }
 
-void CPU::interrupt(uint8_t type) { _execution_unit.interrupt(type); }
+void CPU::interrupt(uint8_t type) {
+  if (type == 0x19) {
+    _power_off = true;
+    return;
+  }
+  _execution_unit.interrupt(type);
+}
