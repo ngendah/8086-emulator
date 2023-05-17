@@ -28,11 +28,11 @@ InstructionSet::InstructionSet() {
   _INSTRUCTION(0x50, 0xF0, PushRegister);
   _INSTRUCTION(0xFF, 0xFF, PushMemory);
   _INSTRUCTION(0x06, 0xE7, PushSegment);
-  // _INSTRUCTION(0x9C, 0xFF, PushFlags);
+  _INSTRUCTION(0x9C, 0xFF, PushFlags);
   _INSTRUCTION(0x58, 0xF8, PopRegister);
   _INSTRUCTION(0x8F, 0xFF, PopMemory);
   _INSTRUCTION(0x07, 0xE7, PopSegment);
-  // _INSTRUCTION(0x9D, 0xFF, PopFlags);
+  _INSTRUCTION(0x9D, 0xFF, PopFlags);
   _INSTRUCTION(0x90, 0xF8, XCHGAccumulator);
   _INSTRUCTION(0x86, 0xFE, XCHGRegisterMemory);
   _INSTRUCTION(0xE4, 0xFE, INPort);

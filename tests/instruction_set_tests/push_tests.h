@@ -83,4 +83,16 @@ TEST(PushTests, test_execute) {
   EXPECT_EQ(registers.SP, 0x6);
 }
 
+TEST(PushFlagsTests, test_execute) {
+  auto registers = Registers();
+  registers.SP = 0x10;
+  registers.FLAGS.set(0xf2);
+  auto ram = RAM(512);
+  auto io = PushFlags(&ram, &registers, &stack_full_ascending);
+  io.execute(Instruction(0xff, 0xCD));
+  auto address = Address((uint16_t)0x10);
+  auto bytes = ram.read(&address, sizeof(uint16_t));
+  EXPECT_EQ((uint16_t)bytes, 0xf2);
+}
+
 #endif // _PUSH_TESTS_H_

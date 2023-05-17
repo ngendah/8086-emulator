@@ -525,6 +525,23 @@ protected:
   StackMemoryIOSelector _stack_mem_selector;
 };
 
+// Flags-Stack push decoder
+struct FSTK_Decoder final : Decoder {
+  FSTK_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers), _stack_mem_selector(bus, registers) {}
+
+  IO *destination(const Instruction &instruction) override {
+    return _stack_mem_selector.get(instruction);
+  }
+
+  IO *source(UNUSED_PARAM const Instruction &) override {
+    return &_registers->FLAGS;
+  }
+
+protected:
+  StackMemoryIOSelector _stack_mem_selector;
+};
+
 // Stack-Register pop decoder
 struct STKR_Decoder final : Decoder {
   struct RegisterSelector1 : RegisterSelector {
@@ -584,6 +601,23 @@ struct STKS_Decoder final : Decoder {
   IO *destination(const Instruction &instruction) override {
     auto seg_selector = OpCodeSegmentSelector();
     return SegmentIOSelector(_registers, &seg_selector).get(instruction);
+  }
+
+protected:
+  StackMemoryIOSelector _stack_mem_selector;
+};
+
+// Stack-Flags pop decoder
+struct STKF_Decoder final : Decoder {
+  STKF_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers), _stack_mem_selector(bus, registers) {}
+
+  IO *source(const Instruction &instruction) override {
+    return _stack_mem_selector.get(instruction);
+  }
+
+  IO *destination(UNUSED_PARAM const Instruction &) override {
+    return &_registers->FLAGS;
   }
 
 protected:
