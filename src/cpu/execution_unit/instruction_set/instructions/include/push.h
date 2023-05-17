@@ -14,15 +14,15 @@
 #include "stack_strategy.h"
 #include "types.h"
 
-struct Push : public MicroOp {
+struct Push : MicroOp {
   Push(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
       : MicroOp(bus, registers), _stack_strategy(stack_stragegy) {}
 
-public:
+protected:
   StackStrategy const *_stack_strategy;
 };
 
-struct PushRegister : public Push {
+struct PushRegister : Push {
   explicit PushRegister(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -38,7 +38,7 @@ struct PushRegister : public Push {
                            RSTK_Decoder)
 };
 
-struct PushMemory : public Push {
+struct PushMemory : Push {
   explicit PushMemory(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -54,7 +54,7 @@ struct PushMemory : public Push {
                            MSTK_Decoder)
 };
 
-struct PushSegment : public Push {
+struct PushSegment : Push {
   explicit PushSegment(BUS *bus, Registers *registers)
       : Push(registers, bus, &stack_full_descending) {}
 
@@ -69,4 +69,20 @@ struct PushSegment : public Push {
   MICRO_OP_INSTRUCTION_DCR(PushSegment, WordMovOpTypeSelector, MovOperator,
                            SSTK_Decoder)
 };
+
+struct PushFlags : Push {
+  explicit PushFlags(BUS *bus, Registers *registers)
+      : Push(registers, bus, &stack_full_descending) {}
+
+  PushFlags(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
+      : Push(registers, bus, stack_stragegy) {}
+
+  void after_execute(UNUSED_PARAM const Instruction &) override {
+    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
+  }
+
+  MICRO_OP_INSTRUCTION_DCR(PushFlags, WordMovOpTypeSelector, MovOperator,
+                           FSTK_Decoder)
+};
+
 #endif // _PUSH_H_
