@@ -1,1 +1,10 @@
-add_library(devices STATIC ram.cpp display.cpp keyboard.cpp pointer.cpp)
+add_library(
+  devices
+  STATIC
+  src/ram.cpp
+  src/display.cpp
+  src/keyboard.cpp
+  src/pointer.cpp
+)
+
+target_include_directories(devices PUBLIC include)

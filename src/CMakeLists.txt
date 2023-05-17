@@ -6,7 +6,7 @@ add_subdirectory(common)
 add_subdirectory(cpu)
 add_subdirectory(devices)
 
-target_include_directories(8086 PRIVATE cpu devices)
+target_include_directories(8086 PRIVATE cpu devices/include)
 
 target_link_libraries(
   8086
