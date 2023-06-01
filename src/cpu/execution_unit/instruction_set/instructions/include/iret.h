@@ -10,9 +10,9 @@
 #include "micro_op.h"
 
 struct IRET : MicroOp {
-  IRET(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
+  IRET(bus_ptr_t bus, registers_ptr_t registers);
 
-  void execute(UNUSED_PARAM const Instruction &) override { assert(false); }
+  void execute(UNUSED_PARAM const Instruction &);
 
   MICRO_OP_INSTRUCTION(IRET)
 };

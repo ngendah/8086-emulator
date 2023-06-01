@@ -18,10 +18,19 @@ Address &Address::operator+=(uint16_t offset) {
   return *this;
 }
 
+Address &Address::operator-=(uint16_t offset) {
+  _address -= offset;
+  return *this;
+}
+
 Address Address::operator+(uint16_t offset) const {
   return Address(_address + offset);
 }
 
 Address Address::operator+(const Address &rhs) const {
   return Address(_address + rhs._address);
+}
+
+Address Address::operator-(const uint16_t offset) const {
+  return Address(_address - offset);
 }

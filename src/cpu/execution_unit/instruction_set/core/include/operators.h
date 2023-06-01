@@ -28,25 +28,22 @@ class Operator {
 protected:
   IO *_source, *_destination;
   OpTypeSelector *_selector;
-  // TODO convert to const OpType *const
   OpType *_op_type_operator;
+  registers_ptr_t _registers;
 
 public:
   virtual ~Operator() = default;
-
   Operator(IO *source, IO *destination, OpTypeSelector *selector,
-           OpType *op_type_operator)
+           OpType *op_type_operator, registers_ptr_t registers = nullptr)
       : _source(source), _destination(destination), _selector(selector),
-        _op_type_operator(op_type_operator) {}
+        _op_type_operator(op_type_operator), _registers(registers) {}
 
   virtual void execute(const Instruction &instruction) {
     auto _op_type = _selector->op_type(instruction);
     // NOLINTNEXTLINE
-    PLOGD << fmt::format("source_ptr=0x{0:x}, destination_ptr=0x{1:x}",
-                         (long)_source, (long)_destination); // NOLINT
-    // NOLINTNEXTLINE
     PLOGD << fmt::format("mov operation type={}", _OpTypes[_op_type]);
-    _op_type_operator->execute(OpType::Params(_op_type, _source, _destination));
+    _op_type_operator->execute(
+        OpType::Params(_op_type, _source, _destination, _registers));
   }
 };
 

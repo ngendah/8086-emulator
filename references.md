@@ -4,7 +4,7 @@
 
 1. Advanced micro-processors & IBM PC assembly language programming, K. U. Kumar & B. S. Umashankar.
 
-2. 8086 user manual.
+2. Intel architectures software developer's manual, volume 2D. 
 
 3. The 8086/8088 Primer, Stephen P. Morse.
 

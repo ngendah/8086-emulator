@@ -19,8 +19,10 @@ struct Address final {
   operator uint16_t() const;
   operator uint32_t() const;
   Address &operator+=(uint16_t offset);
+  Address &operator-=(uint16_t offset);
   Address operator+(uint16_t offset) const;
   Address operator+(const Address &rhs) const;
+  Address operator-(const uint16_t offset) const;
 
 protected:
   uint32_t _address;

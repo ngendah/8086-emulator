@@ -44,11 +44,12 @@ struct MovOpType : OpType {
 
 static const auto mov_op_type_operator = MovOpType();
 
-struct MovOperator : public Operator {
+struct MovOperator : Operator {
   ~MovOperator() override = default;
-  MovOperator(IO *source, IO *destination, OpTypeSelector *selector)
-      : Operator(source, destination, selector,
-                 (OpType *)&mov_op_type_operator) {}
+  MovOperator(IO *source, IO *destination, OpTypeSelector *selector,
+              OpType *op_type_operator = (OpType *)&mov_op_type_operator,
+              registers_ptr_t registers = nullptr)
+      : Operator(source, destination, selector, op_type_operator, registers) {}
 };
 
 struct RegisterMovOpTypeSelector : OpTypeSelector {

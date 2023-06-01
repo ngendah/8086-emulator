@@ -103,30 +103,10 @@ protected:
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
       auto _instruction = _micro_op->before_decode(instruction);
-      auto src_dest = _decoder->decode(_instruction);
-      auto *registers = _micro_op->_registers;
       _micro_op->before_execute(_instruction);
-      auto uop_operator = OperatorT(src_dest.first, src_dest.second,
-                                    &op_selector, &op_type, &registers->FLAGS);
-      uop_operator.execute(_instruction);
-      _micro_op->after_execute(_instruction);
-    }
-  };
-
-  template <class OpTypeSelectorT, class OperatorT, class OpTypeT>
-  struct ExecuteStrategy3 final : ExecuteStrategy {
-    ExecuteStrategy3(Decoder *const decoder, MicroOp *const micro_op)
-        : ExecuteStrategy(decoder, micro_op) {}
-
-    void execute(const Instruction &instruction) const override {
-      auto op_selector = OpTypeSelectorT();
-      auto op_type = OpTypeT();
-      auto _instruction = _micro_op->before_decode(instruction);
-      auto src_dest = _decoder->decode(_instruction);
-      auto *registers = _micro_op->_registers;
-      _micro_op->before_execute(_instruction);
-      auto uop_operator = OperatorT(src_dest.first, src_dest.second,
-                                    &op_selector, &op_type, &registers->FLAGS);
+      auto uop_operator =
+          OperatorT(src_dest.first, src_dest.second, &op_selector, &op_type,
+                    _micro_op->_registers);
       uop_operator.execute(_instruction);
       _micro_op->after_execute(_instruction);
     }
@@ -183,8 +163,9 @@ protected:
   }                                                                            \
   void execute(const Instruction &instruction) override {                      \
     auto decoder = decoder_cls(_bus, _registers);                              \
-    auto _strategy = ExecuteStrategy3<op_type_selector_cls, operator_type_cls, \
-                                      op_type_cls>(&decoder, (MicroOp *)this); \
+    auto _strategy =                                                           \
+        ExecuteStrategy21<op_type_selector_cls, operator_type_cls,             \
+                          op_type_cls>(&decoder, (MicroOp *)this);             \
     Executor(&_strategy).execute(instruction);                                 \
   }
 
