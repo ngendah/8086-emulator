@@ -103,6 +103,7 @@ protected:
       auto op_selector = OpTypeSelectorT();
       auto op_type = OpTypeT();
       auto _instruction = _micro_op->before_decode(instruction);
+      auto src_dest = _decoder->decode(_instruction);
       _micro_op->before_execute(_instruction);
       auto uop_operator =
           OperatorT(src_dest.first, src_dest.second, &op_selector, &op_type,
