@@ -15,73 +15,72 @@
 #include "types.h"
 
 struct Pop : MicroOp {
-  Pop(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
-      : MicroOp(bus, registers), _stack_strategy(stack_stragegy) {}
+  Pop(Registers *registers, BUS *bus) : MicroOp(bus, registers) {}
 
-public:
-  StackStrategy const *_stack_strategy;
+  template <class TStackStrategy> struct PopOpType : OpType {
+    void execute(const OpType::Params &params) const override {
+      if (params._destination == nullptr || params._source == nullptr) {
+        PLOGD << "source or destination is not available, is null";
+        return;
+      }
+      TStackStrategy::prev(params);
+    }
+  };
 };
 
 struct PopRegister : Pop {
-  explicit PopRegister(BUS *bus, Registers *registers)
-      : Pop(registers, bus, &stack_full_descending) {}
-
-  PopRegister(BUS *bus, Registers *registers,
-              StackStrategy const *stack_stragegy)
-      : Pop(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PopRegister, WordMovOpTypeSelector, MovOperator,
-                           STKR_Decoder)
+  PopRegister(BUS *bus, Registers *registers) : Pop(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PopRegister, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullDescending>, STKR_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PopRegister, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullAscending>, STKR_Decoder)
+#endif
 };
 
 struct PopMemory : Pop {
-  explicit PopMemory(BUS *bus, Registers *registers)
-      : Pop(registers, bus, &stack_full_descending) {}
-
-  PopMemory(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
-      : Pop(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PopMemory, WordMovOpTypeSelector, MovOperator,
-                           STKM_Decoder)
+  PopMemory(BUS *bus, Registers *registers) : Pop(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PopMemory, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullDescending>, STKM_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PopMemory, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullAscending>, STKM_Decoder)
+#endif
 };
 
 struct PopSegment : Pop {
-  explicit PopSegment(BUS *bus, Registers *registers)
-      : Pop(registers, bus, &stack_full_descending) {}
-
-  PopSegment(BUS *bus, Registers *registers,
-             StackStrategy const *stack_stragegy)
-      : Pop(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PopSegment, WordMovOpTypeSelector, MovOperator,
-                           STKS_Decoder)
+  PopSegment(BUS *bus, Registers *registers) : Pop(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PopSegment, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullDescending>, STKS_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PopSegment, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullAscending>, STKS_Decoder)
+#endif
 };
 
 struct PopFlags : Pop {
-  explicit PopFlags(BUS *bus, Registers *registers)
-      : Pop(registers, bus, &stack_full_descending) {}
+  PopFlags(BUS *bus, Registers *registers) : Pop(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PopFlags, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullDescending>, STKF_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PopFlags, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullAscending>, STKF_Decoder)
+#endif
+};
 
-  PopFlags(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
-      : Pop(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->prev(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PopFlags, WordMovOpTypeSelector, MovOperator,
-                           STKF_Decoder)
+struct PopIP : Pop {
+  PopIP(BUS *bus, Registers *registers) : Pop(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PopIP, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullDescending>, STKIP_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PopIP, WordMovOpTypeSelector, MovOperator,
+                            PopOpType<StackFullAscending>, STKIP_Decoder)
+#endif
 };
 
 #endif // _POP_H_

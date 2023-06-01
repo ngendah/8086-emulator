@@ -1,6 +1,8 @@
 #ifndef _TESTS_H_
 #define _TESTS_H_
 
+#define _STACK_FULL_ASCENDING
+
 #include "execution_unit_tests/execution_unit_tests.h"
 #include "execution_unit_tests/execution_unit_tests_1.h"
 #include "instruction_set_tests/bus_address_latch_tests.h"
@@ -8,7 +10,9 @@
 #include "instruction_set_tests/in_tests.h"
 #include "instruction_set_tests/incr_tests.h"
 #include "instruction_set_tests/instruction_set_tests.h"
+#include "instruction_set_tests/int_tests.h"
 #include "instruction_set_tests/io_selectors_tests.h"
+#include "instruction_set_tests/iret_tests.h"
 #include "instruction_set_tests/lahf_tests.h"
 #include "instruction_set_tests/lds_tests.h"
 #include "instruction_set_tests/lea_tests.h"

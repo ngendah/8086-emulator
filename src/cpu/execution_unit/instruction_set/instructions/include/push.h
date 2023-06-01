@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 Ngenda Henry
+// Copyright (c) 2023 Ngenda Henry
 //
 // For the license information refer to LICENSE.
 
@@ -15,74 +15,72 @@
 #include "types.h"
 
 struct Push : MicroOp {
-  Push(Registers *registers, BUS *bus, StackStrategy const *stack_stragegy)
-      : MicroOp(bus, registers), _stack_strategy(stack_stragegy) {}
+  Push(Registers *registers, BUS *bus) : MicroOp(bus, registers) {}
 
-protected:
-  StackStrategy const *_stack_strategy;
+  template <class TStackStrategy> struct PushOpType : OpType {
+    void execute(const OpType::Params &params) const override {
+      if (params._destination == nullptr || params._source == nullptr) {
+        PLOGD << "source or destination is not available, is null";
+        return;
+      }
+      TStackStrategy::next(params);
+    }
+  };
 };
 
 struct PushRegister : Push {
-  explicit PushRegister(BUS *bus, Registers *registers)
-      : Push(registers, bus, &stack_full_descending) {}
-
-  PushRegister(BUS *bus, Registers *registers,
-               StackStrategy const *stack_stragegy)
-      : Push(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PushRegister, WordMovOpTypeSelector, MovOperator,
-                           RSTK_Decoder)
+  PushRegister(BUS *bus, Registers *registers) : Push(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PushRegister, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullDescending>, RSTK_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PushRegister, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullAscending>, RSTK_Decoder)
+#endif
 };
 
 struct PushMemory : Push {
-  explicit PushMemory(BUS *bus, Registers *registers)
-      : Push(registers, bus, &stack_full_descending) {}
-
-  PushMemory(BUS *bus, Registers *registers,
-             StackStrategy const *stack_stragegy)
-      : Push(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PushMemory, WordMovOpTypeSelector, MovOperator,
-                           MSTK_Decoder)
+  PushMemory(BUS *bus, Registers *registers) : Push(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PushMemory, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullDescending>, MSTK_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PushMemory, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullAscending>, MSTK_Decoder)
+#endif
 };
 
 struct PushSegment : Push {
-  explicit PushSegment(BUS *bus, Registers *registers)
-      : Push(registers, bus, &stack_full_descending) {}
-
-  PushSegment(BUS *bus, Registers *registers,
-              StackStrategy const *stack_stragegy)
-      : Push(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PushSegment, WordMovOpTypeSelector, MovOperator,
-                           SSTK_Decoder)
+  PushSegment(BUS *bus, Registers *registers) : Push(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PushSegment, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullDescending>, SSTK_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PushSegment, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullAscending>, SSTK_Decoder)
+#endif
 };
 
 struct PushFlags : Push {
-  explicit PushFlags(BUS *bus, Registers *registers)
-      : Push(registers, bus, &stack_full_descending) {}
+  PushFlags(BUS *bus, Registers *registers) : Push(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PushFlags, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullDescending>, FSTK_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PushFlags, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullAscending>, FSTK_Decoder)
+#endif
+};
 
-  PushFlags(BUS *bus, Registers *registers, StackStrategy const *stack_stragegy)
-      : Push(registers, bus, stack_stragegy) {}
-
-  void after_execute(UNUSED_PARAM const Instruction &) override {
-    _stack_strategy->next(_registers->SP, sizeof(uint16_t));
-  }
-
-  MICRO_OP_INSTRUCTION_DCR(PushFlags, WordMovOpTypeSelector, MovOperator,
-                           FSTK_Decoder)
+struct PushIP : Push {
+  PushIP(BUS *bus, Registers *registers) : Push(registers, bus) {}
+#ifndef _STACK_FULL_ASCENDING
+  MICRO_OP_INSTRUCTION_DCRE(PushIP, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullDescending>, FSTK_Decoder)
+#else
+  MICRO_OP_INSTRUCTION_DCRE(PushIP, WordMovOpTypeSelector, MovOperator,
+                            PushOpType<StackFullAscending>, FSTK_Decoder)
+#endif
 };
 
 #endif // _PUSH_H_

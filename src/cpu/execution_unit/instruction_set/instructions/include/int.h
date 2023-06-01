@@ -12,7 +12,9 @@
 struct INT : MicroOp {
   INT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}
 
-  void execute(UNUSED_PARAM const Instruction &) override { assert(false); }
+  void before_execute(UNUSED_PARAM const Instruction &) override;
+
+  void execute(const Instruction &instruction) override;
 
   MICRO_OP_INSTRUCTION(INT)
 };
