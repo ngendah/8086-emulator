@@ -17,8 +17,8 @@ struct CJmpOpTypeSelector : OpTypeSelector {
 struct CJmpOperator : Operator {
   ~CJmpOperator() override = default;
   CJmpOperator(IO *source, IO *destination, OpTypeSelector *selector,
-               OpType *const optype, Flags *flags)
-      : Operator(source, destination, selector, optype), _flags(flags) {}
+               OpType *const optype, registers_ptr_t registers)
+      : Operator(source, destination, selector, optype, registers) {}
 
   void execute(const Instruction &instruction) override {
     auto _op_type = _selector->op_type(instruction);
@@ -31,12 +31,9 @@ struct CJmpOperator : Operator {
     PLOGD << fmt::format("operation type={}", _OpTypes[_op_type]);
     // NOLINTNEXTLINE
     PLOGD << fmt::format("jump type={}", _CJmpOpTypes[(int)_jmp_op_type]);
-    _op_type_operator->execute(
-        OpType::Params(_op_type, _source, _destination, _flags, _jmp_op_type));
+    _op_type_operator->execute(OpType::Params(_op_type, _source, _destination,
+                                              _registers, _jmp_op_type));
   }
-
-protected:
-  Flags *_flags;
 };
 
 struct CJmpOpType : OpType {
@@ -45,94 +42,94 @@ struct CJmpOpType : OpType {
     IO *value = params._destination;
     switch (params._jmp_type) {
     case CJmpOpTypes::je:
-      if (params._flags->bits<flags_t>().Z == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().Z == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jne:
-      if (params._flags->bits<flags_t>().Z != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().Z != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::js:
-      if (params._flags->bits<flags_t>().S == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().S == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jns:
-      if (params._flags->bits<flags_t>().S != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().S != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jo:
-      if (params._flags->bits<flags_t>().O == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().O == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jno:
-      if (params._flags->bits<flags_t>().O != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().O != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jc:
     case CJmpOpTypes::jb:
     case CJmpOpTypes::jnae:
-      if (params._flags->bits<flags_t>().C == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().C == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jnc:
     case CJmpOpTypes::jae:
     case CJmpOpTypes::jnb:
-      if (params._flags->bits<flags_t>().C != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().C != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jp:
     case CJmpOpTypes::jpe:
-      if (params._flags->bits<flags_t>().P == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().P == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jnp:
     case CJmpOpTypes::jpo:
-      if (params._flags->bits<flags_t>().P != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().P != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jbe:
     case CJmpOpTypes::jna:
-      if (params._flags->bits<flags_t>().C == 1 &&
-          params._flags->bits<flags_t>().Z == 1) {
+      if (params._registers->FLAGS.bits<flags_t>().C == 1 &&
+          params._registers->FLAGS.bits<flags_t>().Z == 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jnbe:
     case CJmpOpTypes::ja:
-      if (params._flags->bits<flags_t>().C != 1 &&
-          params._flags->bits<flags_t>().Z != 1) {
+      if (params._registers->FLAGS.bits<flags_t>().C != 1 &&
+          params._registers->FLAGS.bits<flags_t>().Z != 1) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jle:
     case CJmpOpTypes::jng:
-      if (params._flags->bits<flags_t>().S ==
-              params._flags->bits<flags_t>().O &&
-          params._flags->bits<flags_t>().Z == 0) {
+      if (params._registers->FLAGS.bits<flags_t>().S ==
+              params._registers->FLAGS.bits<flags_t>().O &&
+          params._registers->FLAGS.bits<flags_t>().Z == 0) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jl:
     case CJmpOpTypes::jnge:
-      if (params._flags->bits<flags_t>().S !=
-          params._flags->bits<flags_t>().O) {
+      if (params._registers->FLAGS.bits<flags_t>().S !=
+          params._registers->FLAGS.bits<flags_t>().O) {
         (*IP) += value->read();
       }
       break;
     case CJmpOpTypes::jnl:
     case CJmpOpTypes::jge:
-      if (params._flags->bits<flags_t>().S ==
-          params._flags->bits<flags_t>().O) {
+      if (params._registers->FLAGS.bits<flags_t>().S ==
+          params._registers->FLAGS.bits<flags_t>().O) {
         (*IP) += value->read();
       }
     case CJmpOpTypes::noj:

@@ -20,8 +20,8 @@ struct WordOrByteWithSignOpTypeSelector : OpTypeSelector {
 struct MathOperator : Operator {
   ~MathOperator() override = default;
   MathOperator(IO *source, IO *destination, OpTypeSelector *selector,
-               OpType *const optype, Flags *flags)
-      : Operator(source, destination, selector, optype), _flags(flags) {}
+               OpType *optype, Registers *registers)
+      : Operator(source, destination, selector, optype, registers) {}
 
   void execute(const Instruction &instruction) override {
     auto _op_type = _selector->op_type(instruction);
@@ -31,16 +31,13 @@ struct MathOperator : Operator {
     // NOLINTNEXTLINE
     PLOGD << fmt::format("math operation type={}", _OpTypes[_op_type]);
     _op_type_operator->execute(
-        OpType::Params(_op_type, _source, _destination, _flags));
+        OpType::Params(_op_type, _source, _destination, _registers));
   }
-
-protected:
-  Flags *_flags;
 };
 
 struct IncrOpType : OpType {
   void execute(const OpType::Params &params) const override {
-    auto flags = params._flags->bits<flags_t>();
+    auto flags = params._registers->FLAGS.bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
     uint16_t val = params._source->read();
     auto incr_by = params._op_type == OpTypes::word ? 2 : 1;
@@ -48,14 +45,14 @@ struct IncrOpType : OpType {
     flags.O = (val + incr_by) > UINT16_MAX ? 1 : 0;
     val += incr_by;
     params._destination->write(val);
-    params._flags->set((uint16_t)flags);
+    params._registers->FLAGS.set((uint16_t)flags);
   }
 };
 
 // TODO fix to correctly account for negative results
 struct DecrOpType : OpType {
   void execute(const OpType::Params &params) const override {
-    auto flags = params._flags->bits<flags_t>();
+    auto flags = params._registers->FLAGS.bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
     int16_t val = params._source->read();
     auto decr_by = params._op_type == OpTypes::word ? 2 : 1;
@@ -64,7 +61,7 @@ struct DecrOpType : OpType {
     flags.Z = val == 0 ? 1 : 0;
     flags.S = val < 0 ? 1 : 0;
     params._destination->write((uint16_t)(flags.S == 1 ? 0 : val));
-    params._flags->set((uint16_t)flags);
+    params._registers->FLAGS.set((uint16_t)flags);
   }
 };
 
@@ -79,7 +76,7 @@ struct CompareOpType : OpType {
 protected:
   static void byte_cmp(const OpType::Params &params) {
     // TODO revisit and verify it's correct
-    auto flags = params._flags->bits<flags_t>();
+    auto flags = params._registers->FLAGS.bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
     int8_t l = params._source->read_byte();
     int8_t r = params._destination->read_byte();
@@ -89,12 +86,12 @@ protected:
     flags.A = l > r ? 1 : 0;
     flags.O = 0;
     flags.P = std::bitset<8>(l - r).count() % 3 == 0 ? 1 : 0;
-    params._flags->set((uint16_t)flags);
+    params._registers->FLAGS.set((uint16_t)flags);
   }
 
   static void word_cmp(const OpType::Params &params) {
     // TODO revisit and verify it's correct
-    auto flags = params._flags->bits<flags_t>();
+    auto flags = params._registers->FLAGS.bits<flags_t>();
     memset(&flags, 0, sizeof(flags));
     int16_t l = params._source->read();
     int16_t r = params._destination->read();
@@ -105,7 +102,7 @@ protected:
         params._source->read_lo() > params._destination->read_lo() ? 1 : 0;
     flags.O = 0;
     flags.P = std::bitset<16>(l - r).count() % 3 == 0 ? 1 : 0;
-    params._flags->set((uint16_t)flags);
+    params._registers->FLAGS.set((uint16_t)flags);
   }
 };
 

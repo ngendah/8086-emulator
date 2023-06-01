@@ -14,27 +14,32 @@ struct OpType {
     OpTypes _op_type;
     CJmpOpTypes _jmp_type;
     IO *_source, *_destination;
-    Flags *_flags;
+    Registers *_registers;
 
-    Params(OpTypes op_type, IO *source, IO *destination)
+    explicit Params(OpTypes op_type, IO *source, IO *destination)
         : _op_type(op_type), _jmp_type(CJmpOpTypes::noj), _source(source),
-          _destination(destination), _flags(nullptr) {}
+          _destination(destination), _registers(nullptr) {}
 
-    Params(OpTypes op_type, IO *source, IO *destination, Flags *flags)
+    Params(OpTypes op_type, IO *source, IO *destination, Registers *registers)
         : _op_type(op_type), _jmp_type(CJmpOpTypes::noj), _source(source),
-          _destination(destination), _flags(flags) {}
+          _destination(destination), _registers(registers) {}
 
-    Params(OpTypes op_type, IO *source, IO *destination, Flags *flags,
+    Params(OpTypes op_type, IO *source, IO *destination, Registers *registers,
            CJmpOpTypes jmp_type)
         : _op_type(op_type), _jmp_type(jmp_type), _source(source),
-          _destination(destination), _flags(flags) {}
+          _destination(destination), _registers(registers) {}
+
+    Params(const Params &other)
+        : _op_type(other._op_type), _jmp_type(other._jmp_type),
+          _source(other._source), _destination(other._destination),
+          _registers(other._registers) {}
 
     Params &operator=(const Params &rhs) {
       _op_type = rhs._op_type;
       _jmp_type = rhs._jmp_type;
       _source = rhs._source;
       _destination = rhs._destination;
-      _flags = rhs._flags;
+      _registers = rhs._registers;
       return *this;
     }
   };

@@ -486,6 +486,23 @@ protected:
   StackMemoryIOSelector _stack_mem_selector;
 };
 
+// IP (Instruction-Pointer) Register-Stack push decoder
+struct IPSTK_Decoder final : Decoder {
+  IPSTK_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers), _stack_mem_selector(bus, registers) {}
+
+  IO *destination(const Instruction &instruction) override {
+    return _stack_mem_selector.get(instruction);
+  }
+
+  IO *source(UNUSED_PARAM const Instruction &) override {
+    return &_registers->IP;
+  }
+
+protected:
+  StackMemoryIOSelector _stack_mem_selector;
+};
+
 // Memory-Stack push decoder
 struct MSTK_Decoder final : Decoder {
   MSTK_Decoder(bus_ptr_t bus, registers_ptr_t registers)
@@ -561,6 +578,23 @@ struct STKR_Decoder final : Decoder {
   IO *destination(const Instruction &instruction) override {
     auto reg_selector = RegisterSelector1();
     return RegisterIOSelector(_registers, &reg_selector).get(instruction);
+  }
+
+protected:
+  StackMemoryIOSelector _stack_mem_selector;
+};
+
+// Stack - IP(InstructionPointer) Register pop decoder
+struct STKIP_Decoder final : Decoder {
+  STKIP_Decoder(bus_ptr_t bus, registers_ptr_t registers)
+      : Decoder(bus, registers), _stack_mem_selector(bus, registers) {}
+
+  IO *source(const Instruction &instruction) override {
+    return _stack_mem_selector.get(instruction);
+  }
+
+  IO *destination(UNUSED_PARAM const Instruction &) override {
+    return &_registers->IP;
   }
 
 protected:
