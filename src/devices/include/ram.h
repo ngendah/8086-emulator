@@ -167,7 +167,8 @@ protected:
 
     Buffer(uint16_t size = 1024)
         : _memory(std::allocator<uint8_t>().allocate(size)) {
-      this->setbuf(_memory.get(), size);
+      this->setbuf(static_cast<uint8_t *>(std::memset(_memory.get(), 0, size)),
+                   size);
     }
 
     // TODO make it visible only to tests
