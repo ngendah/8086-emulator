@@ -15,7 +15,7 @@ target_include_directories(unitTests PUBLIC "${PROJECT_SOURCE_DIR}/include"
         "${PROJECT_SOURCE_DIR}/src/devices")
 
 add_subdirectory(peripheral_tests)
-add_subdirectory(instruction_set_tests)
+add_subdirectory(instruction_unit_tests)
 add_subdirectory(execution_unit_tests)
 
 target_link_libraries(

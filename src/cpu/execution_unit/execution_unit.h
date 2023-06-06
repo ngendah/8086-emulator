@@ -6,7 +6,7 @@
 #ifndef _EXECUTION_UNIT_H_
 #define _EXECUTION_UNIT_H_
 
-#include "instruction_set.h"
+#include "instruction_unit.h"
 #include "micro_op.h"
 
 #include <queue>
@@ -44,7 +44,7 @@ protected:
   }
 
 private:
-  InstructionSet _instruction_set;
+  InstructionUnit _instruction_unit;
   std::streambuf *_buf;
   MicroOp::Params _params;
   std::queue<uint8_t> _interrupts;

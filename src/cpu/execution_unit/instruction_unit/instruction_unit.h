@@ -98,7 +98,7 @@ struct Comparator {
   }
 };
 
-struct InstructionSet {
+struct InstructionUnit {
   typedef std::shared_ptr<MicroOp> (*create_func_t)(const MicroOp::Params &);
 
   template <typename TDerived>
@@ -107,13 +107,13 @@ struct InstructionSet {
         std::make_pair(key, (create_func_t)&TDerived::create));
   }
 
-  InstructionSet::create_func_t find(const MicroOp::Key &);
+  InstructionUnit::create_func_t find(const MicroOp::Key &);
   InstructionCode *find(uint8_t opcode);
 
   std::shared_ptr<MicroOp> decode(uint8_t opcode,
                                   const MicroOp::Params &params);
 
-  InstructionSet();
+  InstructionUnit();
 
 protected:
   std::list<std::pair<MicroOp::Key, create_func_t>> instructions;

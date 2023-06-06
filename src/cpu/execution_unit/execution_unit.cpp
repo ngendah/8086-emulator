@@ -39,7 +39,7 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
     _opcode = _sop;
     _sop = SOP::NONE;
   }
-  auto _code = _instruction_set.find(_opcode);
+  auto _code = _instruction_unit.find(_opcode);
   if (_code->_arguments.empty()) {
     PLOGD << fmt::format("memonic={}, sop={:x},opcode={:x}", _code->_memonic,
                          _sop, _opcode);
@@ -69,7 +69,7 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
 }
 
 std::shared_ptr<MicroOp> ExecutionUnit::decode(uint8_t opcode) {
-  return _instruction_set.decode(opcode, _params);
+  return _instruction_unit.decode(opcode, _params);
 }
 
 uint16_t ExecutionUnit::beg() {

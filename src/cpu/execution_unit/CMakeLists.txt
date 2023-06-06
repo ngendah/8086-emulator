@@ -1,6 +1,6 @@
 add_library(execution_unit STATIC execution_unit.cpp)
 
-add_subdirectory(instruction_set)
+add_subdirectory(instruction_unit)
 
-target_link_libraries(execution_unit PUBLIC fmt instruction_set)
-target_include_directories(execution_unit PUBLIC instruction_set)
+target_link_libraries(execution_unit PUBLIC fmt instruction_unit)
+target_include_directories(execution_unit PUBLIC instruction_unit)
