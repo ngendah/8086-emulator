@@ -44,7 +44,7 @@ protected:
   }
 
 private:
-  InstructionSet _instruction_set;
+  InstructionUnit _instruction_unit;
   std::streambuf *_buf;
   MicroOp::Params _params;
   std::queue<uint8_t> _interrupts;

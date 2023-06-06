@@ -19,7 +19,7 @@
 #define _INSTRUCTION(opcode, mask, cls)                                        \
   register_instruction<cls>(MicroOp::Key(opcode, mask))
 
-InstructionSet::InstructionSet() {
+InstructionUnit::InstructionUnit() {
   _INSTRUCTION(0x88, 0xFC, MovRegisterAndMemory);
   _INSTRUCTION(0xB0, 0xF0, MovRegisterImmediate);
   _INSTRUCTION(0xA0, 0xF0, MovAccumulator);
@@ -385,7 +385,7 @@ InstructionSet::InstructionSet() {
   _instruction_code_map.insert({0xFF, InstructionCode("GRP5", "E")});
 }
 
-InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
+InstructionUnit::create_func_t InstructionUnit::find(const MicroOp::Key &key) {
   auto it =
       std::find_if(instructions.begin(), instructions.end(),
                    [&key](const std::pair<MicroOp::Key, create_func_t> &rhs) {
@@ -397,14 +397,14 @@ InstructionSet::create_func_t InstructionSet::find(const MicroOp::Key &key) {
   return it->second;
 }
 
-InstructionCode *InstructionSet::find(uint8_t opcode) {
+InstructionCode *InstructionUnit::find(uint8_t opcode) {
   auto it = _instruction_code_map.find(opcode);
   if (it == _instruction_code_map.end())
     return nullptr;
   return &(it->second);
 }
 
-std::shared_ptr<MicroOp> InstructionSet::decode(uint8_t opcode,
+std::shared_ptr<MicroOp> InstructionUnit::decode(uint8_t opcode,
                                                 const MicroOp::Params &params) {
   auto _ctor = find(MicroOp::Key(opcode));
   if (_ctor == nullptr) {

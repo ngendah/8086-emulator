@@ -18,16 +18,16 @@ struct Compare {
   }
 };
 
-TEST(InstructionSetTests, test_decode) {
-  InstructionSet instructions;
+TEST(InstructionUnitTests, test_decode) {
+  InstructionUnit instructions;
   auto cls_create = instructions.find(MicroOp::Key(0x8B));
   EXPECT_EQ(cls_create, &MovRegisterAndMemory::create);
   auto micro_op = instructions.decode(0x8B, MicroOp::Params());
   EXPECT_NE(micro_op.get(), nullptr);
 }
 
-TEST(InstructionSetTests, test_decode_push_segment) {
-  InstructionSet instructions;
+TEST(InstructionUnitTests, test_decode_push_segment) {
+  InstructionUnit instructions;
   {
     auto cls_create = instructions.find(MicroOp::Key(0x06));
     EXPECT_EQ(cls_create, &PushSegment::create);
@@ -48,16 +48,16 @@ TEST(InstructionSetTests, test_decode_push_segment) {
   EXPECT_EQ(cls_create, &PushSegment::create);
 }
 
-TEST(InstructionSetTests, test_decode_push_register) {
-  InstructionSet instructions;
+TEST(InstructionUnitTests, test_decode_push_register) {
+  InstructionUnit instructions;
   for (int key = 0x50; key < 0x58; key++) {
     auto cls_create = instructions.find(MicroOp::Key(key));
     EXPECT_EQ(cls_create, &PushRegister::create);
   }
 }
 
-TEST(InstructionSetTests, test_find_from_map) {
-  InstructionSet instructions;
+TEST(InstructionUnitTests, test_find_from_map) {
+  InstructionUnit instructions;
   auto ins_code = instructions.find(0x88);
   EXPECT_NE(ins_code, nullptr);
   EXPECT_EQ(ins_code->_memonic, "MOV");
