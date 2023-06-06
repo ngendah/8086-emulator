@@ -1,6 +1,6 @@
 add_library(
   instruction_set
-        STATIC
+  STATIC
   instruction_set.cpp
 )
 

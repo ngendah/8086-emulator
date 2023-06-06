@@ -86,7 +86,7 @@ InstructionSet::InstructionSet() {
 
   /**
    * Code defination
-   * E - Argument(s) encoded in Mode
+   * E - Argument(s) encoded in ModR/M
    * I - Immediate value
    *
    * Argument Size
