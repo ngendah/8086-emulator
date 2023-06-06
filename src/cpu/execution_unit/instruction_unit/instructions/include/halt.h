@@ -6,9 +6,9 @@
 #ifndef _HALT_H_
 #define _HALT_H_
 
+#include "instruction_templates.h"
 #include "logger.h"
 #include "micro_op.h"
-#include "instruction_templates.h"
 
 struct HALT : MicroOp {
   HALT(bus_ptr_t bus, registers_ptr_t registers) : MicroOp(bus, registers) {}

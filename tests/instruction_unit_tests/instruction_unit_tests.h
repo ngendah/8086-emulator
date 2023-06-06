@@ -1,7 +1,7 @@
 #ifndef _INSTRUCTION_SET_TESTS_H_
 #define _INSTRUCTION_SET_TESTS_H_
 
-#include "instruction_set.h"
+#include "instruction_unit.h"
 #include "mov.h"
 #include "push.h"
 #include "ram.h"
