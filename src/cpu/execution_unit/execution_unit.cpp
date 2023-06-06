@@ -45,16 +45,16 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
                          _sop, _opcode);
     return {_opcode, Instruction(_sop, _opcode)};
   }
-  uint8_t _mode = 0;
-  if (_code->has_mode()) {
-    _mode = getb();
-    auto _has_offset = _code->has_disp(_mode);
+  uint8_t _mod = 0;
+  if (_code->has_mod()) {
+    _mod = getb();
+    auto _has_offset = _code->has_disp(_mod);
     if (_has_offset.first) {
       auto _offset_len = _has_offset.second;
       _offset = _offset_len == sizeof(uint8_t) ? getb() : getw();
     }
   }
-  uint16_t _opcode_mode = make_word(_opcode, _mode);
+  uint16_t _opcode_mod = make_word(_opcode, _mod);
   auto _has_data = _code->has_data();
   if (_has_data.first) {
     _data_len = _has_data.second;
@@ -62,8 +62,8 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
   }
   auto _instruction =
       _data_len == sizeof(uint8_t)
-          ? Instruction(_sop, _opcode_mode, _offset, (uint8_t)_data)
-          : Instruction(_sop, _opcode_mode, _offset, (uint16_t)_data);
+          ? Instruction(_sop, _opcode_mod, _offset, (uint8_t)_data)
+          : Instruction(_sop, _opcode_mod, _offset, (uint16_t)_data);
   PLOGD << fmt::format("memonic={}", _code->_memonic) << _instruction;
   return {_opcode, _instruction};
 }

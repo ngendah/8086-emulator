@@ -71,17 +71,17 @@ TEST(InstructionCodeTests, test_cnstr) {
 
 TEST(InstructionCodeTests, test_has_mode_1) {
   auto code = InstructionCode("ADD", "E", "E");
-  EXPECT_EQ(code.has_mode(), true);
+  EXPECT_EQ(code.has_mod(), true);
 }
 
 TEST(InstructionCodeTests, test_has_mode_2) {
   auto code = InstructionCode("INC", "E");
-  EXPECT_EQ(code.has_mode(), true);
+  EXPECT_EQ(code.has_mod(), true);
 }
 
 TEST(InstructionCodeTests, test_has_mode_3) {
   auto code = InstructionCode("PUSH");
-  EXPECT_EQ(code.has_mode(), false);
+  EXPECT_EQ(code.has_mod(), false);
 }
 
 TEST(InstructionCodeTests, test_has_data_1) {

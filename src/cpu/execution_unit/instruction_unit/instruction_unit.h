@@ -36,7 +36,7 @@ struct InstructionCode {
   InstructionCode(std::string memonic, std::string larg, std::string rarg)
       : _memonic(memonic), _arguments({larg, rarg}) {}
 
-  bool has_mode() const {
+  bool has_mod() const {
     if (_arguments.empty())
       return false;
     if (_arguments.size() == 1 && _arguments[0] == "E")
@@ -44,11 +44,11 @@ struct InstructionCode {
     return _arguments[0] == "E" || _arguments[1] == "E";
   }
 
-  std::pair<bool, uint8_t> has_disp(uint8_t const &mode) const {
-    if (!has_mode()) {
+  std::pair<bool, uint8_t> has_disp(uint8_t const &mod) const {
+    if (!has_mod()) {
       assert(false);
     }
-    auto _mod_reg_rm = *(_mod_reg_rm_t *)&mode;
+    auto _mod_reg_rm = *(_mod_reg_rm_t *)&mod;
     if (_mod_reg_rm.MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT &&
         _mod_reg_rm.RM == AddressingModes::RM::DIRECT_ADDRESSING) {
       return {true, sizeof(uint16_t)};
