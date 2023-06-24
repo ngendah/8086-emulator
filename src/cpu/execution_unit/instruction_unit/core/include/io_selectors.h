@@ -207,8 +207,10 @@ struct StackMemoryIOSelector final : IOSelector {
 
   IO *get(const Instruction &instruction) override {
     Segment *_segment = segment(instruction, _selector);
-    _bus.set_address(
-        PhysicalAddresser(_registers).address(_segment, _registers->SP));
+    auto address =
+        PhysicalAddresser(_registers).address(_segment, _registers->SP);
+    _bus.set_address(address);
+    PLOGD << fmt::format("BUSIO object ptr=0x{:x}", (long)&_bus);
     return &_bus;
   }
 

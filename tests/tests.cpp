@@ -1,8 +1,6 @@
 #ifndef _TESTS_H_
 #define _TESTS_H_
 
-#define _STACK_FULL_ASCENDING
-
 #include "execution_unit_tests/execution_unit_tests.h"
 #include "execution_unit_tests/execution_unit_tests_1.h"
 #include "instruction_unit_tests/bus_address_latch_tests.h"

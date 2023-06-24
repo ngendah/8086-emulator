@@ -60,9 +60,9 @@ public:
                         ? IndexSegmentMapper(_registers).get(idx)
                         : DefaultSegmentMapper(_registers).get(idx);
     PLOGD << fmt::format("idx=0x{0:x}, "
-                         "segment_mapping_type={1}, name={2}, ptr=0x{3:x}",
+                         "segment_mapping_type={1}, name={2}",
                          idx, _SegmentMappingTypes[segment_mapping_type],
-                         _segment->name(), (long)_segment);
+                         _segment->name());
     return _segment;
   }
 

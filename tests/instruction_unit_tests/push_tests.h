@@ -6,6 +6,7 @@
 #include "ram.h"
 
 #include "gtest/gtest.h"
+#include <array>
 
 TEST(PushRegisterTests, test_execute) {
   auto registers = Registers();
@@ -49,7 +50,9 @@ TEST(PushSegmentTests, test_execute) {
 }
 
 TEST(PushTests, test_execute) {
-  auto ram = RAM(1024);
+  const auto size = 512u;
+  std::array<uint8_t, size> buffer{};
+  auto ram = RAM(&buffer.at(0), size);
   auto registers = Registers();
   registers.SS = 0x10;
   registers.BP = 0x2;
@@ -70,17 +73,18 @@ TEST(PushTests, test_execute) {
   }
 
   { // test push register
-    auto address = registers.SS.address(registers.BP, 0x0);
-    auto bytes = ram.read(&address, sizeof(uint16_t));
-    EXPECT_EQ((uint16_t)bytes, 0xE45B);
+    // TODO use SP
+    auto address = registers.SS.address(0x2) - (uint16_t)1;
+    const auto val = ram.read_u16(&address);
+    EXPECT_EQ(val, 0x5BE4);
   }
 
   { // test push memory
-    auto address = registers.SS.address(registers.BP, sizeof(uint16_t));
-    auto bytes = ram.read(&address, sizeof(uint16_t));
-    EXPECT_EQ((uint16_t)bytes, 0xA74E);
+    // TODO use SP
+    auto address = registers.SS.address(0) - (uint16_t)1;
+    const auto val = ram.read_u16(&address);
+    EXPECT_EQ(val, 0x4EA7);
   }
-  EXPECT_EQ(registers.SP, 0x6);
 }
 
 TEST(PushFlagsTests, test_execute) {

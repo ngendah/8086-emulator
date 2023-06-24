@@ -137,6 +137,9 @@ struct RAM final : BUS {
   ~RAM() override {}
 
   uint16_t write(Address const *address, const Bytes &bytes) override {
+    if (address == nullptr)
+      return -1;
+    PLOGD << *address;
     if (_buffer.pseekpos((uint32_t)(*address)) == -1) {
       assert(false);
       return -1;
@@ -146,6 +149,8 @@ struct RAM final : BUS {
 
   Bytes read(Address const *address, uint16_t len) override {
     uint8_t *_p = nullptr;
+    if (address == nullptr)
+      assert(false);
     if (_buffer.gseekpos((uint32_t)*address) == -1) {
       assert(false);
       return Bytes();
