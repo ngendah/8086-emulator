@@ -46,7 +46,7 @@ struct IO {
 
     uint8_t read_lo() const { return _parent->read_lo(); }
 
-    u16_t read_u16() const { return u16_t(_parent->read()); }
+    uint16_t read_reversed() const { return make_word(read_lo(), read_hi()); }
 
     friend struct IO;
 

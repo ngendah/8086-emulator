@@ -4,4 +4,5 @@ add_library(common
         src/bytes.cpp
         src/instruction.cpp
         src/instruction_templates.cpp
+        src/bus.cpp
         )

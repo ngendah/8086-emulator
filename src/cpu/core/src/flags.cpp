@@ -29,7 +29,7 @@ uint8_t Flags::read_hi() const { return _flags.hi; }
 
 uint8_t Flags::read_lo() const { return _flags.lo; }
 
-void Flags::write(UNUSED_PARAM const uint8_t) { assert(false); }
+void Flags::write(const uint8_t val) { this->write((uint16_t)val); }
 
 uint8_t Flags::read_byte() const {
   assert(false);

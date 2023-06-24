@@ -1,5 +1,7 @@
 #include "address.h"
 
+#include <fmt/core.h>
+
 Address::Address() : _address(0) {}
 Address::Address(const Address &rhs) : _address(rhs._address) {}
 Address::Address(const uint8_t address) : _address(address) {}
@@ -34,3 +36,9 @@ Address Address::operator+(const Address &rhs) const {
 Address Address::operator-(const uint16_t offset) const {
   return Address(_address - offset);
 }
+
+std::ostream &operator<<(std::ostream &os, const Address &address) {
+  os << fmt::format("address=0x{:x}", address._address);
+  return os;
+}
+
