@@ -57,7 +57,7 @@ protected:
       _instruction.sop(SegmentMapper::SOP_DS_INDEX);
       _instruction.opcode(opcode);
       _instruction.mode(mode);
-      _instruction.offset(_instruction.offset() + sizeof(uint16_t));
+      _instruction.offset(_instruction.offset() + sizeof_ui16);
       MovMemorySegment(_bus, _registers).execute(_instruction);
     }
   }
