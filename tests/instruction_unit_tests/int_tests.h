@@ -1,7 +1,8 @@
-#ifndef _INT_TESTS_H_
-#define _INT_TESTS_H_
+#ifndef intr_TESTS_H_
+#define intr_TESTS_H_
 
 #include "int.h"
+#include "iret.h"
 #include "logger.h"
 #include "ram.h"
 
@@ -15,11 +16,11 @@ TEST(INTTests, test_before_execute) {
   auto registers = Registers();
   registers.SP = 0x25;
   {
-    registers.FLAGS.set(0xffff);
+    registers.FLAGS.set(0xFFFF);
     registers.CS = 0x35FF;
     registers.IP = 0xEA55;
-    auto _int = INT(&ram, &registers);
-    _int.before_execute(Instruction());
+    auto intr = INT(&ram, &registers);
+    intr.before_execute(Instruction());
   }
   // clear values
   {
@@ -73,4 +74,28 @@ TEST(INTTests, test_execute) {
   EXPECT_EQ((uint16_t)registers.IP, ip_word);
 }
 
-#endif // _INT_TESTS_H_
+TEST(IRETTests, test_execute) {
+  std::array<uint8_t, 125> buffer{};
+  auto ram = RAM(&buffer.at(0), 125);
+  auto bus = BUSIO(&ram);
+  auto registers = Registers();
+  registers.SP = 0x25;
+  {
+    registers.FLAGS.set(0xFFFF);
+    registers.CS = 0x35FF;
+    registers.IP = 0xEA55;
+    auto intr = INT(&ram, &registers);
+    intr.before_execute(Instruction());
+  }
+  // clear values
+  registers.FLAGS.set(0);
+  registers.CS = 0;
+  registers.IP = 0;
+  auto iret = IRET(&ram, &registers);
+  iret.execute(Instruction());
+  EXPECT_EQ((uint16_t)registers.IP, 0xEA55);
+  EXPECT_EQ((uint16_t)registers.CS, 0x35FF);
+  EXPECT_EQ((uint16_t)registers.FLAGS, 0xFFFF);
+}
+
+#endif // intr_TESTS_H_
