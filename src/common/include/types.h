@@ -38,6 +38,17 @@ typedef union _u16 final {
   bool operator==(const _u16 val) const { return val.word == word; }
 } u16_t;
 
+typedef union _u32 final {
+  uint32_t dword;
+  struct word {
+    u16_t lo;
+    u16_t hi;
+  };
+} u32_t;
+
+typedef u16_t word_t;
+typedef u32_t dword_t;
+
 typedef struct _instruction final {
   uint8_t X; // unused
   u16_t imm;
@@ -47,6 +58,11 @@ typedef struct _instruction final {
 } instruction_t;
 
 #pragma GCC diagnostic pop
+
+#define cast_ui8(x) ((uint8_t)x)
+#define cast_ui16(x) ((uint16_t)x)
+#define sizeof_ui8 sizeof(uint8_t)
+#define sizeof_ui16 sizeof(uint16_t)
 
 struct BUS;
 struct Registers;
