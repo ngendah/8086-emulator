@@ -23,7 +23,7 @@ struct Push : MicroOp {
         PLOGD << "source or destination is null";
         return;
       }
-      TStackStrategy::next(params);
+      TStackStrategy::push(params);
     }
   };
 };

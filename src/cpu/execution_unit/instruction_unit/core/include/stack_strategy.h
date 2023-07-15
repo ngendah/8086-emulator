@@ -9,93 +9,76 @@
 #include "op_type.h"
 
 struct StackFullDescending {
-  static void next(const OpType::Params &params) {
+  static Address next_addr(const OpType::Params &params, uint16_t offset) {
+    auto *dest = reinterpret_cast<BUSIO *>(params._destination);
+    assert(dest != nullptr);
+    if (params._registers->SP.empty) {
+      params._registers->SP.empty = false;
+    } else {
+      params._registers->SP -= offset;
+      dest->set_address(dest->address() - offset);
+    }
+    return dest->address();
+  }
+
+  static Address prev_addr(const OpType::Params &params, uint16_t offset) {
+    auto *src = reinterpret_cast<BUSIO *>(params._source);
+    assert(src != nullptr);
+    if (params._registers->SP.at_base()) {
+      params._registers->SP.empty = true;
+    } else {
+      params._registers->SP += offset;
+      src->set_address(src->address() + offset);
+    }
+    return src->address();
+  }
+
+  // condition:
+  // StackMemoryIOSelector will have set the physical address of the current SP
+  // refer: io_selectors.h::StackMemoryIOSelector
+  static void push(const OpType::Params &params) {
     switch (params._op_type) {
     case word: {
-      PLOGD << fmt::format("SP={0:d}, value={1:d}, 0x{1:x}",
-                           (uint16_t)params._registers->SP,
-                           params._source->to_u16().read()); // NOLINT
-      // the stack grow down
-      // change to have endianess in the downward direction
-      auto *dest = reinterpret_cast<BUSIO *>(params._destination);
-      assert(dest != nullptr);
-      const auto address = dest->address();
-      dest->set_address(address - (uint16_t)1);
-      dest->to_u16().write(params._source->to_u16().read_reversed());
-      dest->set_address(address);
-      params._registers->SP -= 2;
+      next_addr(params, 1);
+      auto val = params._source->to_u16();
+      params._destination->to_u8().write(val.read_lo());
+      next_addr(params, 1);
+      params._destination->to_u8().write(val.read_hi());
     } break;
-    case byte: {
-      auto *dest = reinterpret_cast<BUSIO *>(params._destination);
-      assert(dest != nullptr);
-      PLOGD << fmt::format("SP={0:d}, value={1:d}, 0x{1:x}",
-                           (uint16_t)params._registers->SP,
-                           params._source->to_u8().read()); // NOLINT
-    }
-
+    case byte:
+      next_addr(params, 1);
       params._destination->to_u8().write(params._source->to_u8().read());
-      params._registers->SP -= 1;
       break;
     default:
       assert(0);
       break;
     }
-  };
+  }
 
-  static void prev(const OpType::Params &params) {
+  static void pop(const OpType::Params &params) {
     switch (params._op_type) {
     case word: {
-      auto *src = reinterpret_cast<BUSIO *>(params._source);
-      assert(src != nullptr);
-      auto address = src->address();
-      // reverse the order in which the word was written
-      params._destination->to_u16().write(src->to_u16().read_reversed());
-      src->set_address(address);
-      params._registers->SP += 2;
+      auto hi = params._source->to_u8().read();
+      prev_addr(params, 1);
+      auto lo = params._source->to_u8().read();
+      params._destination->to_u16().write(make_word(hi, lo));
+      prev_addr(params, 1);
     } break;
     case byte:
       params._destination->to_u8().write(params._source->to_u8().read());
-      params._registers->SP += 1;
+      prev_addr(params, 1);
       break;
     default:
       assert(0);
       break;
     }
-  };
+  }
 };
 
 struct StackFullAscending {
-  static void next(const OpType::Params &params) {
-    switch (params._op_type) {
-    case word:
-      params._destination->to_u16().write(params._source->to_u16().read());
-      params._registers->SP += 2;
-      break;
-    case byte:
-      params._destination->to_u8().write(params._source->to_u8().read());
-      params._registers->SP += 1;
-      break;
-    default:
-      assert(0);
-      break;
-    }
-  };
+  static void push(const OpType::Params &) { assert(0); }
 
-  static void prev(const OpType::Params &params) {
-    switch (params._op_type) {
-    case word:
-      params._destination->to_u16().write(params._source->to_u16().read());
-      params._registers->SP -= 2;
-      break;
-    case byte:
-      params._destination->to_u8().write(params._source->to_u8().read());
-      params._registers->SP -= 1;
-      break;
-    default:
-      assert(0);
-      break;
-    }
-  };
+  static void pop(const OpType::Params &) { assert(0); }
 };
 
 #endif // _STACK_STRATEGY_H_

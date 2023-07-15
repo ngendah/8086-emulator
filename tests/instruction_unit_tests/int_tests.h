@@ -11,22 +11,66 @@
 TEST(INTTests, test_before_execute) {
   std::array<uint8_t, 125> buffer{};
   auto ram = RAM(&buffer.at(0), 125);
+  auto bus = BUSIO(&ram);
   auto registers = Registers();
   registers.SP = 0x25;
-  registers.FLAGS.set(0xffff);
-  registers.CS = 0x35;
-  registers.IP = 0x55;
-  auto _int = INT(&ram, &registers);
-  _int.before_execute(Instruction());
-  // at this point the SP points to the next address to write to
-  // since its full descending we add a word to get the
-  // previous memory that was written to.
-  auto physical_addresser = PhysicalAddresser(&registers);
-  auto address =
-      physical_addresser.address(&registers.SS, registers.SP) + (uint16_t)2;
-  auto value = ram.read_u16(&address);
-  // IP was the last value to be pushed to the stack
-  EXPECT_EQ((uint16_t)registers.IP, value);
+  {
+    registers.FLAGS.set(0xffff);
+    registers.CS = 0x35FF;
+    registers.IP = 0xEA55;
+    auto _int = INT(&ram, &registers);
+    _int.before_execute(Instruction());
+  }
+  // clear values
+  {
+    registers.FLAGS.set(0);
+    registers.CS = 0;
+    registers.IP = 0;
+  }
+  // read back from stack
+  {
+    auto address =
+        PhysicalAddresser(&registers).address(&registers.SS, registers.SP);
+    bus.set_address(address);
+    auto params = OpType::Params{word, &bus, &registers.IP, &registers};
+    StackFullDescending::pop(params);
+    EXPECT_EQ((uint16_t)registers.IP, 0xEA55);
+  }
+  {
+    auto address =
+        PhysicalAddresser(&registers).address(&registers.SS, registers.SP);
+    bus.set_address(address);
+    auto params = OpType::Params{word, &bus, &registers.CS, &registers};
+    StackFullDescending::pop(params);
+    EXPECT_EQ((uint16_t)registers.CS, 0x35FF);
+  }
+  {
+    auto address =
+        PhysicalAddresser(&registers).address(&registers.SS, registers.SP);
+    bus.set_address(address);
+    auto params = OpType::Params{word, &bus, &registers.FLAGS, &registers};
+    StackFullDescending::pop(params);
+    EXPECT_EQ((uint16_t)registers.FLAGS, 0xFFFF);
+  }
+}
+
+TEST(INTTests, test_execute) {
+  const uint16_t interrupt_number = 3; // Breakpoint interrupt
+  std::array<uint8_t, 25> buffer{};
+  auto ram = RAM(&buffer.at(0), 25);
+  auto ip_addr = Address((uint16_t)(3 * 4));
+  uint16_t ip_word = 0xEADD;
+  ram.write(&ip_addr, Bytes((uint8_t *)&ip_word, 2));
+  auto cs_addr = ip_addr + (uint16_t)2;
+  uint16_t cs_word = 0xAEDD;
+  ram.write(&cs_addr, Bytes((uint8_t *)&cs_word, 2));
+  auto bus = BUSIO(&ram);
+  auto registers = Registers();
+  auto intr = INT(&ram, &registers);
+  auto instruction = Instruction(0xff, 0xCD, 0x0, interrupt_number);
+  intr.execute(instruction);
+  EXPECT_EQ((uint16_t)registers.CS, cs_word);
+  EXPECT_EQ((uint16_t)registers.IP, ip_word);
 }
 
 #endif // _INT_TESTS_H_

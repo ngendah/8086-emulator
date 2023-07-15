@@ -17,6 +17,8 @@
 struct Register : IO {
   explicit Register(uint16_t val = 0);
 
+  Register(uint16_t val, const std::string &name);
+
   Register(const std::string &name);
 
   Register(const Register &rhs);
@@ -72,10 +74,38 @@ struct Segment final : Register {
   Address address(uint16_t eff_addr);
 };
 
+struct StackPointer : protected Register {
+  explicit StackPointer(uint16_t val = 0);
+
+  StackPointer(const std::string &name);
+
+  StackPointer(const StackPointer &rhs);
+
+  ~StackPointer() override = default;
+
+  operator uint16_t() const;
+
+  Register *operator&();
+
+  StackPointer &operator+=(uint16_t offset);
+
+  StackPointer &operator-=(uint16_t offset);
+
+  StackPointer &operator=(uint16_t val);
+
+  bool at_base() const;
+
+  bool empty;
+
+protected:
+  u16_t _base;
+};
+
 struct Registers final {
-  Register AX, BX, CX, DX, SP, BP, SI, DI, IP;
+  Register AX, BX, CX, DX, BP, SI, DI, IP;
   Segment CS, DS, SS, ES;
   Flags FLAGS;
+  StackPointer SP;
   Ports PORTS; // TODO move or rename cls
 
   Registers();

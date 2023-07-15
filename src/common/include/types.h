@@ -35,6 +35,7 @@ typedef union _u16 final {
     this->word = val;
     return *this;
   }
+  bool operator==(const _u16 val) const { return val.word == word; }
 } u16_t;
 
 typedef struct _instruction final {
