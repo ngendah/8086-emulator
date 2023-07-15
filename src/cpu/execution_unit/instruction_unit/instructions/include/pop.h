@@ -23,7 +23,7 @@ struct Pop : MicroOp {
         PLOGD << "source or destination is not available, is null";
         return;
       }
-      TStackStrategy::prev(params);
+      TStackStrategy::pop(params);
     }
   };
 };

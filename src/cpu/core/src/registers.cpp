@@ -4,6 +4,9 @@
 
 Register::Register(uint16_t val) : _register(val) {}
 
+Register::Register(uint16_t val, const std::string &name)
+    : _register(val), _name(name) {}
+
 Register::Register(const std::string &name) : _register(0), _name(name) {}
 
 Register::Register(const Register &rhs)
@@ -69,6 +72,39 @@ Address Segment::address(uint16_t eff_addr) {
   return Address((uint32_t)(((uint32_t) * this) * 0x10 + eff_addr));
 }
 
+StackPointer::StackPointer(uint16_t val)
+    : Register(val), empty(true), _base(val) {}
+
+StackPointer::StackPointer(const std::string &name)
+    : Register(name), empty(true), _base(0) {}
+
+StackPointer::StackPointer(const StackPointer &rhs)
+    : Register(rhs), empty(rhs.empty), _base(rhs._base) {}
+
+StackPointer::operator uint16_t() const {
+  return Register::operator uint16_t();
+}
+
+Register *StackPointer::operator&() { return dynamic_cast<Register *>(this); }
+
+StackPointer &StackPointer::operator+=(uint16_t offset) {
+  Register::operator+=(offset);
+  return *this;
+}
+
+StackPointer &StackPointer::operator-=(uint16_t offset) {
+  Register::operator-=(offset);
+  return *this;
+}
+
+StackPointer &StackPointer::operator=(uint16_t val) {
+  _base = val;
+  Register::operator=(val);
+  return *this;
+}
+
+bool StackPointer::at_base() const { return _base == _register; }
+
 Registers::Registers()
-    : AX("AX"), BX("BX"), CX("CX"), DX("DX"), SP("SP"), BP("BP"), SI("SI"),
-      DI("DI"), IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES") {}
+    : AX("AX"), BX("BX"), CX("CX"), DX("DX"), BP("BP"), SI("SI"), DI("DI"),
+      IP("IP"), CS("CS"), DS("DS"), SS("SS"), ES("ES"), SP("SP") {}

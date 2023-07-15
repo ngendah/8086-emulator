@@ -109,7 +109,7 @@ TEST(StackFullDescendingTests, test_next) {
   registers.SP = buffer_size - 1;
   auto params = OpType::Params{word, reinterpret_cast<IO *>(&src),
                                reinterpret_cast<IO *>(&dest), &registers};
-  StackFullDescending::next(params);
+  StackFullDescending::push(params);
   EXPECT_EQ(buffer2.at(25), 0x55);
   EXPECT_EQ(buffer2.at(24), 0x11);
 }
@@ -121,15 +121,14 @@ TEST(StackFullDescendingTests, test_prev) {
   const auto src_addr = Address((uint16_t)24);
   BUSIO src{&ram1, src_addr}, dest{&ram2, Address((uint8_t)15)};
   src.to_u8().write(0x11);
-  src.set_address(src_addr + (uint16_t)1);
+  src.set_address(src_addr - (uint16_t)1);
   src.to_u8().write(0x55);
-  src.set_address(src_addr);
   auto registers = Registers();
-  registers.SP = buffer_size - 1;
+  registers.SP = buffer_size;
   auto params = OpType::Params{word, reinterpret_cast<IO *>(&src),
                                reinterpret_cast<IO *>(&dest), &registers};
-  StackFullDescending::prev(params);
-  EXPECT_EQ(dest.to_u16().read(), make_word(0x11, 0x55));
+  StackFullDescending::push(params);
+  EXPECT_EQ(dest.to_u16().read(), make_word(0x55, 0x11));
 }
 
 #endif // _PUSH_TESTS_H_
