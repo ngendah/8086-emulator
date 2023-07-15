@@ -90,18 +90,18 @@ struct IOAddresser {
     if (MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT) {
       if (RM == AddressingModes::RM::DIRECT_ADDRESSING) {
         auto _segment = direct_addressing_segment(instruction);
-        return _addresser.address(_segment, (uint16_t)offset);
+        return _addresser.address(_segment, cast_ui16(offset));
       }
       auto *_segment = segment(instruction, _selector);
       return _addresser.address(_segment, RM);
     }
     if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_8) {
       auto *_segment = segment(instruction, _selector);
-      return _addresser.address(_segment, RM, (uint8_t)offset);
+      return _addresser.address(_segment, RM, cast_ui8(offset));
     }
     if (MOD == AddressingModes::MOD::MEM_DISPLACEMENT_16) {
       auto *_segment = segment(instruction, _selector);
-      return _addresser.address(_segment, RM, (uint16_t)offset);
+      return _addresser.address(_segment, RM, cast_ui16(offset));
     }
     PLOGD << "mod=0x3(0b11) is register selector mode";
     assert(false);
