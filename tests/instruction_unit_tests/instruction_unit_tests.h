@@ -88,28 +88,28 @@ TEST(InstructionCodeTests, test_has_data_1) {
   auto code = InstructionCode("ADC", "E", "Iw");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
-  EXPECT_EQ(data.second, sizeof(uint16_t));
+  EXPECT_EQ(data.second, sizeof_ui16);
 }
 
 TEST(InstructionCodeTests, test_has_data_2) {
   auto code = InstructionCode("RET", "Iw");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
-  EXPECT_EQ(data.second, sizeof(uint16_t));
+  EXPECT_EQ(data.second, sizeof_ui16);
 }
 
 TEST(InstructionCodeTests, test_has_data_3) {
   auto code = InstructionCode("MOV", "E", "Ib");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
-  EXPECT_EQ(data.second, sizeof(uint8_t));
+  EXPECT_EQ(data.second, sizeof_ui8);
 }
 
 TEST(InstructionCodeTests, test_has_data_4) {
   auto code = InstructionCode("INT", "Ib");
   auto data = code.has_data();
   EXPECT_EQ(data.first, true);
-  EXPECT_EQ(data.second, sizeof(uint8_t));
+  EXPECT_EQ(data.second, sizeof_ui8);
 }
 
 TEST(InstructionCodeTests, test_has_data_5) {
@@ -123,14 +123,14 @@ TEST(InstructionCodeTests, test_has_disp_1) {
   auto code = InstructionCode("ADD", "E", "E");
   auto disp = code.has_disp((uint8_t)0x2 << 6);
   EXPECT_EQ(disp.first, true);
-  EXPECT_EQ(disp.second, sizeof(uint16_t));
+  EXPECT_EQ(disp.second, sizeof_ui16);
 }
 
 TEST(InstructionCodeTests, test_has_disp_2) {
   auto code = InstructionCode("ADD", "E", "E");
   auto disp = code.has_disp((uint8_t)0x1 << 6);
   EXPECT_EQ(disp.first, true);
-  EXPECT_EQ(disp.second, sizeof(uint8_t));
+  EXPECT_EQ(disp.second, sizeof_ui8);
 }
 
 TEST(InstructionCodeTests, test_has_disp_3) {

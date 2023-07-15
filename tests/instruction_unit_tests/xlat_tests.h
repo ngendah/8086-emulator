@@ -16,7 +16,7 @@ TEST(XLATTests, test_execute) {
   auto address =
       registers.DS.address(registers.AX.read() + registers.BX.read());
   uint16_t _val = 0x25;
-  auto val = Bytes((uint8_t *)&_val, sizeof(uint16_t));
+  auto val = Bytes((uint8_t *)&_val, sizeof_ui16);
   ram.write(&address, val);
   auto instruction = Instruction(0xff, 0xD7);
   auto io = XLAT(&ram, &registers);

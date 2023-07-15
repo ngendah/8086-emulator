@@ -51,13 +51,13 @@ struct InstructionCode {
     auto _mod_reg_rm = *(_mod_reg_rm_t *)&mod;
     if (_mod_reg_rm.MOD == AddressingModes::MOD::MEM_NO_DISPLACEMENT &&
         _mod_reg_rm.RM == AddressingModes::RM::DIRECT_ADDRESSING) {
-      return {true, sizeof(uint16_t)};
+      return {true, sizeof_ui16};
     }
     bool _is_disp_8 = false;
     if ((_is_disp_8 =
              (_mod_reg_rm.MOD == AddressingModes::MOD::MEM_DISPLACEMENT_8)) ||
         _mod_reg_rm.MOD == AddressingModes::MOD::MEM_DISPLACEMENT_16) {
-      return {true, _is_disp_8 ? sizeof(uint8_t) : sizeof(uint16_t)};
+      return {true, _is_disp_8 ? sizeof_ui8 : sizeof_ui16};
     }
     return {false, 0};
   }
@@ -69,7 +69,7 @@ struct InstructionCode {
         (_arguments[0].find("Iw") != std::string::npos ||
          _arguments[0].find("Ib") != std::string::npos)) {
       uint8_t size =
-          _arguments[0][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
+          _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
       return {true, size};
     }
     bool _arg_1 = false, _arg_2 = false;
@@ -79,12 +79,12 @@ struct InstructionCode {
                   _arguments[1].find("Ib") != std::string::npos)) {
       if (_arg_1) {
         uint8_t size =
-            _arguments[0][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
+            _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
         return {true, size};
       }
       if (_arg_2) {
         uint8_t size =
-            _arguments[1][1] == 'b' ? sizeof(uint8_t) : sizeof(uint16_t);
+            _arguments[1][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
         return {true, size};
       }
     }

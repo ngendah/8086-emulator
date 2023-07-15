@@ -16,7 +16,7 @@ TEST(PushRegisterTests, test_execute) {
   auto io = PushRegister(&ram, &registers);
   io.execute(Instruction(0xff, 0x5600));
   auto address = Address((uint16_t)0x100);
-  auto bytes = ram.read(&address, sizeof(uint16_t));
+  auto bytes = ram.read(&address, sizeof_ui16);
   EXPECT_EQ((uint16_t)bytes, 0x37);
 }
 
@@ -26,13 +26,13 @@ TEST(PushMemoryTests, test_execute) {
   auto ram = RAM(512);
   uint16_t val = 0x37;
   auto address = Address((uint16_t)0x0083);
-  auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
+  auto bytes = Bytes((uint8_t *)&val, sizeof_ui16);
   ram.write(&address, bytes);
   auto io = PushMemory(&ram, &registers);
   io.execute(Instruction(0xff, 0xFFB4, address));
   {
     address = Address((uint16_t)0x100);
-    bytes = ram.read(&address, sizeof(uint16_t));
+    bytes = ram.read(&address, sizeof_ui16);
     EXPECT_EQ((uint16_t)bytes, 0x37);
   }
 }
@@ -45,7 +45,7 @@ TEST(PushSegmentTests, test_execute) {
   auto io = PushSegment(&ram, &registers);
   io.execute(Instruction(0xff, 0x1E00));
   auto address = Address((uint16_t)0x100);
-  auto bytes = ram.read(&address, sizeof(uint16_t));
+  auto bytes = ram.read(&address, sizeof_ui16);
   EXPECT_EQ((uint16_t)bytes, 0x37);
 }
 
@@ -66,7 +66,7 @@ TEST(PushTests, test_execute) {
   {
     uint16_t val = 0xA74E;
     auto address = Address((uint16_t)0x0083);
-    auto bytes = Bytes((uint8_t *)&val, sizeof(uint16_t));
+    auto bytes = Bytes((uint8_t *)&val, sizeof_ui16);
     ram.write(&address, bytes);
     auto io = PushMemory(&ram, &registers);
     io.execute(Instruction(0xff, 0xFFB4, address));
@@ -95,7 +95,7 @@ TEST(PushFlagsTests, test_execute) {
   auto io = PushFlags(&ram, &registers);
   io.execute(Instruction(0xff, 0xCD));
   auto address = Address((uint16_t)0x10);
-  auto bytes = ram.read(&address, sizeof(uint16_t));
+  auto bytes = ram.read(&address, sizeof_ui16);
   EXPECT_EQ((uint16_t)bytes, 0xf2);
 }
 

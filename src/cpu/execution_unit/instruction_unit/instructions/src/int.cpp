@@ -20,7 +20,7 @@ void INT::before_execute(UNUSED_PARAM const Instruction &) {
 void INT::execute(const Instruction &instruction) {
   const uint16_t offset = instruction.data<uint8_t>() * 4; // TODO use <<
   auto address = Address(offset);
-  _registers->IP = _bus->read(&address, sizeof(uint16_t));
-  address += sizeof(uint16_t);
-  _registers->CS = _bus->read(&address, sizeof(uint16_t));
+  _registers->IP = _bus->read(&address, sizeof_ui16);
+  address += sizeof_ui16;
+  _registers->CS = _bus->read(&address, sizeof_ui16);
 }

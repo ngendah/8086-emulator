@@ -51,17 +51,17 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
     auto _has_offset = _code->has_disp(_mod);
     if (_has_offset.first) {
       auto _offset_len = _has_offset.second;
-      _offset = _offset_len == sizeof(uint8_t) ? getb() : getw();
+      _offset = _offset_len == sizeof_ui8 ? getb() : getw();
     }
   }
   uint16_t _opcode_mod = make_word(_opcode, _mod);
   auto _has_data = _code->has_data();
   if (_has_data.first) {
     _data_len = _has_data.second;
-    _data = _data_len == sizeof(uint8_t) ? getb() : getw();
+    _data = _data_len == sizeof_ui8 ? getb() : getw();
   }
   auto _instruction =
-      _data_len == sizeof(uint8_t)
+      _data_len == sizeof_ui8
           ? Instruction(_sop, _opcode_mod, _offset, (uint8_t)_data)
           : Instruction(_sop, _opcode_mod, _offset, (uint16_t)_data);
   PLOGD << fmt::format("memonic={}", _code->_memonic) << _instruction;
