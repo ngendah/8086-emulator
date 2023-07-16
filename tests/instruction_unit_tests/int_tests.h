@@ -12,7 +12,7 @@
 TEST(INTTests, test_before_execute) {
   std::array<uint8_t, 125> buffer{};
   auto ram = RAM(&buffer.at(0), 125);
-  auto bus = BUSIO(&ram);
+  auto bus = AddressLatch(&ram);
   auto registers = Registers();
   registers.SP = 0x25;
   {
@@ -65,7 +65,7 @@ TEST(INTTests, test_execute) {
   auto cs_addr = ip_addr + (uint16_t)2;
   uint16_t cs_word = 0xAEDD;
   ram.write(&cs_addr, Bytes((uint8_t *)&cs_word, 2));
-  auto bus = BUSIO(&ram);
+  auto bus = AddressLatch(&ram);
   auto registers = Registers();
   auto intr = INT(&ram, &registers);
   auto instruction = Instruction(0xff, 0xCD, 0x0, interrupt_number);

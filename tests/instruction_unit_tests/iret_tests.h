@@ -12,7 +12,7 @@
 TEST(IRETTests, test_execute) {
   std::array<uint8_t, 125> buffer{};
   auto ram = RAM(&buffer.at(0), 125);
-  auto bus = BUSIO(&ram);
+  auto bus = AddressLatch(&ram);
   auto registers = Registers();
   registers.SP = 0x25;
   {

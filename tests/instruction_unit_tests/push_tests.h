@@ -103,7 +103,7 @@ TEST(StackFullDescendingTests, test_next) {
   const auto buffer_size = 30u;
   std::array<uint8_t, buffer_size> buffer1{}, buffer2{};
   RAM ram1{&buffer1.at(0), buffer_size}, ram2{&buffer2.at(0), buffer_size};
-  BUSIO src{&ram1, Address((uint8_t)15)}, dest{&ram2, Address((uint8_t)25)};
+  AddressLatch src{&ram1, Address((uint8_t)15)}, dest{&ram2, Address((uint8_t)25)};
   src.to_u16().write(make_word(0x11, 0x55));
   auto registers = Registers();
   registers.SP = buffer_size - 1;
@@ -119,7 +119,7 @@ TEST(StackFullDescendingTests, test_prev) {
   std::array<uint8_t, buffer_size> buffer1{}, buffer2{};
   RAM ram1{&buffer1.at(0), buffer_size}, ram2{&buffer2.at(0), buffer_size};
   const auto src_addr = Address((uint16_t)24);
-  BUSIO src{&ram1, src_addr}, dest{&ram2, Address((uint8_t)15)};
+  AddressLatch src{&ram1, src_addr}, dest{&ram2, Address((uint8_t)15)};
   src.to_u8().write(0x11);
   src.set_address(src_addr - (uint16_t)1);
   src.to_u8().write(0x55);
