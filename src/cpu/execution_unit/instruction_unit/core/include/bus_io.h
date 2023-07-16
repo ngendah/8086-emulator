@@ -16,20 +16,20 @@
  * @brief Latch the address for IO operations
  *
  */
-struct BUSIO final : IO { // TODO rename to BusAddressLatch
-  explicit BUSIO(BUS *bus) : _bus(bus) {}
+struct AddressLatch final : IO {
+  explicit AddressLatch(BUS *bus) : _bus(bus) {}
 
-  BUSIO(bus_ptr_t bus, const Address &address) : _bus(bus), _address(address){};
+  AddressLatch(bus_ptr_t bus, const Address &address) : _bus(bus), _address(address){};
 
-  BUSIO(const BUSIO &rhs) : _bus(rhs._bus), _address(rhs._address) {}
+  AddressLatch(const AddressLatch &rhs) : _bus(rhs._bus), _address(rhs._address) {}
 
-  ~BUSIO() override = default;
+  ~AddressLatch() override = default;
 
   BUS *bus() const { return _bus; }
 
   Address address() const { return _address; }
 
-  BUSIO set_address(const Address &address) {
+  AddressLatch set_address(const Address &address) {
     _address = address;
     return *this;
   }
@@ -80,8 +80,8 @@ struct BUSIO final : IO { // TODO rename to BusAddressLatch
     return *cast_ui8p(bytes._bytes);
   }
 
-  friend std::ostream &operator<<(std::ostream &ostream, const BUSIO &t) {
-    ostream << fmt::format("BUSIO_ptr=0x{:x}", (long)&t) << ", "
+  friend std::ostream &operator<<(std::ostream &ostream, const AddressLatch &t) {
+    ostream << fmt::format("AddressLatch_ptr=0x{:x}", (long)&t) << ", "
             << fmt::format("physical_address=0x{:x}", cast_ui32(t._address));
     return ostream;
   }

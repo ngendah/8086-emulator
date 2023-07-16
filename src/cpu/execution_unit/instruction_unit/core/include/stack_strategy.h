@@ -10,7 +10,7 @@
 
 struct StackFullDescending {
   static Address next_addr(const OpType::Params &params, uint16_t offset) {
-    auto *dest = reinterpret_cast<BUSIO *>(params._destination);
+    auto *dest = reinterpret_cast<AddressLatch *>(params._destination);
     assert(dest != nullptr);
     if (params._registers->SP.empty) {
       params._registers->SP.empty = false;
@@ -22,7 +22,7 @@ struct StackFullDescending {
   }
 
   static Address prev_addr(const OpType::Params &params, uint16_t offset) {
-    auto *src = reinterpret_cast<BUSIO *>(params._source);
+    auto *src = reinterpret_cast<AddressLatch *>(params._source);
     assert(src != nullptr);
     if (params._registers->SP.at_base()) {
       params._registers->SP.empty = true;
