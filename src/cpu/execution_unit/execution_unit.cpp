@@ -62,8 +62,8 @@ std::pair<uint8_t, Instruction> ExecutionUnit::fetch() {
   }
   auto _instruction =
       _data_len == sizeof_ui8
-          ? Instruction(_sop, _opcode_mod, _offset, (uint8_t)_data)
-          : Instruction(_sop, _opcode_mod, _offset, (uint16_t)_data);
+          ? Instruction(_sop, _opcode_mod, _offset, cast_ui8(_data))
+          : Instruction(_sop, _opcode_mod, _offset, cast_ui16(_data));
   PLOGD << fmt::format("memonic={}", _code->_memonic) << _instruction;
   return {_opcode, _instruction};
 }
@@ -73,7 +73,7 @@ std::shared_ptr<MicroOp> ExecutionUnit::decode(uint8_t opcode) {
 }
 
 uint16_t ExecutionUnit::beg() {
-  auto res = _buf->pubseekpos((uint16_t)_params.registers->IP);
+  auto res = _buf->pubseekpos(cast_ui16(_params.registers->IP));
   return res;
 }
 

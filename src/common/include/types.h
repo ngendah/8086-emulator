@@ -61,6 +61,7 @@ typedef struct _instruction final {
 
 #define cast_ui8(x) static_cast<uint8_t>(x)
 #define cast_ui16(x) static_cast<uint16_t>(x)
+#define cast_ui32(x) static_cast<uint32_t>(x)
 #define sizeof_ui8 sizeof(uint8_t)
 #define sizeof_ui16 sizeof(uint16_t)
 

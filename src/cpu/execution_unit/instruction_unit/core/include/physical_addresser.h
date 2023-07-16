@@ -35,12 +35,12 @@ protected:
   static Address _address(const Register &r1, const Register &r2,
                           const uint16_t &offset) {
     PLOGD << r1 << ", " << r2 << ", " << fmt::format("offset=0x{:x}", offset);
-    return Address((uint16_t)(r1.read() + r2.read() + offset));
+    return Address(cast_ui16(r1.read() + r2.read() + offset));
   }
 
   static Address _address(const Register &r1, const uint16_t &offset) {
     PLOGD << r1 << ", " << fmt::format("offset=0x{:x}", offset);
-    return Address((uint16_t)(r1.read() + offset));
+    return Address(cast_ui16(r1.read() + offset));
   }
 
   Address _e0(const uint16_t &offset) {

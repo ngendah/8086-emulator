@@ -79,7 +79,7 @@ public:
    * For details on REG and W bits, refer to instruction_templates.h
    */
   static uint8_t to_idx(uint8_t w, uint8_t reg) {
-    return (uint8_t)((w << 3) | reg);
+    return cast_ui8((w << 3) | reg);
   }
 
   static const uint8_t AX_INDEX = 0;

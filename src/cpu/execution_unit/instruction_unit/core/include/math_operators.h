@@ -45,7 +45,7 @@ struct IncrOpType : OpType {
     flags.O = (val + incr_by) > UINT16_MAX ? 1 : 0;
     val += incr_by;
     params._destination->write(val);
-    params._registers->FLAGS.set((uint16_t)flags);
+    params._registers->FLAGS.set(cast_ui16(flags));
   }
 };
 
@@ -60,8 +60,8 @@ struct DecrOpType : OpType {
     val -= decr_by;
     flags.Z = val == 0 ? 1 : 0;
     flags.S = val < 0 ? 1 : 0;
-    params._destination->write((uint16_t)(flags.S == 1 ? 0 : val));
-    params._registers->FLAGS.set((uint16_t)flags);
+    params._destination->write(cast_ui16(flags.S == 1 ? 0 : val));
+    params._registers->FLAGS.set(cast_ui16(flags));
   }
 };
 
@@ -86,7 +86,7 @@ protected:
     flags.A = l > r ? 1 : 0;
     flags.O = 0;
     flags.P = std::bitset<8>(l - r).count() % 3 == 0 ? 1 : 0;
-    params._registers->FLAGS.set((uint16_t)flags);
+    params._registers->FLAGS.set(cast_ui16(flags));
   }
 
   static void word_cmp(const OpType::Params &params) {
@@ -102,7 +102,7 @@ protected:
         params._source->read_lo() > params._destination->read_lo() ? 1 : 0;
     flags.O = 0;
     flags.P = std::bitset<16>(l - r).count() % 3 == 0 ? 1 : 0;
-    params._registers->FLAGS.set((uint16_t)flags);
+    params._registers->FLAGS.set(cast_ui16(flags));
   }
 };
 
