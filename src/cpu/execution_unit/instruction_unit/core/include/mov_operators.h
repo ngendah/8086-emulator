@@ -58,7 +58,7 @@ struct RegisterMovOpTypeSelector : OpTypeSelector {
         instruction);
     uint8_t REG = instruction_template.mode().REG;
     uint8_t W = instruction_template.opcode().W;
-    auto WREG = (uint8_t)(W << 3 | REG);
+    auto WREG = cast_ui8(W << 3 | REG);
     if (W == 1) {
       return word;
     } else {
@@ -78,7 +78,7 @@ struct ImmediateMovOpTypeSelector : OpTypeSelector {
     opcode_w_reg_t opcode = instruction.opcode_to<opcode_w_reg_t>();
     uint8_t REG = opcode.REG;
     uint8_t W = opcode.W;
-    auto WREG = (uint8_t)(W << 3 | REG);
+    auto WREG = cast_ui8(W << 3 | REG);
     if (W == 1) {
       return word;
     } else {

@@ -85,7 +85,7 @@ template <class T> struct LoopT : MicroOp {
     opcode_reg_t opcode = {};
     opcode.REG = RegisterMapper::CX_INDEX;
     DECRegister(_bus, _registers)
-        .execute(Instruction(0xff, make_word((uint8_t)opcode, 0)));
+        .execute(Instruction(0xff, make_word(cast_ui8(opcode), 0)));
     T(_bus, _registers).execute(instruction);
   }
 

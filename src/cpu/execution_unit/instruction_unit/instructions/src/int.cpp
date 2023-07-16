@@ -8,11 +8,11 @@ void INT::before_execute(UNUSED_PARAM const Instruction &) {
   PushFlags push_flags{_bus, _registers};
   PushSegment push_segment{_bus, _registers};
   PushIP push_ip{_bus, _registers};
-  push_flags.execute(Instruction(SOP::NONE, (uint8_t)OPCODES::PUSHF));
+  push_flags.execute(Instruction(SOP::NONE, cast_ui8(OPCODES::PUSHF)));
   {
     sr_t mod{0, SegmentMapper::CS_INDEX, 0};
     push_segment.execute(Instruction(
-        SOP::NONE, make_word((uint8_t)OPCODES::PUSH_CS, (uint8_t)mod)));
+        SOP::NONE, make_word(cast_ui8(OPCODES::PUSH_CS), cast_ui8(mod))));
   }
   push_ip.execute(Instruction());
 }

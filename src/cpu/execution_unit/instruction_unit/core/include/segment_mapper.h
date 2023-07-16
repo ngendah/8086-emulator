@@ -72,9 +72,9 @@ public:
   static const uint8_t DS_INDEX = 3;
 
   static const uint8_t SOP_ES_INDEX = 0;
-  static const uint8_t SOP_CS_INDEX = (uint8_t)(1 << 3);
-  static const uint8_t SOP_SS_INDEX = (uint8_t)(2 << 3);
-  static const uint8_t SOP_DS_INDEX = (uint8_t)(3 << 3);
+  static const uint8_t SOP_CS_INDEX = cast_ui8(1 << 3);
+  static const uint8_t SOP_SS_INDEX = cast_ui8(2 << 3);
+  static const uint8_t SOP_DS_INDEX = cast_ui8(3 << 3);
 };
 
 #endif // INSTRUCTION_SET_SEGMENT_MAPPER_H_

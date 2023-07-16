@@ -1,4 +1,5 @@
 #include "bytes.h"
+#include "types.h"
 
 Bytes::Bytes() : _bytes(nullptr), _size(0) {}
 
@@ -19,7 +20,7 @@ Bytes &Bytes::operator=(const Bytes &&other) {
 
 Bytes::operator uint16_t() const {
   assert(_size == 2);
-  return (uint16_t)((_bytes[1] << 8) | _bytes[0]); // NOLINT
+  return cast_ui16((_bytes[1] << 8) | _bytes[0]); // NOLINT
 }
 
 Bytes::operator uint8_t() const {

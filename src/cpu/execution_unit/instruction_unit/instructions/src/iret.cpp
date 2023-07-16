@@ -15,7 +15,7 @@ void IRET::execute(UNUSED_PARAM const Instruction &) {
   {
     sr_t mod{0, SegmentMapper::CS_INDEX, 0};
     pop_segment.execute(Instruction(
-        SOP::NONE, make_word((uint8_t)OPCODES::POP_CS, (uint8_t)mod)));
+        SOP::NONE, make_word(cast_ui8(OPCODES::POP_CS), cast_ui8(mod))));
   }
-  pop_flags.execute(Instruction(SOP::NONE, (uint8_t)OPCODES::POPF));
+  pop_flags.execute(Instruction(SOP::NONE, cast_ui8(OPCODES::POPF)));
 }

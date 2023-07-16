@@ -50,7 +50,7 @@ struct DECRegisterMemory : MicroOp {
       opcode_reg.OPCODE = 0x9;
       opcode_reg.REG = mod_rm.RM;
       DECRegister(_bus, _registers)
-          .execute(Instruction(0xff, make_word((uint8_t)opcode_reg, 0)));
+          .execute(Instruction(0xff, make_word(cast_ui8(opcode_reg), 0)));
     } else {
       DECMemory(_bus, _registers).execute(instruction);
     }

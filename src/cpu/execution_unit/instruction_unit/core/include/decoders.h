@@ -756,7 +756,7 @@ struct REA_Decoder : Decoder {
   IO *source(const Instruction &instruction) override {
     auto io_addresser = IOAddresser(_registers, &default_memory_selector);
     auto address = io_addresser.address<EffectiveAddresser>(instruction);
-    _io.write((uint16_t)address);
+    _io.write(cast_ui16(address));
     return &_io;
   }
 
