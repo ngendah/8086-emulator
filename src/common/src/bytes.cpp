@@ -1,4 +1,5 @@
 #include "bytes.h"
+
 #include "types.h"
 
 Bytes::Bytes() : _bytes(nullptr), _size(0) {}

@@ -1,4 +1,5 @@
 #include "address.h"
+
 #include "types.h"
 
 #include <fmt/core.h>
@@ -42,4 +43,3 @@ std::ostream &operator<<(std::ostream &os, const Address &address) {
   os << fmt::format("address=0x{:x}", address._address);
   return os;
 }
-

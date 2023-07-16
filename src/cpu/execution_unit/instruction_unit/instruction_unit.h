@@ -68,8 +68,7 @@ struct InstructionCode {
     if (_arguments.size() == 1 &&
         (_arguments[0].find("Iw") != std::string::npos ||
          _arguments[0].find("Ib") != std::string::npos)) {
-      uint8_t size =
-          _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
+      uint8_t size = _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
       return {true, size};
     }
     bool _arg_1 = false, _arg_2 = false;
@@ -78,13 +77,11 @@ struct InstructionCode {
         (_arg_2 = _arguments[1].find("Iw") != std::string::npos ||
                   _arguments[1].find("Ib") != std::string::npos)) {
       if (_arg_1) {
-        uint8_t size =
-            _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
+        uint8_t size = _arguments[0][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
         return {true, size};
       }
       if (_arg_2) {
-        uint8_t size =
-            _arguments[1][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
+        uint8_t size = _arguments[1][1] == 'b' ? sizeof_ui8 : sizeof_ui16;
         return {true, size};
       }
     }
