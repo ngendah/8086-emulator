@@ -25,8 +25,8 @@ struct Address final {
   Address operator+(const Address &rhs) const;
   Address operator-(const uint16_t offset) const;
 
-friend std::ostream &operator<<(std::ostream &os,
-                                  const Address &address);
+  friend std::ostream &operator<<(std::ostream &os, const Address &address);
+
 protected:
   uint32_t _address;
 };

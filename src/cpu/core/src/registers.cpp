@@ -65,12 +65,12 @@ Segment &Segment::operator=(uint16_t val) {
 
 Address Segment::address(const Register &reg, uint16_t offset) {
   const uint16_t eff_addr = offset + cast_ui16(reg);
-  const uint32_t segment_addr = cast_ui32(* this);
+  const uint32_t segment_addr = cast_ui32(*this);
   return Address(cast_ui32(segment_addr * 0x10 + eff_addr));
 }
 
 Address Segment::address(uint16_t eff_addr) {
-  const uint32_t segment_addr = cast_ui32(* this);
+  const uint32_t segment_addr = cast_ui32(*this);
   return Address(cast_ui32(segment_addr * 0x10 + eff_addr));
 }
 

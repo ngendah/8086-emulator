@@ -404,8 +404,8 @@ InstructionCode *InstructionUnit::find(uint8_t opcode) {
   return &(it->second);
 }
 
-std::shared_ptr<MicroOp> InstructionUnit::decode(uint8_t opcode,
-                                                const MicroOp::Params &params) {
+std::shared_ptr<MicroOp>
+InstructionUnit::decode(uint8_t opcode, const MicroOp::Params &params) {
   auto _ctor = find(MicroOp::Key(opcode));
   if (_ctor == nullptr) {
     assert(false);

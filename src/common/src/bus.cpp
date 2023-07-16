@@ -1,4 +1,5 @@
 #include "bus.h"
+
 #include "types.h"
 
 uint16_t BUS::read_u16(Address const *address) {

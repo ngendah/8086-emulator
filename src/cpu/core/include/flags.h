@@ -20,7 +20,7 @@ struct Flags final : IO {
 
   template <typename T> T bits() const { return *(T *)&_flags.word; }
 
-  template<typename T> T* to_bits() { return (T *)&_flags.word; }
+  template <typename T> T *to_bits() { return (T *)&_flags.word; }
 
   operator uint16_t() const;
 
