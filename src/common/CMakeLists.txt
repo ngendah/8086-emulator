@@ -2,6 +2,7 @@ add_library(common
         STATIC
         src/address.cpp
         src/bytes.cpp
+        src/device_io.cpp
         src/instruction.cpp
         src/instruction_templates.cpp
         src/bus.cpp

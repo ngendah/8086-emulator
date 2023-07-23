@@ -31,7 +31,8 @@ TEST(LDSTests, test_execute_1) {
     ram.write(&address, bytes);
   }
   auto registers = Registers();
-  auto io = LDSTest(&ram, &registers, [](LDS *const les, uint8_t point) {
+  auto bus = BUS::from_device(&ram);
+  auto io = LDSTest(&bus, &registers, [](LDS *const les, uint8_t point) {
     auto registers = ((LDSTest *)les)->get();
     if (point == 0) {
       EXPECT_EQ((uint16_t)registers->BX, 55);

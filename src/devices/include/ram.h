@@ -9,6 +9,7 @@
 #include "address.h"
 #include "bus.h"
 #include "bytes.h"
+#include "device.h"
 #include "logger.h"
 #include "types.h"
 
@@ -129,12 +130,14 @@ struct stream_buffer : std::basic_streambuf<uint8_t> {
   }
 };
 
-struct RAM final : BUS {
+struct RAM final : Device {
   RAM(uint32_t size = 1024) : _buffer(size){};
 
   RAM(uint8_t *buffer, uint16_t size) : _buffer(buffer, size) {}
 
-  ~RAM() override {}
+  ~RAM() {}
+
+  void initialize(UNUSED_PARAM InterruptHandler *) override {}
 
   uint16_t write(Address const *address, const Bytes &bytes) override {
     if (address == nullptr)

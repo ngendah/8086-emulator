@@ -675,8 +675,12 @@ struct AXO_Decoder final : Decoder {
   }
 
   IO *destination(const Instruction &instruction) override {
-    return _registers->PORTS.port(instruction.port());
+    _port.device(_bus->io(instruction.port()));
+    return &_port;
   }
+
+protected:
+  PortIO _port;
 };
 
 // AX-DX out decoder
@@ -696,8 +700,12 @@ struct AXDX_Decoder final : Decoder {
   }
 
   IO *destination(UNUSED_PARAM const Instruction &) override {
-    return _registers->PORTS.port(_registers->DX);
+    _port.device(_bus->io(_registers->DX));
+    return &_port;
   }
+
+protected:
+  PortIO _port;
 };
 
 // Port-AX in decoder
@@ -712,13 +720,17 @@ struct IAX_Decoder final : Decoder {
       : Decoder(bus, registers) {}
 
   IO *source(const Instruction &instruction) override {
-    return _registers->PORTS.port(instruction.port());
+    _port.device(_bus->io(instruction.port()));
+    return &_port;
   }
 
   IO *destination(const Instruction &instruction) override {
     auto register_selector = RegisterSelector1();
     return RegisterIOSelector(_registers, &register_selector).get(instruction);
   }
+
+protected:
+  PortIO _port;
 };
 
 // DX-AX in decoder
@@ -733,13 +745,17 @@ struct IAXDX_Decoder final : Decoder {
       : Decoder(bus, registers) {}
 
   IO *source(UNUSED_PARAM const Instruction &) override {
-    return _registers->PORTS.port(_registers->DX);
+    _port.device(_bus->io(_registers->DX));
+    return &_port;
   }
 
   IO *destination(const Instruction &instruction) override {
     auto register_selector = RegisterSelector1();
     return RegisterIOSelector(_registers, &register_selector).get(instruction);
   }
+
+protected:
+  PortIO _port;
 };
 
 // Effective Address - Register decoder

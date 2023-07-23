@@ -68,8 +68,8 @@ InstructionUnit::InstructionUnit() {
   //_INSTRUCTION(0xff, 0xFF, SCAS);
   //_INSTRUCTION(0xff, 0xFF, RET);
   //_INSTRUCTION(0xff, 0xFF, RETF);
-  //_INSTRUCTION(0xff, 0xFF, INT);
-  //_INSTRUCTION(0xff, 0xFF, IRET);
+  //_INSTRUCTION(0xff, 0xFF, INT); //DONE
+  //_INSTRUCTION(0xff, 0xFF, IRET); //DONE
   //_INSTRUCTION(0xff, 0xFF, AAM);
   //_INSTRUCTION(0xff, 0xFF, AAD);
   //_INSTRUCTION(0xff, 0xFF, LOCK);

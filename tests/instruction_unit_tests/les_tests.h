@@ -18,6 +18,7 @@ struct LESTest final : LES {
 TEST(LESTests, test_execute_1) {
   uint8_t _buffer[125] = {};
   auto ram = RAM(_buffer, 125);
+  auto bus = BUS::from_device(&ram);
   auto address = Address((uint16_t)0x42);
   auto val = (uint8_t)55;
   auto bytes = Bytes(&val, 1);
@@ -27,7 +28,7 @@ TEST(LESTests, test_execute_1) {
   address = Address((uint16_t)0x44);
   ram.write(&address, bytes);
   auto registers = Registers();
-  auto io = LESTest(&ram, &registers, [](LES *const les, uint8_t point) {
+  auto io = LESTest(&bus, &registers, [](LES *const les, uint8_t point) {
     auto registers = ((LESTest *)les)->get();
     if (point == 0) {
       EXPECT_EQ((uint16_t)registers->BX, 55);

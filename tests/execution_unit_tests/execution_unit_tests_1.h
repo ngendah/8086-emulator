@@ -18,9 +18,10 @@ TEST(ExecutionUnit, test_fetch_decode_execute_10) {
   EXPECT_EQ(executable.is_open(), true);
   std::array<uint8_t, 2048> buffer{};
   auto ram = RAM(&buffer.at(0), 2048);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
-  auto executor = ExecutionUnit(&ram, &registers);
-  executor.bootstrap(executable.rdbuf(), true);
+  auto executor = ExecutionUnit(&bus, &registers);
+  executor.bootstrap(executable.rdbuf());
   {
     auto fetch = executor.fetch();
     auto instruction = fetch.second;

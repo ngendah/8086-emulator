@@ -40,20 +40,24 @@ TEST_F(RegisterIOSelectorTests, test_get_2) {
 struct MemoryIOSelectorTests : ::testing::Test {};
 
 TEST_F(MemoryIOSelectorTests, test_get_default_without_sop) {
-  auto bus = RAM(128);
+  auto ram = RAM(128);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   auto mem_io_selector = MemoryIOSelector(&bus, &registers);
-  auto _mem = (AddressLatch *)mem_io_selector.get(Instruction(0xff, 0x8996, 0xF246));
+  auto _mem =
+      (AddressLatch *)mem_io_selector.get(Instruction(0xff, 0x8996, 0xF246));
   ASSERT_NE(_mem, nullptr);
   EXPECT_EQ(0xF246, (uint16_t)_mem->address());
 }
 
 TEST_F(MemoryIOSelectorTests, test_get_default_without_sop_2) {
-  auto bus = RAM(128);
+  auto ram = RAM(128);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   registers.BP += 0x22;
   auto mem_io_selector = MemoryIOSelector(&bus, &registers);
-  auto _mem = (AddressLatch *)mem_io_selector.get(Instruction(0xff, 0x8996, 0xF246));
+  auto _mem =
+      (AddressLatch *)mem_io_selector.get(Instruction(0xff, 0x8996, 0xF246));
   ASSERT_NE(_mem, nullptr);
   EXPECT_EQ(0xF246 + 0x22, (uint16_t)_mem->address());
 }

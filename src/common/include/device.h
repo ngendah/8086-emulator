@@ -6,19 +6,18 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#include "port.h"
+#include "device_io.h"
 
 #include <cstdint>
-#include <streambuf>
 
 struct InterruptHandler {
   virtual ~InterruptHandler() = default;
   virtual void interrupt(uint8_t type) = 0;
 };
 
-struct Device { // TODO rename to Device
+struct Device : DeviceIO {
   virtual ~Device() = default;
-  virtual void bootstrap(Ports *, InterruptHandler *) = 0;
+  virtual void initialize(InterruptHandler *) = 0;
 };
 
 #endif // _DEVICE_H_

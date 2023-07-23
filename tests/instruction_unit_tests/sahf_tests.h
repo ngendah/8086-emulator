@@ -9,9 +9,10 @@
 
 TEST(SAHFTests, test_execute) {
   auto ram = RAM(128);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   registers.AX.write((uint16_t)0x12F6);
-  auto io = SAHF(&ram, &registers);
+  auto io = SAHF(&bus, &registers);
   io.execute(Instruction(0xff, 0x9E00));
   EXPECT_EQ(registers.FLAGS.read_lo(), 0x12);
 }

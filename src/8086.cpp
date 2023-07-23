@@ -21,12 +21,13 @@ int main(int, char **) {
   SDL_Event evt;
   // uint8_t *key_state = nullptr;
   RAM ram(125);
-  CPU cpu(&ram);
-  Display display;
   KeyBoard keyboard;
+  Display display;
   Pointer pointer;
-  cpu.bootstrap("./dos.com",
-                std::vector<Device *>{&keyboard, &display, &pointer});
+  BUS bus(Devices::devices_t{
+      {0x00, &ram}, {0x10, &display}, {0x16, &keyboard}, {0x13, &pointer}});
+  CPU cpu(&bus);
+  cpu.bootstrap("./dos.com");
   while (!cpu.power_off()) {
     while (SDL_PollEvent(&evt)) {
       switch (evt.type) {
