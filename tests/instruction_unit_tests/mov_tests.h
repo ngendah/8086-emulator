@@ -63,7 +63,8 @@ TEST(MovRegisterMemoryTests, test_execute) {
   auto registers = Registers();
   registers.DX += 0x12;
   auto ram = RAM(512);
-  auto io = MovRegisterMemory(&ram, &registers);
+  auto bus = BUS::from_device(&ram);
+  auto io = MovRegisterMemory(&bus, &registers);
   auto address = Address((uint16_t)0x0100);
   io.execute(Instruction(0xff, 0x8996, (uint16_t)address));
   auto bytes = ram.read(&address, sizeof_ui16);
@@ -89,11 +90,12 @@ TEST(MovRegisterSegmentTests, test_execute_2) {
 TEST(MovMemorySegmentTests, test_execute) {
   auto registers = Registers();
   auto ram = RAM(64);
+  auto bus = BUS::from_device(&ram);
   uint16_t val = 0x12;
   auto bytes = Bytes((uint8_t *)&val, sizeof_ui16);
   auto address = Address((uint16_t)(0x010));
   ram.write(&address, bytes);
-  auto io = MovMemorySegment(&ram, &registers);
+  auto io = MovMemorySegment(&bus, &registers);
   io.execute(Instruction(0xff, 0x8E90, address));
   EXPECT_EQ((uint16_t)registers.SS, val);
 }
@@ -101,10 +103,11 @@ TEST(MovMemorySegmentTests, test_execute) {
 TEST(MovMemorySegmentTests, test_execute_2) {
   auto registers = Registers();
   auto ram = RAM(64);
+  auto bus = BUS::from_device(&ram);
   uint16_t val = 0x12;
   registers.SS += val;
   auto address = Address((uint16_t)(0x010));
-  auto io = MovMemorySegment(&ram, &registers);
+  auto io = MovMemorySegment(&bus, &registers);
   io.execute(Instruction(0xff, 0x8C90, address));
   auto bytes = ram.read(&address, sizeof_ui16);
   EXPECT_EQ((uint16_t)bytes, val);
@@ -115,12 +118,13 @@ TEST(MovMemorySegmentTests, test_execute_with_bx_si_set) {
   registers.BX = 0x2;
   registers.SI = 0x3;
   auto ram = RAM(64);
+  auto bus = BUS::from_device(&ram);
   uint16_t val = 0x12;
   auto bytes = Bytes((uint8_t *)&val, sizeof_ui16);
   auto base_addr = Address((uint16_t)(0x010));
   auto address = base_addr + (uint16_t)0x5;
   ram.write(&address, bytes);
-  auto io = MovMemorySegment(&ram, &registers);
+  auto io = MovMemorySegment(&bus, &registers);
   io.execute(Instruction(0xff, 0x8E90, base_addr));
   EXPECT_EQ((uint16_t)registers.SS, val);
 }
@@ -128,12 +132,13 @@ TEST(MovMemorySegmentTests, test_execute_with_bx_si_set) {
 TEST(MovAccumulatorTests, test_execute) {
   auto registers = Registers();
   auto ram = RAM(64);
+  auto bus = BUS::from_device(&ram);
   uint16_t val = 0x23;
   auto bytes = Bytes((uint8_t *)&val, sizeof_ui16);
   auto address = Address((uint16_t)(0x010));
   ram.write(&address, bytes);
-  PLOGD << fmt::format("source=0x{:x}", (long)&ram);
-  auto io = MovAccumulator(&ram, &registers);
+  PLOGD << fmt::format("source=0x{:x}", (long)&bus);
+  auto io = MovAccumulator(&bus, &registers);
   io.execute(Instruction(0xff, 0xA100, address));
   PLOGD << fmt::format("destination=0x{:x}", (long)&registers.AX);
   EXPECT_EQ((uint16_t)registers.AX, val);
@@ -142,9 +147,10 @@ TEST(MovAccumulatorTests, test_execute) {
 TEST(MovMemoryImmediateTests, test_execute) {
   auto registers = Registers();
   auto ram = RAM(64);
+  auto bus = BUS::from_device(&ram);
   uint16_t val = 0x2310;
   uint16_t offset = 0x10;
-  auto io = MovMemoryImmediate(&ram, &registers);
+  auto io = MovMemoryImmediate(&bus, &registers);
   io.execute(Instruction(0x3E, 0xC786, offset, val));
   auto address = registers.DS.address(offset);
   auto bytes = ram.read(&address, sizeof_ui16);

@@ -9,9 +9,10 @@
 
 TEST(LAHFTests, test_execute) {
   auto ram = RAM(128);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   registers.FLAGS.write((uint16_t)0x12F6);
-  auto io = LAHF(&ram, &registers);
+  auto io = LAHF(&bus, &registers);
   io.execute(Instruction(0xff, 0x9F00));
   EXPECT_EQ(registers.AX.read_hi(), 0xF6);
 }

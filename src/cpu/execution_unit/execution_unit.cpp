@@ -1,7 +1,7 @@
 #include "execution_unit.h"
 
 ExecutionUnit::ExecutionUnit(bus_ptr_t bus, registers_ptr_t registers)
-    : _buf(bus->rdbuf()), _params(bus, registers) {}
+    : _params(bus, registers) {}
 
 void ExecutionUnit::fetch_decode_execute() {
   seek(_params.registers->IP);
@@ -9,20 +9,9 @@ void ExecutionUnit::fetch_decode_execute() {
   decode(args.first)->execute(args.second);
 }
 
-void ExecutionUnit::bootstrap(std::streambuf *program, bool replace) {
-  if (replace) {
-    _buf = program;
-  } else {
-    const auto _size = 512;
-    uint8_t _chr[_size] = {};
-    uint16_t _len = 0;
-    while (program->pubseekoff(_len, std::ios_base::cur, std::ios_base::out) !=
-           -1) {
-      _len = program->sgetn(reinterpret_cast<char *>(_chr), _size); // NOLINT
-      _buf->sputn(reinterpret_cast<const char *>(_chr), _len);      // NOLINT
-    }
-  }
-  // TODO set up registers
+void ExecutionUnit::bootstrap(std::streambuf *program) {
+  _params.bus->devices().initialize(this);
+  _buf = program;
   beg();
 }
 

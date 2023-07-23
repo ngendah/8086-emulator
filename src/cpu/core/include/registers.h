@@ -106,7 +106,6 @@ struct Registers final {
   Segment CS, DS, SS, ES;
   Flags FLAGS;
   StackPointer SP;
-  Ports PORTS; // TODO move or rename cls
 
   Registers();
 };

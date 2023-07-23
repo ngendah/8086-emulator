@@ -6,23 +6,12 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
+#include "bus.h"
 #include "device.h"
-#include "pointer.h"
+#include "types.h"
 
 struct KeyBoard final : Device {
-  struct _Port final : Port {
-    friend struct KeyBoard;
-
-  private:
-    _Port(KeyBoard *keyboard) : _keyboard(keyboard) {}
-    KeyBoard *_keyboard;
-  };
-
-  const uint16_t _port_number = 0x61;
-  _Port _port;
   InterruptHandler *_interrupt_handler{};
-
-  KeyBoard() : _port(this) {}
 
   void process_input(uint8_t *key_state) {
     if (key_state == nullptr) {
@@ -32,9 +21,16 @@ struct KeyBoard final : Device {
   }
 
 protected:
-  void bootstrap(Ports *ports, InterruptHandler *handler) override {
-    ports->add(_port_number, &_port);
+  void initialize(InterruptHandler *handler) override {
     _interrupt_handler = handler;
+  }
+
+  uint16_t write(UNUSED_PARAM Address const *,
+                 UNUSED_PARAM const Bytes &) override {
+    assert(0);
+  }
+  Bytes read(UNUSED_PARAM Address const *, UNUSED_PARAM uint16_t) override {
+    assert(0);
   }
 };
 

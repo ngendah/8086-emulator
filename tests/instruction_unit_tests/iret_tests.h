@@ -12,21 +12,21 @@
 TEST(IRETTests, test_execute) {
   std::array<uint8_t, 125> buffer{};
   auto ram = RAM(&buffer.at(0), 125);
-  auto bus = AddressLatch(&ram);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   registers.SP = 0x25;
   {
     registers.FLAGS.set(0xFFFF);
     registers.CS = 0x35FF;
     registers.IP = 0xEA55;
-    auto intr = INT(&ram, &registers);
+    auto intr = INT(&bus, &registers);
     intr.before_execute(Instruction());
   }
   // clear values
   registers.FLAGS.set(0);
   registers.CS = 0;
   registers.IP = 0;
-  auto iret = IRET(&ram, &registers);
+  auto iret = IRET(&bus, &registers);
   iret.execute(Instruction());
   EXPECT_EQ(cast_ui16(registers.IP), 0xEA55);
   EXPECT_EQ(cast_ui16(registers.CS), 0x35FF);

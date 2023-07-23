@@ -1,13 +1,18 @@
 #include "bus.h"
 
+#include "device.h"
 #include "types.h"
 
-uint16_t BUS::read_u16(Address const *address) {
-  auto bytes = this->read(address, sizeof_ui16);
-  return bytes;
+DeviceIO *Devices::device(uint8_t port) const { return _devices.at(port); }
+
+void Devices::attach(uint8_t port, DeviceIO *device) {
+  _devices[port] = device;
 }
 
-uint8_t BUS::read_u8(Address const *address) {
-  auto bytes = this->read(address, sizeof_ui8);
-  return bytes;
+void Devices::detach(uint8_t port) { _devices.erase(port); }
+
+void Devices::initialize(InterruptHandler *handler) {
+  for (auto device : _devices) {
+    reinterpret_cast<Device *>(device.second)->initialize(handler);
+  }
 }

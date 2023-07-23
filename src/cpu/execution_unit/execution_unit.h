@@ -6,20 +6,21 @@
 #ifndef _EXECUTION_UNIT_H_
 #define _EXECUTION_UNIT_H_
 
+#include "device.h"
 #include "instruction_unit.h"
 #include "micro_op.h"
 
 #include <queue>
 #include <streambuf>
 
-struct ExecutionUnit final {
+struct ExecutionUnit final : InterruptHandler {
   ExecutionUnit(bus_ptr_t bus, registers_ptr_t registers);
 
   void fetch_decode_execute();
 
-  void bootstrap(std::streambuf *program, bool replace = false);
+  void bootstrap(std::streambuf *program);
 
-  void interrupt(uint8_t type);
+  void interrupt(uint8_t type) override;
 
   std::pair<uint8_t, Instruction> fetch();
 
@@ -45,7 +46,7 @@ protected:
 
 private:
   InstructionUnit _instruction_unit;
-  std::streambuf *_buf;
+  std::streambuf *_buf = {};
   MicroOp::Params _params;
   std::queue<uint8_t> _interrupts;
 };

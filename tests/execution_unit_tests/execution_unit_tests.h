@@ -24,8 +24,9 @@ TEST(ExecutionUnit, test_fetch_decode) {
   instructions.write((char *)&data, sizeof(data));
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = ExecutionUnit(&ram, &registers);
-  executor.bootstrap(instructions.rdbuf(), true);
+  auto bus = BUS::from_device(&ram);
+  auto executor = ExecutionUnit(&bus, &registers);
+  executor.bootstrap(instructions.rdbuf());
   auto fetch = executor.fetch();
   auto code = fetch.first;
   EXPECT_EQ(code, 0xc7);
@@ -46,8 +47,9 @@ TEST(ExecutionUnit, test_fetch_decode_execute_1) {
   EXPECT_EQ(executable.is_open(), true);
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = ExecutionUnit(&ram, &registers);
-  executor.bootstrap(executable.rdbuf(), true);
+  auto bus = BUS::from_device(&ram);
+  auto executor = ExecutionUnit(&bus, &registers);
+  executor.bootstrap(executable.rdbuf());
   {
     auto fetch = executor.fetch();
     EXPECT_EQ(fetch.first, 0xb4);
@@ -84,8 +86,9 @@ TEST(ExecutionUnit, test_fetch_decode_execute_2) {
   EXPECT_EQ(executable.is_open(), true);
   auto ram = RAM(125);
   auto registers = Registers();
-  auto executor = ExecutionUnit(&ram, &registers);
-  executor.bootstrap(executable.rdbuf(), true);
+  auto bus = BUS::from_device(&ram);
+  auto executor = ExecutionUnit(&bus, &registers);
+  executor.bootstrap(executable.rdbuf());
   {
     auto fetch = executor.fetch();
     EXPECT_EQ(fetch.first, 0x8d);

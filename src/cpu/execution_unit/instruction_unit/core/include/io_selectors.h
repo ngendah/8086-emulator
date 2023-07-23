@@ -138,11 +138,13 @@ struct MemoryIOSelector final : IOSelector {
       : _addr_latch(bus), _registers(registers), _selector(selector) {}
 
   MemoryIOSelector(const MemoryIOSelector &rhs)
-      : _addr_latch(rhs._addr_latch), _registers(rhs._registers), _selector(rhs._selector) {}
+      : _addr_latch(rhs._addr_latch), _registers(rhs._registers),
+        _selector(rhs._selector) {}
 
   IO *get(const Instruction &instruction) override {
     auto io_addresser = IOAddresser(_registers, _selector);
-    _addr_latch.set_address(io_addresser.address<PhysicalAddresser>(instruction));
+    _addr_latch.set_address(
+        io_addresser.address<PhysicalAddresser>(instruction));
     return &_addr_latch;
   }
 
@@ -186,7 +188,8 @@ struct DirectMemoryIOSelector final : IOSelector {
     auto io_addresser = IOAddresser(_registers, _selector);
     Segment *_segment = io_addresser.segment(instruction, _selector);
     uint16_t offset = instruction.offset();
-    _addr_latch.set_address(PhysicalAddresser(_registers).address(_segment, offset));
+    _addr_latch.set_address(
+        PhysicalAddresser(_registers).address(_segment, offset));
     PLOGD << _addr_latch;
     return &_addr_latch;
   }

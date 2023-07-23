@@ -9,6 +9,7 @@
 
 TEST(XLATTests, test_execute) {
   auto ram = RAM(256);
+  auto bus = BUS::from_device(&ram);
   auto registers = Registers();
   registers.DS.write((u_int8_t)0x5);
   registers.AX.write((uint8_t)0x2);
@@ -19,7 +20,7 @@ TEST(XLATTests, test_execute) {
   auto val = Bytes((uint8_t *)&_val, sizeof_ui16);
   ram.write(&address, val);
   auto instruction = Instruction(0xff, 0xD7);
-  auto io = XLAT(&ram, &registers);
+  auto io = XLAT(&bus, &registers);
   io.execute(instruction);
   EXPECT_EQ((uint16_t)registers.AX, (uint16_t)val);
 }
